@@ -26,11 +26,17 @@ By using real data on the restaurants gathered from the Yelp or Zomato API, we w
 Basic functions:
 
 -Use Zomato API/ Yelp API to pull real data for all restaurants in the Champaign-Urbana area.
+
 -Create an account that allows users to store some personal information.
+
 -With an account, write reviews for local restaurants by assigning a score on 1-10 and by writing a text description
+
 -Also, can favorite restaurants
+
 -View profiles of local restaurants and have access to information on reviews and basic 	information on them.
+
 -Allow verified restaurant owners to access their profiles, edit their descriptions and display promotions. 
+
 -Users can also add promotions at a restaurant on a given day/time.
 
 ### Advanced Functions
