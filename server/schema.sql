@@ -27,8 +27,9 @@ CREATE TABLE "Recommendation"(
     date timetz NOT NULL,
     useremail citext REFERENCES "User"(email),
     restaurant text REFERENCES "Restaurant"(address),
-    PRIMARY KEY 
+    PRIMARY KEY (useremail, restaurant)
 );
+
 CREATE TABLE "Review"(
     useremail citext REFERENCES "User"(email),
     restaurant text REFERENCES "Restaurant"(address),
