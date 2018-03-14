@@ -11,13 +11,18 @@ CREATE TABLE User(
     hashedpass char(20) NOT NULL
 );
 CREATE TABLE Budget(
-    startdate timetz NOT NULL,
+    date timetz NOT NULL,
     useremail REFERENCES User(email),
-    term timetz NOT NULL,
     total money NOT NULL,
-    used money NOT NULL
     PRIMARY KEY (useremail, startdate)
 );
+CREATE TABLE Transaction(
+    date timetz NOT NULL,
+    useremail REFERENCES User(email),
+    amount money NOT NULL,
+    PRIMARY KEY (useremail, date)
+)
+
 CREATE TABLE Recommendation(
     date timetz NOT NULL,
     useremail REFERENCES User(email),
