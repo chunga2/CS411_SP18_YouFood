@@ -21,7 +21,7 @@ CREATE TABLE "Transaction"(
     useremail citext REFERENCES "User"(email),
     amount money NOT NULL,
     PRIMARY KEY (useremail, date)
-)
+);
 
 CREATE TABLE "Recommendation"(
     date timetz NOT NULL,
