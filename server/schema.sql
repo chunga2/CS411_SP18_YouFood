@@ -14,7 +14,7 @@ CREATE TABLE "Budget"(
     date timetz NOT NULL,
     useremail citext REFERENCES "User"(email),
     total money NOT NULL,
-    PRIMARY KEY (useremail, startdate)
+    PRIMARY KEY (useremail, date)
 );
 CREATE TABLE "Transaction"(
     date timetz NOT NULL,
