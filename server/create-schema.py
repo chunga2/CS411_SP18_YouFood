@@ -7,3 +7,4 @@ with open("schema.sql") as f:
     with conn.cursor() as cur:
         print("Opened database connection...")
         cur.execute(f.read())
+        conn.commit()
