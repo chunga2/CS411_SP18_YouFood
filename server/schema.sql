@@ -36,7 +36,7 @@ CREATE TABLE "Review"(
     description text,
     rating numeric 
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
-    date timetz NOT NULL
+    date timetz NOT NULL,
     PRIMARY KEY(useremail, restaurant)
 );
 
