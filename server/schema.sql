@@ -1,8 +1,16 @@
+CREATE TABLE "Restaurant"(
+    address text NOT NULL PRIMARY KEY,
+    pricerange int
+        CONSTRAINT numdollarsigns CHECK(pricerange <=4 AND pricerange >=1) NOT NULL,
+    cuisine text NOT NULL,
+    name text NOT NULL
+);
 CREATE TABLE "Owner"(
     email citext
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
-    hashedpass char(20) NOT NULL
+    hashedpass char(20) NOT NULL,
+    restaurant text REFERENCES "Restaurant"(address)
 );
 CREATE TABLE "User"(
     email citext
@@ -45,13 +53,4 @@ CREATE TABLE "Promotion"(
     date timetz NOT NULL,
     description text NOT NULL,
     PRIMARY KEY (restaurant, date, description)
-);
-
-CREATE TABLE "Restaurant"(
-    address text NOT NULL PRIMARY KEY,
-    pricerange int
-        CONSTRAINT numdollarsigns CHECK(pricerange <=4 AND pricerange >=1) NOT NULL,
-    cuisine text NOT NULL,
-    name text NOT NULL,
-    owner citext REFERENCES "Owner"(email)
 );
