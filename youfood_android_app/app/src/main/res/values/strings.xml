@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">youfood_android_app</string>
+    <string name="bottom_navigation_restaurants">Restaurants</string>
+    <string name="bottom_navigation_account">Account</string>
+    <string name="bottom_navigation_budget">Budget</string>
+    <string name="cuisines_title">Cuisines</string>
+    <string name="average_cost_title">Average Cost</string>
+    <string name="rating_title">Rating</string>
+    <string name="temp_restaurant_name">YouFood Restaurant</string>
+    <string name="temp_restaurant_cuisines">Italian, Pizza</string>
+    <string name="temp_restaurant_location">201 N Goodwin Ave, Urbana, IL 61801</string>
+    <string name="temp_restaurant_average_cost">$30 for two people (approx.)</string>
+    <string name="temp_restaurant_price_range">$$$$$</string>
+    <string name="temp_restaurant_num_votes">1334 Votes</string>
+</resources>

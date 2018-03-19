@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_restaurants"
+        android:enabled="true"
+        android:icon="@drawable/ic_restaurant_black_24dp"
+        android:title="@string/bottom_navigation_restaurants"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menu_budget_temp"
+        android:enabled="true"
+        android:icon="@drawable/ic_attach_money_black_24dp"
+        android:title="@string/bottom_navigation_budget"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menu_account"
+        android:enabled="true"
+        android:icon="@drawable/ic_person_black_24dp"
+        android:title="@string/bottom_navigation_account"
+        app:showAsAction="ifRoom"/>
+
+</menu>
