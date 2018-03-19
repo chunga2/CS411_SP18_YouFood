@@ -54,3 +54,9 @@ CREATE TABLE "Promotion"(
     description text NOT NULL,
     PRIMARY KEY (restaurant, date, description)
 );
+
+CREATE TABLE "RestaurantCategories" (
+    restaurant text REFERENCES "Restaurant"(address),
+    category text NOT NULL,
+    PRIMARY KEY (address, category)
+);
