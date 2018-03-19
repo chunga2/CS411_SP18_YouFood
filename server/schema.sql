@@ -5,7 +5,9 @@ CREATE TABLE "Restaurant"(
     pricerange int
         CONSTRAINT numdollarsigns CHECK(pricerange <=4 AND pricerange >=1) NOT NULL,
     cuisine text NOT NULL,
-    name text NOT NULL
+    name text NOT NULL,
+    phone text NOT NULL,
+    image_url text NOT NULL
 );
 CREATE TABLE "Owner"(
     email citext
