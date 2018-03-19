@@ -32,8 +32,7 @@ class UserAPI(MethodView):
 
         data = {
             'email' : row[0],
-            'name' : row[1],
-            'password' : row[2]
+            'name' : row[1]
         }
 
         cur.close()
