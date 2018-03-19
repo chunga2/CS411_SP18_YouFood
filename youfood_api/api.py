@@ -15,8 +15,12 @@ class UserAPI(MethodView):
         GET: /users?email=<emali>
         Gets user info for a given specified email address that is a URL query parameter
         """
+        
+        email = request.args.get("email")
+        if email == None:
+            return jsonify({'error': 'No email address specified'}), 400
+
         cur = conn.cursor()
-        email = str(request.args.get("email"))
         cur.execute("SELECT * FROM \"User\" WHERE email=%s;", (email,))
 
         row = cur.fetchone()
@@ -58,7 +62,6 @@ class UserAPI(MethodView):
         try:
             cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", (email, name, password))
             conn.commit()
-            cur.close()
         except IntegrityError:
             conn.rollback()
             cur.close()
@@ -105,9 +108,31 @@ class UserAPI(MethodView):
         cur.close()
         return Response(status=204)
 
+    def delete(self):
+        """
+        DELETE: /users?email=<email>
+        Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
+        entered can correspond to at most 1 user
+        """
+        
+        email = request.args.get("email")
+        if email == None:
+            return jsonify({'error': 'No email address specified'}), 400
+
+        cur = conn.cursor()
+        cur.execute("DELETE FROM \"User\" WHERE email=%s;", (email,))
+        if cur.rowcount == 0:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'No user with that email exists'}), 400
+
+        conn.commit()
+        cur.close()
+        return Response(status=204)
+
 
 user_view = UserAPI.as_view('user_api')
-app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT'])
+app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 
 if __name__ == "__main__":
