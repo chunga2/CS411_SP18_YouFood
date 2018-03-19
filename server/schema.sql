@@ -1,3 +1,5 @@
+CREATE EXTENSION citext;
+
 CREATE TABLE "Restaurant"(
     address text NOT NULL PRIMARY KEY,
     pricerange int
