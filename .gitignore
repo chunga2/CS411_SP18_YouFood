@@ -3,4 +3,5 @@ server/__pycache__/credentials.cpython-36.pyc
 youfood_api/api.pyc
 youfood_api/wsgi.pyc
 server/credentials.pyc
+.idea/*
 youfoodenv/
