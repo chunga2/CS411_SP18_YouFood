@@ -264,7 +264,6 @@ app.add_url_rule('/', 'home', home, methods=['GET'])
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
-
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
 
