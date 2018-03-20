@@ -143,33 +143,34 @@ class UserAPI(MethodView):
 
 
 
-class RestaurantAPI(MethodView):
-    def format_restaurants(self, restaurant_tuples):
-        json_objects = []
-        i = 0
-        while i < len(restaurant_tuples):
-            rest_tuple = restaurant_tuples[i]
-            address, name, pricerange, phone, image_url, category = rest_tuple
-            json_obj = {
-                "address": address,
-                "name": name,
-                "pricerange": pricerange,
-                "phone": phone,
-                "image_url": image_url,
-                "categories": [category]
-            }
+def format_restaurants(restaurant_tuples):
+    json_objects = []
+    i = 0
+    while i < len(restaurant_tuples):
+        rest_tuple = restaurant_tuples[i]
+        address, name, pricerange, phone, image_url, category = rest_tuple
+        json_obj = {
+            "address": address,
+            "name": name,
+            "pricerange": pricerange,
+            "phone": phone,
+            "image_url": image_url,
+            "categories": [category]
+        }
 
-            while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
-                json_obj["categories"].append(restaurant_tuples[i+1][5])
-                i = i + 1
-
-            json_objects.append(json_obj)
+        while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
+            json_obj["categories"].append(restaurant_tuples[i+1][5])
             i = i + 1
 
-        return json_objects
+        json_objects.append(json_obj)
+        i = i + 1
+
+    return json_objects
+
+
+class RestaurantAPI(MethodView):
 
     def get(self):
-
         """
         Respond to API call /restaurants?params with a list of all restaurants, encoded as JSON.
         Accepts params as GET arguments, which are documented in build_where.
@@ -204,22 +205,66 @@ class RestaurantAPI(MethodView):
                     AND "Restaurant".address = "RestaurantCategories".restaurant_address 
                     ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
-                jsonobjects = self.format_restaurants(rv)
+                jsonobjects = format_restaurants(rv)
+                cur.close()
                 return jsonify(jsonobjects)
             except DataError as e:
                 conn.rollback()
+                cur.close()
                 return "Invalid query data!", 500
             except ProgrammingError as e:
                 conn.rollback()
+                cur.close()
+                return "Invalid query data!", 500
+
+
+
+class RestaurantCategoriesAPI(MethodView):
+    def get(self):
+        """
+        Respond to API call /restaurant_categories?category=<category>
+        :return: JSON response, formatted by format_restaurant.
+        """
+        category = request.args.get("category")
+        if category == None:
+            return jsonify({'error': 'No category specified'}), 400
+
+        with conn.cursor() as cur:
+            try:
+                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                    "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                    FROM "Restaurant", "RestaurantCategories"
+                    WHERE "RestaurantCategories".category = %s 
+                    AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""", (category,))
+                rv = cur.fetchall()
+                jsonobjects = format_restaurants(rv)
+                jsonobjects.append({'length': len(jsonobjects)})
+                cur.close()
+                return jsonify(jsonobjects)
+            except DataError as e:
+                conn.rollback()
+                cur.close()
+                return "Invalid query data!", 500
+            except ProgrammingError as e:
+                conn.rollback()
+                cur.close()
                 return "Invalid query data!", 500
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
+app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
+
+
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
-app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
+
+restaurant_categories_view = RestaurantCategoriesAPI.as_view('restaurant_categories_api')
+app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view, methods=['GET'])
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
