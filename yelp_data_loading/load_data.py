@@ -12,18 +12,20 @@ conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST
 cur = conn.cursor()
 
 for business in businesses:
-    print(business['name'])
+    # Format special things for display
+    print("Adding " + business['name'] + "...")
     my_price = business.get('price', None)
     if my_price:
         my_price = len(my_price)
     else:
         my_price = -1
+    in_address = ", ".join(business['location']['display_address'])
     # insert restaurant
     cur.execute('''
     INSERT INTO \"Restaurant\" (address, pricerange, cuisine, name, phone, image_url) 
     VALUES (%s, %s, %s, %s, %s, %s)
     ''',
-                (business['location']['display_address'], my_price, business['categories'][0]['title'],
+                (in_address, my_price, business['categories'][0]['title'],
                  business['name'], business['display_phone'], business['image_url']))
     # insert categories
     for category in business['categories']:
@@ -31,7 +33,7 @@ for business in businesses:
         INSERT INTO \"RestaurantCategories\" (category, restaurant_name, restaurant_address)  
         VALUES (%s, %s, %s)
         ''',
-                    (category['title'], business['name'], business['location']['display_address']))
+                    (category['title'], business['name'], in_address))
 
 conn.commit()
 
