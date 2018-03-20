@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Yelp Fusion API code sample.
-This program demonstrates the capability of the Yelp Fusion API
-by using the Search API to query for businesses by a search term and location,
-and the Business API to query additional information about the top result
-from the search query.
-Please refer to http://www.yelp.com/developers/v3/documentation for the API
-documentation.
 This program requires the Python requests library, which you can install via:
 `pip install -r requirements.txt`.
 Sample usage of the program:
 `python sample.py --term="bars" --location="San Francisco, CA"`
 
 This is a modified version to return a JSON of 1000 entries based on the target parameters.
-
 This does not check if there's less than 1000. It's designed to try to get as many from a city as possible.
 """
 from __future__ import print_function
@@ -24,7 +16,6 @@ import pprint
 import requests
 import sys
 import urllib
-
 
 # This client code can run on Python 2.x or 3.x.  Your imports can be
 # simpler if you only need one of those.
@@ -45,7 +36,7 @@ except ImportError:
 # It now uses private keys to authenticate requests (API Key)
 # You can find it on
 # https://www.yelp.com/developers/v3/manage_app
-API_KEY= "J6S_EqR69hRXRkRaAmGQmdwcnkygjLq2tDPUUHdAij77TYrZ0FYXU3O1yZFJuahSzxcGnnPyEKoKS4oxBJ1-RRYX_cGQ0qi2FGzxcigUoQsNvIeNVDnBlBwmvfOqWnYx"
+API_KEY= MY_YELP_API_KEY
 
 
 # API constants, you shouldn't have to change these.
