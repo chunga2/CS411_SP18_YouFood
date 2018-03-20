@@ -20,6 +20,54 @@ def flatten(iterable):
         else:
             yield e
 
+def verify_login():
+    """
+    POST: /verify_login
+    Request Body:
+    {
+        is_owner: <true/false>,
+        email: <email>,
+        password: <password
+    }
+    """
+    json_data = request.get_json()
+    is_owner = json_data.get("is_owner")
+    email = json_data.get("email")
+    password = json_data.get("password")
+
+    if is_owner == None or email == None or password == None:
+        return "Missing necessary parameter in request body", 400
+
+    if is_owner == True:
+        with conn as c:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT * 
+                    FROM "Owner" 
+                    WHERE email = %s AND hashedpass = %s""", (email, password))
+
+                row = cur.fetchone()
+                if row == None:
+                    return "Invalid Login", 401
+                else:
+                    return Response(status=204)
+    else:
+        with conn as c:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT * 
+                    FROM "User" 
+                    WHERE email = %s AND hashedpass = %s""", (email, password))
+
+                row = cur.fetchone()
+                if row == None:
+                    return "Invalid Login", 401
+                else:
+                    return Response(status=204)
+
+
+
+
 class UserAPI(MethodView):
 
     def get(self):
@@ -215,7 +263,6 @@ class RestaurantAPI(MethodView):
                 return "Invalid query data!", 500
 
 
-
 class RestaurantCategoriesAPI(MethodView):
     def get(self):
         """
@@ -260,6 +307,7 @@ class RestaurantCategoriesAPI(MethodView):
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
+app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
