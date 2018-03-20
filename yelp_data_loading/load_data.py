@@ -7,17 +7,23 @@ FILENAME = 'data.json'
 
 data = json.load(open(FILENAME))
 businesses = data['businesses']
+for business in businesses:
+    print(len(business))
+    if(len(business) != 15):
+        pprint(business)
+
 
 conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST)
 cur = conn.cursor()
 
 for business in businesses:
+    my_price = business.get('price', '$$$$$$$$$')
     # insert restaurant
     cur.execute('''
     INSERT INTO Restaurant (address, pricerange, cuisine, name, phone, image_url) 
     VALUES (%s, %s, %s, %s, %s, %s)
     ''',
-                (business['location']['display_address'], len(business['price']), business['categories'][0]['title'],
+                (business['location']['display_address'], my_price, business['categories'][0]['title'],
                  business['name'], business['display_phone'], business['image_url']))
     # insert categories
     for category in business['categories']:
