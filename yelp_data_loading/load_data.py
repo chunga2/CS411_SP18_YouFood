@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'san_jose.json'
+FILENAME = 'fremont.json'
 
 #Load the json
 data = json.load(open(FILENAME))
@@ -36,6 +36,7 @@ for business in businesses:
         VALUES (%s, %s, %s)
         ''',
                     (category['title'], business['name'], in_address))
+    conn.commit()
     counter += 1
 
 print("Finished! Check Database.")
