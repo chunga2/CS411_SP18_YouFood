@@ -232,12 +232,25 @@ class RestaurantCategoriesAPI(MethodView):
         with conn.cursor() as cur:
             try:
                 cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                    "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
-                    FROM "Restaurant", "RestaurantCategories"
-                    WHERE "RestaurantCategories".category = %s 
-                    AND "Restaurant".name = "RestaurantCategories".restaurant_name 
-                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""", (category,))
+                    "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
+                    FROM "Restaurant",
+                        (
+                            (SELECT * FROM "RestaurantCategories")
+                            EXCEPT
+                            (SELECT * 
+                             FROM "RestaurantCategories" AS "OuterTable"
+                             WHERE NOT EXISTS
+                                (
+                                SELECT * FROM "RestaurantCategories"
+                                WHERE "RestaurantCategories".category = %s AND 
+                                "OuterTable".restaurant_name = "RestaurantCategories".restaurant_name AND 
+                                "OuterTable".restaurant_address = "RestaurantCategories".restaurant_address
+                                )
+                            ) 
+                        ) AS "SpecificRestaurants"
+                    WHERE "Restaurant".name = "SpecificRestaurants".restaurant_name 
+                    AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", (category,))
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 jsonobjects.append({'length': len(jsonobjects)})
@@ -247,10 +260,10 @@ class RestaurantCategoriesAPI(MethodView):
                 conn.rollback()
                 cur.close()
                 return "Invalid query data!", 500
-            except ProgrammingError as e:
-                conn.rollback()
-                cur.close()
-                return "Invalid query data!", 500
+            # except ProgrammingError as e:
+            #     conn.rollback()
+            #     cur.close()
+            #     return "ProgrammingError!", 500
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
