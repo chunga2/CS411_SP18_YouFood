@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 
+from datetime import datetime
 import psycopg2
 from psycopg2 import IntegrityError, ProgrammingError
 from flask import Flask, jsonify, request, Response
@@ -264,15 +265,17 @@ class RestaurantCategoriesAPI(MethodView):
                 return "ProgrammingError!", 500
 
 
-def format_transaction(transaction_tuple: Tuple)->Dict[str, str]:
+def format_transaction(transaction_tuple: Tuple) -> Dict[str, str]:
     date, user, amount, restaurant_name, restaurant_address = transaction_tuple
     return {
         "date": date,
-        "user": user,
+        "useremail": user,
         "amount": amount,
         "restaurant_name": restaurant_name,
         "restaurant_address": restaurant_address,
     }
+
+
 class TransactionAPI(MethodView):
     def get(self):
         """
@@ -302,7 +305,7 @@ class TransactionAPI(MethodView):
         with conn as c:
             with c.cursor() as cur:
                 try:
-                    cur.execute(f"""SELECT date, user, amount, restaurant_name, restaurant_address FROM "Transaction"
+                    cur.execute(f"""SELECT date, useremail, amount, restaurant_name, restaurant_address FROM "Transaction"
                             {where_clause} ORDER BY date ASC""", where_params)
                     rv = cur.fetchall()
                     jsonobjects = [format_transaction(x) for x in rv]
@@ -310,6 +313,48 @@ class TransactionAPI(MethodView):
                 except DataError as e:
                     print(e)
                     return "Invalid query data!", 500
+
+    def put(self):
+        """
+        PUT: /transactions
+
+        JSON request payload (email is required, at least 1 of name or password is also required)
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "amount": <amount>,
+            "restaurant_name": <restaurant_name>,
+            "restaurant_address": <restaurant_address>,
+        }
+        """
+        json_data = request.get_json()
+        insert_cols = ["date", "useremail", "amount", "restaurant_name", "restaurant_address"]
+        insert_params = []
+
+        for v in insert_cols:
+            if v not in json_data:
+                return f"Missing field {v}", 500
+            if v == "date":
+                try:
+                    timestamp = datetime.strptime(json_data[v], "%d-%m-%Y %H:%M:%S")
+                    insert_params += [timestamp]
+                except ValueError as e:
+                    return "Invalid time format", 500
+            else:
+                insert_params += [json_data[v]]
+
+        with conn as c:
+            with c.cursor() as cur:
+                try:
+                    cur.execute("""INSERT INTO "Transaction"(date, useremail, amount, restaurant_name, restaurant_address)
+                                    VALUES (%s, %s, %s, %s, %s)""", insert_params)
+                    conn.commit()
+                    return "OK", 200
+                except DataError as e:
+                    print(e)
+                    return "Invalid data type!", 500
+                except IntegrityError as e:
+                    return f"Integrity violation: {e}", 500
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
@@ -324,7 +369,7 @@ restaurant_categories_view = RestaurantCategoriesAPI.as_view('restaurant_categor
 app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view, methods=['GET'])
 
 transaction_view = TransactionAPI.as_view('transaction_api')
-app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET'])
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'PUT'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
