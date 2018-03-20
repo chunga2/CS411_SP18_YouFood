@@ -48,7 +48,7 @@ BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 # Defaults for our simple example.
 DEFAULT_TERM = 'restaurant'
 DEFAULT_OFFSET = 0
-DEFAULT_LOCATION = 'Fremont, CA'
+DEFAULT_LOCATION = 'Berkeley, CA'
 SEARCH_LIMIT = 50
 
 
@@ -124,7 +124,7 @@ def query_api(term, location):
 
     ret = {}
     ret['businesses'] = begin
-    with open('fremont.json', 'w') as fp:
+    with open('berkeley.json', 'w') as fp:
         json.dump(ret, fp)
         
     return begin

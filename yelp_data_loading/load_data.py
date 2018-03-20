@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'fremont.json'
+FILENAME = 'berkeley.json'
 
 #Load the json
 data = json.load(open(FILENAME))
@@ -39,7 +39,7 @@ for business in businesses:
     conn.commit()
     counter += 1
 
-print("Finished! Check Database.")
+print("Finished! Check Database. Did this many: ", counter)
 conn.commit()
 
 # Note that I use display_phone instead of the normal phone
