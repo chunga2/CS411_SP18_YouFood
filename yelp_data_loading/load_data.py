@@ -7,17 +7,16 @@ FILENAME = 'data.json'
 
 data = json.load(open(FILENAME))
 businesses = data['businesses']
-for business in businesses:
-    print(len(business))
-    if(len(business) != 15):
-        pprint(business)
-
 
 conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST)
 cur = conn.cursor()
 
 for business in businesses:
-    my_price = business.get('price', '$$$$$$$$$')
+    my_price = business.get('price', None)
+    if my_price:
+        my_price = len(my_price)
+    else:
+        my_price = -1
     # insert restaurant
     cur.execute('''
     INSERT INTO Restaurant (address, pricerange, cuisine, name, phone, image_url) 
@@ -28,10 +27,10 @@ for business in businesses:
     # insert categories
     for category in business['categories']:
         cur.execute('''
-        INSERT INTO RestaurantCategories (restaurant, category) 
-        VALUES (%s, %s)
+        INSERT INTO RestaurantCategories (restaurantaddress, restaurantname, category) 
+        VALUES (%s, %s, %s)
         ''',
-                    (business['location']['display_address'], category['title']))
+                    (business['location']['display_address'], business['name'], category['title']))
 
 # For present purposes, I use the first item in categories as the cuisine. It should be a list that links to another table but for now this is should get us started
 # Note also that I use display_phone instead of the normal phone
