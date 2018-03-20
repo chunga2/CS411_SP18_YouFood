@@ -193,17 +193,16 @@ class RestaurantAPI(MethodView):
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
-            return "", ""
+            return "WHERE", []
 
         where_clause, where_params = build_where(request.args)
         with conn.cursor() as cur:
             try:
-                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                    "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                cur.execute(f"""SELECT address, name, pricerange, phone, image_url, category
                     FROM "Restaurant", "RestaurantCategories"
-                    {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
-                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
+                    {where_clause} name = restaurant_name
+                    AND address = restaurant_address
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""", where_params)
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects)
