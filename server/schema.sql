@@ -60,7 +60,8 @@ CREATE TABLE "Promotion"(
 );
 
 CREATE TABLE "RestaurantCategories" (
-    restaurant text REFERENCES "Restaurant"(address),
+    restaurantaddress text REFERENCES "Restaurant"(address),
+    restaurantname text REFERENCES "Restaurant"(name),
     category text NOT NULL,
-    PRIMARY KEY (restaurant, category)
+    PRIMARY KEY (restaurantaddress, restaurantname, category)
 );
