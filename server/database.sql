@@ -1,0 +1,3 @@
+CREATE DATABASE youfood; GRANT ALL PRIVILEGES ON DATABASE youfood TO youfood;
+\c youfood
+CREATE EXTENSION citext;
