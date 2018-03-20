@@ -15,7 +15,7 @@ CREATE TABLE "Owner"(
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
     restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_address text REFERENCES "Restaurant"(address)
 );
 CREATE TABLE "User"(
     email citext
