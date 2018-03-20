@@ -44,7 +44,7 @@ CREATE TABLE "Recommendation"(
     restaurant_name text,
     restaurant_address text,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
-    PRIMARY KEY (useremail, restaurant_name, restaurant_address)
+    PRIMARY KEY (useremail, restaurant_name, restaurant_address, date)
 );
 
 CREATE TABLE "Review"(
@@ -56,7 +56,7 @@ CREATE TABLE "Review"(
     rating numeric
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
     date timestamp NOT NULL,
-    PRIMARY KEY(useremail, restaurant_name, restaurant_address)
+    PRIMARY KEY(useremail, restaurant_name, restaurant_address, date)
 );
 
 CREATE TABLE "Promotion"(
