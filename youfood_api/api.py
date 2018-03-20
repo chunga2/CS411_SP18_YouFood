@@ -42,7 +42,7 @@ def verify_login():
 
     if is_owner == True:
         with conn as c:
-            with conn.cursor() as cur:
+            with c.cursor() as cur:
                 cur.execute("""
                     SELECT * 
                     FROM "Owner" 
@@ -55,7 +55,7 @@ def verify_login():
                     return Response(status=204)
     else:
         with conn as c:
-            with conn.cursor() as cur:
+            with c.cursor() as cur:
                 cur.execute("""
                     SELECT * 
                     FROM "User" 
@@ -66,7 +66,6 @@ def verify_login():
                     return "Invalid Login", 401
                 else:
                     return Response(status=204)
-
 
 
 
@@ -83,22 +82,20 @@ class UserAPI(MethodView):
             return jsonify({'error': 'No email address specified'}), 400
 
         cur = conn.cursor()
-        cur.execute("SELECT * FROM \"User\" WHERE email=%s;", (email,))
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("SELECT * FROM \"User\" WHERE email=%s;", (email,))
+                row = cur.fetchone()
+                # Executes if no user with that email address was found
+                if row == None:
+                    return jsonify({'error': 'No user with that email exists'}), 400
 
-        row = cur.fetchone()
-        # Executes if no user with that email address was found
-        if row == None:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No user with that email exists'}), 400
+                data = {
+                    'email' : row[0],
+                    'name' : row[1]
+                }
 
-        data = {
-            'email' : row[0],
-            'name' : row[1]
-        }
-
-        cur.close()
-        return jsonify(data), 200
+                return jsonify(data), 200
 
     def post(self):
         """
@@ -119,17 +116,10 @@ class UserAPI(MethodView):
         if email == None or name == None or password == None:
             return Response(status=400)
 
-        cur = conn.cursor()
-        try:
-            cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", (email, name, password))
-            conn.commit()
-        except IntegrityError:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'User with email already exists'}), 400
-
-        cur.close()
-        return Response(status=201)
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", (email, name, password))
+                return Response(status=201)
 
     def put(self):
         """
@@ -150,24 +140,19 @@ class UserAPI(MethodView):
         if email == None or (name == None and password == None):
             return jsonify({'error': 'Missing email or both name and password'}), 400
 
-        cur = conn.cursor()
-        if(name != None):
-            cur.execute("UPDATE \"User\" SET name = %s WHERE email = %s;", (name, email))
-            if cur.rowcount == 0:
-                conn.rollback()
-                cur.close()
-                return jsonify({'error': 'No user with that email exists'}), 400
+        with conn as c:
+            with c.cursor() as cur:
+                if(name != None):
+                    cur.execute("UPDATE \"User\" SET name = %s WHERE email = %s;", (name, email))
+                    if cur.rowcount == 0:
+                        return jsonify({'error': 'No user with that email exists'}), 400
 
-        if(password != None):
-            cur.execute("UPDATE \"User\" SET hashedpass = %s WHERE email = %s;", (password, email))
-            if cur.rowcount == 0:
-                conn.rollback()
-                cur.close()
-                return jsonify({'error': 'No user with that email exists'}), 400
+                if(password != None):
+                    cur.execute("UPDATE \"User\" SET hashedpass = %s WHERE email = %s;", (password, email))
+                    if cur.rowcount == 0:
+                        return jsonify({'error': 'No user with that email exists'}), 400
 
-        conn.commit()
-        cur.close()
-        return Response(status=204)
+                return Response(status=204)
 
     def delete(self):
         """
@@ -180,17 +165,13 @@ class UserAPI(MethodView):
         if email == None:
             return jsonify({'error': 'No email address specified'}), 400
 
-        cur = conn.cursor()
-        cur.execute("DELETE FROM \"User\" WHERE email=%s;", (email,))
-        if cur.rowcount == 0:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No user with that email exists'}), 400
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("DELETE FROM \"User\" WHERE email=%s;", (email,))
+                if cur.rowcount == 0:
+                    return jsonify({'error': 'No user with that email exists'}), 400
 
-        conn.commit()
-        cur.close()
-        return Response(status=204)
-
+                return Response(status=204)
 
 
 def format_restaurants(restaurant_tuples):
@@ -246,8 +227,8 @@ class RestaurantAPI(MethodView):
             return "", ""
 
         where_clause, where_params = build_where(request.args)
-        with conn.cursor() as cur:
-            try:
+        with conn as c:
+            with c.cursor() as cur:
                 cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
                     "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
                     FROM "Restaurant", "RestaurantCategories"
@@ -257,12 +238,6 @@ class RestaurantAPI(MethodView):
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects)
-            except DataError as e:
-                conn.rollback()
-                return "Invalid query data!", 500
-            except ProgrammingError as e:
-                conn.rollback()
-                return "Invalid query data!", 500
 
 
 class RestaurantCategoriesAPI(MethodView):
@@ -275,8 +250,8 @@ class RestaurantCategoriesAPI(MethodView):
         if category == None:
             return jsonify({'error': 'No category specified'}), 400
 
-        with conn.cursor() as cur:
-            try:
+        with conn as c:
+            with c.cursor() as cur:
                 cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
                     "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
                     FROM "Restaurant",
@@ -300,12 +275,6 @@ class RestaurantCategoriesAPI(MethodView):
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects)
-            except DataError as e:
-                conn.rollback()
-                return "Invalid query data!", 500
-            except ProgrammingError as e:
-                conn.rollback()
-                return "ProgrammingError!", 500
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
