@@ -36,7 +36,7 @@ except ImportError:
 # It now uses private keys to authenticate requests (API Key)
 # You can find it on
 # https://www.yelp.com/developers/v3/manage_app
-API_KEY= MY_YELP_API_KEY
+API_KEY= 'l56_sZmz8usw5OFHotWL2PCVV_r-z5E_EMpV8NNf1eYZnE70lsviJoGuu_usz_u0QB3fcUQfy0MPpjdMX3UqpFtqZ80wousquxZ8EfOnZmxYIDmxUHx_fO7MM16wWnYx'
 
 
 # API constants, you shouldn't have to change these.
@@ -48,7 +48,7 @@ BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 # Defaults for our simple example.
 DEFAULT_TERM = 'restaurant'
 DEFAULT_OFFSET = 0
-DEFAULT_LOCATION = 'San Francisco, CA'
+DEFAULT_LOCATION = 'San Jose, CA'
 SEARCH_LIMIT = 50
 
 
@@ -124,7 +124,7 @@ def query_api(term, location):
 
     ret = {}
     ret['businesses'] = begin
-    with open('data.json', 'w') as fp:
+    with open('san_jose.json', 'w') as fp:
         json.dump(ret, fp)
         
     return begin

@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'data.json'
+FILENAME = 'san_jose.json'
 
 #Load the json
 data = json.load(open(FILENAME))
@@ -15,9 +15,10 @@ conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST
 cur = conn.cursor()
 
 #loop through and add all json to database
+counter = 0
 for business in businesses:
     # Format special things for display
-    print("Adding " + business['name'])
+    print("Adding #" + str(counter) + " " + business['name'])
     my_price = business.get('price', None)
     if my_price:
         my_price = len(my_price)
@@ -35,6 +36,7 @@ for business in businesses:
         VALUES (%s, %s, %s)
         ''',
                     (category['title'], business['name'], in_address))
+    counter += 1
 
 print("Finished! Check Database.")
 conn.commit()
