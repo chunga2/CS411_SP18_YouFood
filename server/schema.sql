@@ -14,7 +14,8 @@ CREATE TABLE "Owner"(
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
-    restaurant text REFERENCES "Restaurant"(address)
+    restaurant_name text REFERENCES "Restaurant"(name),
+    restaurant_address text REFERENCES "Restaurant"(address),
 );
 CREATE TABLE "User"(
     email citext
@@ -38,30 +39,33 @@ CREATE TABLE "Transaction"(
 CREATE TABLE "Recommendation"(
     date timetz NOT NULL,
     useremail citext REFERENCES "User"(email),
-    restaurant text REFERENCES "Restaurant"(address),
-    PRIMARY KEY (useremail, restaurant)
+    restaurant_name text REFERENCES "Restaurant"(name),
+    restaurant_address text REFERENCES "Restaurant"(address),
+    PRIMARY KEY (useremail, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "Review"(
     useremail citext REFERENCES "User"(email),
-    restaurant text REFERENCES "Restaurant"(address),
+    restaurant_name text REFERENCES "Restaurant"(name),
+    restaurant_address text REFERENCES "Restaurant"(address),
     description text,
     rating numeric 
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
     date timetz NOT NULL,
-    PRIMARY KEY(useremail, restaurant)
+    PRIMARY KEY(useremail, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "Promotion"(
-    restaurant text REFERENCES "Restaurant"(address) NOT NULL,
+    restaurant_name text REFERENCES "Restaurant"(name),
+    restaurant_address text REFERENCES "Restaurant"(address),
     date timetz NOT NULL,
     description text NOT NULL,
-    PRIMARY KEY (restaurant, date, description)
+    PRIMARY KEY (date, description,restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "RestaurantCategories" (
-    restaurantaddress text REFERENCES "Restaurant"(address),
-    restaurantname text REFERENCES "Restaurant"(name),
+    restaurant_name text REFERENCES "Restaurant"(name),
+    restaurant_address text REFERENCES "Restaurant"(address),
     category text NOT NULL,
-    PRIMARY KEY (restaurantaddress, restaurantname, category)
+    PRIMARY KEY (category, restaurant_name, restaurant_address)
 );
