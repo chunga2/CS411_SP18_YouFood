@@ -206,15 +206,12 @@ class RestaurantAPI(MethodView):
                     ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
-                cur.close()
                 return jsonify(jsonobjects)
             except DataError as e:
                 conn.rollback()
-                cur.close()
                 return "Invalid query data!", 500
             except ProgrammingError as e:
                 conn.rollback()
-                cur.close()
                 return "Invalid query data!", 500
 
 
@@ -243,8 +240,8 @@ class RestaurantCategoriesAPI(MethodView):
                                 (
                                 SELECT * FROM "RestaurantCategories"
                                 WHERE "RestaurantCategories".category = %s AND 
-                                "OuterTable".restaurant_name = "RestaurantCategories".restaurant_name AND 
-                                "OuterTable".restaurant_address = "RestaurantCategories".restaurant_address
+                                "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
+                                "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
                                 )
                             ) 
                         ) AS "SpecificRestaurants"
@@ -254,15 +251,12 @@ class RestaurantCategoriesAPI(MethodView):
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 jsonobjects.append({'length': len(jsonobjects)})
-                cur.close()
                 return jsonify(jsonobjects)
             except DataError as e:
                 conn.rollback()
-                cur.close()
                 return "Invalid query data!", 500
             except ProgrammingError as e:
                 conn.rollback()
-                cur.close()
                 return "ProgrammingError!", 500
 
 
