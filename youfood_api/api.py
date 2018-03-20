@@ -1,10 +1,10 @@
+from datetime import datetime
 from typing import Dict, Tuple
 
-from datetime import datetime
 import psycopg2
-from psycopg2 import IntegrityError, ProgrammingError
 from flask import Flask, jsonify, request, Response
 from flask.views import MethodView
+from psycopg2 import IntegrityError, ProgrammingError
 from psycopg2._psycopg import DataError
 
 app = Flask(__name__)
@@ -24,6 +24,10 @@ def flatten(iterable):
                 yield f
         else:
             yield e
+
+
+def parse_date(date: str) -> datetime:
+    return datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
 
 
 class UserAPI(MethodView):
@@ -268,7 +272,7 @@ class RestaurantCategoriesAPI(MethodView):
 def format_transaction(transaction_tuple: Tuple) -> Dict[str, str]:
     date, user, amount, restaurant_name, restaurant_address = transaction_tuple
     return {
-        "date": date,
+        "date": date.strftime("%d-%m-%Y %H:%M:%S"),
         "useremail": user,
         "amount": amount,
         "restaurant_name": restaurant_name,
@@ -293,9 +297,15 @@ class TransactionAPI(MethodView):
             selections = []
             params = []
             for k, v in query_params.items():
-                if k in subqueries:
-                    selections += [subqueries[k]]
+                if k == "start" or k == "end":
+                    try:
+                        timestamp = parse_date(v)
+                        params += [timestamp]
+                    except ValueError as e:
+                        return "Invalid time format", 500
+                else:
                     params += [str(v)]
+                selections += [subqueries[k]]
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
@@ -318,7 +328,7 @@ class TransactionAPI(MethodView):
         """
         PUT: /transactions
 
-        JSON request payload (email is required, at least 1 of name or password is also required)
+        JSON request payload
         {
             "date": <date>,
             "useremail": <user>,
@@ -357,6 +367,101 @@ class TransactionAPI(MethodView):
                     return f"Integrity violation: {e}", 500
 
 
+def format_budget(transaction_tuple: Tuple) -> Dict[str, str]:
+    date, user, total = transaction_tuple
+    return {
+        "date": date.strftime("%d-%m-%Y %H:%M:%S"),
+        "useremail": user,
+        "total": total,
+    }
+
+
+class BudgetAPI(MethodView):
+    def get(self):
+        """
+        Respond to API call /budget?params with a list of all budgets matching the params.
+        :return: JSON response, formatted by format_restaurant.
+        """
+
+        def build_where(query_params):
+            subqueries = {
+                "start": "date > %s",
+                "end": "date < %s",
+                "user": "useremail = %s",
+                "total": "total = %s",
+            }
+            selections = []
+            params = []
+            for k, v in query_params.items():
+                if k in subqueries:
+                    if k == "start" or k == "end":
+                        try:
+                            timestamp = parse_date(v)
+                            params += [timestamp]
+                        except ValueError as e:
+                            return "Invalid time format", 500
+                    else:
+                        params += [str(v)]
+                    selections += [subqueries[k]]
+            if selections:
+                where_clause = "WHERE " + " AND ".join(selections)
+                return where_clause, params
+            return "", []
+
+        where_clause, where_params = build_where(request.args)
+        with conn as c:
+            with c.cursor() as cur:
+                try:
+                    cur.execute(f"""SELECT date, useremail, total FROM "Budget"
+                            {where_clause} ORDER BY date ASC""", where_params)
+                    rv = cur.fetchall()
+                    jsonobjects = [format_budget(x) for x in rv]
+                    return jsonify(jsonobjects)
+                except DataError as e:
+                    print(e)
+                    return "Invalid query data!", 500
+
+    def put(self):
+        """
+        PUT: /budget
+
+        JSON request payload
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "total": <amount>,
+        }
+        """
+        json_data = request.get_json()
+        insert_cols = ["date", "useremail", "total"]
+        insert_params = []
+
+        for k in insert_cols:
+            if k not in json_data:
+                return f"Missing field {k}", 500
+            if k == "date":
+                try:
+                    timestamp = parse_date(json_data[k])
+                    insert_params += [timestamp]
+                except ValueError as e:
+                    return "Invalid time format", 500
+            else:
+                insert_params += [json_data[k]]
+
+        with conn as c:
+            with c.cursor() as cur:
+                try:
+                    cur.execute("""INSERT INTO "Budget"(date, useremail, total)
+                                    VALUES (%s, %s, %s)""", insert_params)
+                    conn.commit()
+                    return "OK", 200
+                except DataError as e:
+                    print(e)
+                    return "Invalid data type!", 500
+                except IntegrityError as e:
+                    return f"Integrity violation: {e}", 500
+
+
 app.add_url_rule('/', 'home', home, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
@@ -370,6 +475,9 @@ app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view,
 
 transaction_view = TransactionAPI.as_view('transaction_api')
 app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'PUT'])
+
+budget_view = BudgetAPI.as_view('budget_api')
+app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'PUT'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
