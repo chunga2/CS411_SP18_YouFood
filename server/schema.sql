@@ -1,7 +1,6 @@
 CREATE TABLE "Restaurant"(
     address text NOT NULL,
-    pricerange int NOT NULL,
-    cuisine text NOT NULL,
+    pricerange int,
     name text NOT NULL,
     phone text NOT NULL,
     image_url text NOT NULL,
