@@ -23,20 +23,23 @@ CREATE TABLE "User"(
     hashedpass char(20) NOT NULL
 );
 CREATE TABLE "Budget"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     total money NOT NULL,
     PRIMARY KEY (useremail, date)
 );
 CREATE TABLE "Transaction"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     amount money NOT NULL,
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     PRIMARY KEY (useremail, date)
 );
 
 CREATE TABLE "Recommendation"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     restaurant_name text,
     restaurant_address text,
