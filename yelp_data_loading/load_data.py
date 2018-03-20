@@ -3,30 +3,31 @@ import psycopg2
 import json
 from pprint import pprint
 
+#Choose the file (Must be in same file)
 FILENAME = 'data.json'
 
+#Load the json
 data = json.load(open(FILENAME))
 businesses = data['businesses']
 
+#Connect with psycopg2 to server
 conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST)
 cur = conn.cursor()
 
+#loop through and add all json to database
 for business in businesses:
     # Format special things for display
-    print("Adding " + business['name'] + "...")
+    print("Adding " + business['name'])
     my_price = business.get('price', None)
     if my_price:
         my_price = len(my_price)
-    else:
-        my_price = -1
     in_address = ", ".join(business['location']['display_address'])
     # insert restaurant
     cur.execute('''
-    INSERT INTO \"Restaurant\" (address, pricerange, cuisine, name, phone, image_url) 
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO \"Restaurant\" (address, pricerange, name, phone, image_url) 
+    VALUES (%s, %s, %s, %s, %s)
     ''',
-                (in_address, my_price, business['categories'][0]['title'],
-                 business['name'], business['display_phone'], business['image_url']))
+                (in_address, my_price, business['name'], business['display_phone'], business['image_url']))
     # insert categories
     for category in business['categories']:
         cur.execute('''
@@ -35,10 +36,10 @@ for business in businesses:
         ''',
                     (category['title'], business['name'], in_address))
 
+print("Finished! Check Database.")
 conn.commit()
 
-# For present purposes, I use the first item in categories as the cuisine. It should be a list that links to another table but for now this is should get us started
-# Note also that I use display_phone instead of the normal phone
+# Note that I use display_phone instead of the normal phone
 
 """
 SAMPLE ENTRY
