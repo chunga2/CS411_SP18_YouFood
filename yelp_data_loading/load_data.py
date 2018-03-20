@@ -12,6 +12,7 @@ conn = psycopg2.connect(dbname=DATABASE, user=USER, password=PASSWORD, host=HOST
 cur = conn.cursor()
 
 for business in businesses:
+    print(business['name'])
     my_price = business.get('price', None)
     if my_price:
         my_price = len(my_price)
@@ -19,7 +20,7 @@ for business in businesses:
         my_price = -1
     # insert restaurant
     cur.execute('''
-    INSERT INTO Restaurant (address, pricerange, cuisine, name, phone, image_url) 
+    INSERT INTO \"Restaurant\" (address, pricerange, cuisine, name, phone, image_url) 
     VALUES (%s, %s, %s, %s, %s, %s)
     ''',
                 (business['location']['display_address'], my_price, business['categories'][0]['title'],
@@ -27,10 +28,12 @@ for business in businesses:
     # insert categories
     for category in business['categories']:
         cur.execute('''
-        INSERT INTO RestaurantCategories (restaurantaddress, restaurantname, category) 
+        INSERT INTO \"RestaurantCategories\" (category, restaurant_name, restaurant_address)  
         VALUES (%s, %s, %s)
         ''',
-                    (business['location']['display_address'], business['name'], category['title']))
+                    (category['title'], business['name'], business['location']['display_address']))
+
+conn.commit()
 
 # For present purposes, I use the first item in categories as the cuisine. It should be a list that links to another table but for now this is should get us started
 # Note also that I use display_phone instead of the normal phone
