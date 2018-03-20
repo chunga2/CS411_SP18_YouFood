@@ -7,4 +7,4 @@ server/credentials.pyc
 .idea/*
 youfoodenv/
 yelp_data_loading/__pycache__/credentials.cpython-36.pyc
-yelp_data_loading/credentials.pyc
+yelp_data_loading/credentials.pycserver/.idea
