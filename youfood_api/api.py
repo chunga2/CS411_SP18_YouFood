@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import psycopg2
 from psycopg2 import IntegrityError, ProgrammingError
 from flask import Flask, jsonify, request, Response
@@ -8,8 +10,10 @@ app = Flask(__name__)
 
 conn = psycopg2.connect(dbname="youfood", user="youfood", password="wizard11", host="localhost")
 
+
 def home():
     return "<h1 style='color:blue'>Hello There!</h1>"
+
 
 def flatten(iterable):
     it = iter(iterable)
@@ -20,6 +24,7 @@ def flatten(iterable):
         else:
             yield e
 
+
 class UserAPI(MethodView):
 
     def get(self):
@@ -27,7 +32,7 @@ class UserAPI(MethodView):
         GET: /users?email=<emali>
         Gets user info for a given specified email address that is a URL query parameter
         """
-        
+
         email = request.args.get("email")
         if email == None:
             return jsonify({'error': 'No email address specified'}), 400
@@ -43,8 +48,8 @@ class UserAPI(MethodView):
             return jsonify({'error': 'No user with that email exists'}), 400
 
         data = {
-            'email' : row[0],
-            'name' : row[1]
+            'email': row[0],
+            'name': row[1]
         }
 
         cur.close()
@@ -65,7 +70,7 @@ class UserAPI(MethodView):
         email = json_data.get("email")
         name = json_data.get("name")
         password = json_data.get("password")
-        
+
         if email == None or name == None or password == None:
             return Response(status=400)
 
@@ -96,19 +101,19 @@ class UserAPI(MethodView):
         email = json_data.get("email")
         name = json_data.get("name")
         password = json_data.get("password")
-        
+
         if email == None or (name == None and password == None):
             return jsonify({'error': 'Missing email or both name and password'}), 400
 
         cur = conn.cursor()
-        if(name != None):
+        if (name != None):
             cur.execute("UPDATE \"User\" SET name = %s WHERE email = %s;", (name, email))
             if cur.rowcount == 0:
                 conn.rollback()
                 cur.close()
                 return jsonify({'error': 'No user with that email exists'}), 400
 
-        if(password != None):
+        if (password != None):
             cur.execute("UPDATE \"User\" SET hashedpass = %s WHERE email = %s;", (password, email))
             if cur.rowcount == 0:
                 conn.rollback()
@@ -125,7 +130,7 @@ class UserAPI(MethodView):
         Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
         entered can correspond to at most 1 user
         """
-        
+
         email = request.args.get("email")
         if email == None:
             return jsonify({'error': 'No email address specified'}), 400
@@ -140,7 +145,6 @@ class UserAPI(MethodView):
         conn.commit()
         cur.close()
         return Response(status=204)
-
 
 
 def format_restaurants(restaurant_tuples):
@@ -158,8 +162,9 @@ def format_restaurants(restaurant_tuples):
             "categories": [category]
         }
 
-        while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
-            json_obj["categories"].append(restaurant_tuples[i+1][5])
+        while (i + 1) < len(restaurant_tuples) and address == restaurant_tuples[i + 1][0] and name == \
+                restaurant_tuples[i + 1][1]:
+            json_obj["categories"].append(restaurant_tuples[i + 1][5])
             i = i + 1
 
         json_objects.append(json_obj)
@@ -183,6 +188,7 @@ class RestaurantAPI(MethodView):
                 "address": "address = %s",
                 "pricelt": "pricerange < %s",
                 "priceeq": "pricerange = %s",
+                "category": "category = %s"
             }
             selections = []
             params = []
@@ -212,7 +218,6 @@ class RestaurantAPI(MethodView):
             except ProgrammingError as e:
                 conn.rollback()
                 return "Invalid query data!", 500
-
 
 
 class RestaurantCategoriesAPI(MethodView):
@@ -259,11 +264,58 @@ class RestaurantCategoriesAPI(MethodView):
                 return "ProgrammingError!", 500
 
 
+def format_transaction(transaction_tuple: Tuple)->Dict[str, str]:
+    date, user, amount, restaurant_name, restaurant_address = transaction_tuple
+    return {
+        "date": date,
+        "user": user,
+        "amount": amount,
+        "restaurant_name": restaurant_name,
+        "restaurant_address": restaurant_address,
+    }
+class TransactionAPI(MethodView):
+    def get(self):
+        """
+        Respond to API call /transactions?params with a list of all transactions matching the params.
+        :return: JSON response, formatted by format_restaurant.
+        """
+
+        def build_where(query_params):
+            subqueries = {
+                "start": "date > %s",
+                "end": "date < %s",
+                "user": "useremail = %s",
+                "amount": "money = %s",
+            }
+            selections = []
+            params = []
+            for k, v in query_params.items():
+                if k in subqueries:
+                    selections += [subqueries[k]]
+                    params += [str(v)]
+            if selections:
+                where_clause = "WHERE " + " AND ".join(selections)
+                return where_clause, params
+            return "", []
+
+        where_clause, where_params = build_where(request.args)
+        with conn as c:
+            with c.cursor() as cur:
+                try:
+                    cur.execute(f"""SELECT date, user, amount, restaurant_name, restaurant_address FROM "Transaction"
+                            {where_clause} ORDER BY date ASC""", where_params)
+                    rv = cur.fetchall()
+                    jsonobjects = [format_transaction(x) for x in rv]
+                    return jsonify(jsonobjects)
+                except DataError as e:
+                    print(e)
+                    return "Invalid query data!", 500
+
+
 app.add_url_rule('/', 'home', home, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
-
 
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
@@ -271,6 +323,8 @@ app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
 restaurant_categories_view = RestaurantCategoriesAPI.as_view('restaurant_categories_api')
 app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view, methods=['GET'])
 
+transaction_view = TransactionAPI.as_view('transaction_api')
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
