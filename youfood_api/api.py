@@ -144,16 +144,26 @@ class UserAPI(MethodView):
 
 
 class RestaurantAPI(MethodView):
-    def format_restaurant(restaurant_tuple):
-        address, pricerange, cuisine, name, phone, image_url = restaurant_tuple
-        return {
+    def format_restaurant(self, restaurant_tuple):
+        if len(restaurant_tuple) == 4:
+            address, name, phone, image_url = restaurant_tuple
+            return {
             "address": address,
-            "pricerange": pricerange,
-            "cuisine": cuisine,
             "name": name,
+            "pricerange": None,
             "phone": phone,
             "image_url": image_url
-        }
+            }
+
+        else:
+            address, pricerange, name, phone, image_url = restaurant_tuple
+            return {
+                "address": address,
+                "pricerange": pricerange,
+                "name": name,
+                "phone": phone,
+                "image_url": image_url
+            }
 
     def get(self):
 
@@ -175,19 +185,23 @@ class RestaurantAPI(MethodView):
             for k, v in query_params.items():
                 if k in subqueries:
                     selections += [subqueries[k]]
-                    params += [v]
+                    params += [str(v)]
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
             return "", ""
 
         where_clause, where_params = build_where(request.args)
-
+        print where_clause
+        print where_params
+        query = 'SELECT * FROM "Restaurant" {where_clause}'.format(where_clause=where_clause)
+        print query
         with conn.cursor() as cur:
             try:
                 cur.execute('SELECT * FROM "Restaurant" {where_clause}'.format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
-                rv = [RestaurantAPI.format_restaurant(r) for r in rv]
+                print rv
+                rv = [self.format_restaurant(r) for r in rv]
                 return jsonify(rv)
             except DataError as e:
                 conn.rollback()
