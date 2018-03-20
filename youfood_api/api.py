@@ -260,10 +260,10 @@ class RestaurantCategoriesAPI(MethodView):
                 conn.rollback()
                 cur.close()
                 return "Invalid query data!", 500
-            # except ProgrammingError as e:
-            #     conn.rollback()
-            #     cur.close()
-            #     return "ProgrammingError!", 500
+            except ProgrammingError as e:
+                conn.rollback()
+                cur.close()
+                return "ProgrammingError!", 500
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
