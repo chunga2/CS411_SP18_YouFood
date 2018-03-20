@@ -2,12 +2,12 @@ CREATE EXTENSION citext;
 
 CREATE TABLE "Restaurant"(
     address text NOT NULL PRIMARY KEY,
-    pricerange int
-        CONSTRAINT numdollarsigns CHECK(pricerange <=4 AND pricerange >=1) NOT NULL,
+    pricerange int NOT NULL,
     cuisine text NOT NULL,
     name text NOT NULL,
     phone text NOT NULL,
-    image_url text NOT NULL
+    image_url text NOT NULL,
+    PRIMARY KEY (address, name)
 );
 CREATE TABLE "Owner"(
     email citext
