@@ -11,11 +11,12 @@ CREATE TABLE "Restaurant"(
 );
 CREATE TABLE "Owner"(
     email citext
-        CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
+        CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
     restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address)
+    restaurant_address text REFERENCES "Restaurant"(address),
+    PRIMARY KEY (email, restaurant_name, restaurant_address)
 );
 CREATE TABLE "User"(
     email citext
