@@ -205,6 +205,7 @@ class RestaurantAPI(MethodView):
                     ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
                 jsonobjects = self.format_restaurants(rv)
+                jsonobjects.append({'length': len(jsonobjects)})
                 return jsonify(jsonobjects)
             except DataError as e:
                 conn.rollback()
