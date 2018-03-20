@@ -8,6 +8,8 @@ app = Flask(__name__)
 
 conn = psycopg2.connect(dbname="youfood", user="youfood", password="wizard11", host="localhost")
 
+def home():
+    return "<h1 style='color:blue'>Hello There!</h1>"
 
 def flatten(iterable):
     it = iter(iterable)
@@ -191,6 +193,8 @@ class RestaurantAPI(MethodView):
                 conn.rollback()
                 return "Invalid query data!", 500
 
+
+app.add_url_rule('/', 'home', home, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
