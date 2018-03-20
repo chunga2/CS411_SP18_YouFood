@@ -12,8 +12,9 @@ CREATE TABLE "Owner"(
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
-    restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     PRIMARY KEY (email, restaurant_name, restaurant_address)
 );
 CREATE TABLE "User"(
@@ -38,33 +39,37 @@ CREATE TABLE "Transaction"(
 CREATE TABLE "Recommendation"(
     date timetz NOT NULL,
     useremail citext REFERENCES "User"(email),
-    restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     PRIMARY KEY (useremail, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "Review"(
     useremail citext REFERENCES "User"(email),
-    restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     description text,
-    rating numeric 
+    rating numeric
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
     date timetz NOT NULL,
     PRIMARY KEY(useremail, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "Promotion"(
-    restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     date timetz NOT NULL,
     description text NOT NULL,
     PRIMARY KEY (date, description,restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "RestaurantCategories" (
-    restaurant_name text REFERENCES "Restaurant"(name),
-    restaurant_address text REFERENCES "Restaurant"(address),
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     category text NOT NULL,
     PRIMARY KEY (category, restaurant_name, restaurant_address)
 );
