@@ -15,7 +15,7 @@ for business in businesses:
     # insert restaurant
     cur.execute('''
     INSERT INTO Restaurant (address, pricerange, cuisine, name, phone, image_url) 
-    VALUES (%s, %d, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s)
     ''',
                 (business['location']['display_address'], len(business['price']), business['categories'][0]['title'],
                  business['name'], business['display_phone'], business['image_url']))
@@ -26,8 +26,6 @@ for business in businesses:
         VALUES (%s, %s)
         ''',
                     (business['location']['display_address'], category['title']))
-
-    
 
 # For present purposes, I use the first item in categories as the cuisine. It should be a list that links to another table but for now this is should get us started
 # Note also that I use display_phone instead of the normal phone
