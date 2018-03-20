@@ -250,7 +250,6 @@ class RestaurantCategoriesAPI(MethodView):
                     ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", (category,))
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
-                jsonobjects.append({'length': len(jsonobjects)})
                 return jsonify(jsonobjects)
             except DataError as e:
                 conn.rollback()
