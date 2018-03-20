@@ -29,6 +29,8 @@ def verify_login():
         email: <email>,
         password: <password
     }
+
+    Returns 400 if a request param was missing, 401 if the login was invalid, or 204 if it was valid
     """
     json_data = request.get_json()
     is_owner = json_data.get("is_owner")
