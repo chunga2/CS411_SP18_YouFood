@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2 import IntegrityError
+from psycopg2 import IntegrityError, ProgrammingError
 from flask import Flask, jsonify, request, Response
 from flask.views import MethodView
 from psycopg2._psycopg import DataError
@@ -144,26 +144,29 @@ class UserAPI(MethodView):
 
 
 class RestaurantAPI(MethodView):
-    def format_restaurant(self, restaurant_tuple):
-        if len(restaurant_tuple) == 4:
-            address, name, phone, image_url = restaurant_tuple
-            return {
-            "address": address,
-            "name": name,
-            "pricerange": None,
-            "phone": phone,
-            "image_url": image_url
+    def format_restaurants(self, restaurant_tuples):
+        json_objects = []
+        i = 0
+        while i < len(restaurant_tuples):
+            rest_tuple = restaurant_tuples[i]
+            address, name, pricerange, phone, image_url, category = rest_tuple
+            json_obj = {
+                "address": address,
+                "name": name,
+                "pricerange": pricerange,
+                "phone": phone,
+                "image_url": image_url,
+                "categories": [category]
             }
 
-        else:
-            address, pricerange, name, phone, image_url = restaurant_tuple
-            return {
-                "address": address,
-                "pricerange": pricerange,
-                "name": name,
-                "phone": phone,
-                "image_url": image_url
-            }
+            while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
+                json_obj["categories"].append(restaurant_tuples[i+1][5])
+                i = i + 1
+
+            json_objects.append(json_obj)
+            i = i + 1
+
+        return json_objects
 
     def get(self):
 
@@ -194,11 +197,19 @@ class RestaurantAPI(MethodView):
         where_clause, where_params = build_where(request.args)
         with conn.cursor() as cur:
             try:
-                cur.execute('SELECT * FROM "Restaurant" {where_clause}'.format(where_clause=where_clause), where_params)
+                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                    "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                    FROM "Restaurant", "RestaurantCategories"
+                    {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
-                rv = [self.format_restaurant(r) for r in rv]
-                return jsonify(rv)
+                jsonobjects = self.format_restaurants(rv)
+                return jsonify(jsonobjects)
             except DataError as e:
+                conn.rollback()
+                return "Invalid query data!", 500
+            except ProgrammingError as e:
                 conn.rollback()
                 return "Invalid query data!", 500
 
