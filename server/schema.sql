@@ -23,25 +23,28 @@ CREATE TABLE "User"(
     hashedpass char(20) NOT NULL
 );
 CREATE TABLE "Budget"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     total money NOT NULL,
     PRIMARY KEY (useremail, date)
 );
 CREATE TABLE "Transaction"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     amount money NOT NULL,
+    restaurant_name text,
+    restaurant_address text,
+    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     PRIMARY KEY (useremail, date)
 );
 
 CREATE TABLE "Recommendation"(
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     useremail citext REFERENCES "User"(email),
     restaurant_name text,
     restaurant_address text,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
-    PRIMARY KEY (useremail, restaurant_name, restaurant_address)
+    PRIMARY KEY (useremail, restaurant_name, restaurant_address, date)
 );
 
 CREATE TABLE "Review"(
@@ -52,17 +55,17 @@ CREATE TABLE "Review"(
     description text,
     rating numeric
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
-    date timetz NOT NULL,
-    PRIMARY KEY(useremail, restaurant_name, restaurant_address)
+    date timestamp NOT NULL,
+    PRIMARY KEY(useremail, restaurant_name, restaurant_address, date)
 );
 
 CREATE TABLE "Promotion"(
     restaurant_name text,
     restaurant_address text,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
-    date timetz NOT NULL,
+    date timestamp NOT NULL,
     description text NOT NULL,
-    PRIMARY KEY (date, description,restaurant_name, restaurant_address)
+    PRIMARY KEY (date, description, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "RestaurantCategories" (
