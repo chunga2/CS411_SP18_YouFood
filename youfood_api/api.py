@@ -192,15 +192,10 @@ class RestaurantAPI(MethodView):
             return "", ""
 
         where_clause, where_params = build_where(request.args)
-        print where_clause
-        print where_params
-        query = 'SELECT * FROM "Restaurant" {where_clause}'.format(where_clause=where_clause)
-        print query
         with conn.cursor() as cur:
             try:
                 cur.execute('SELECT * FROM "Restaurant" {where_clause}'.format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
-                print rv
                 rv = [self.format_restaurant(r) for r in rv]
                 return jsonify(rv)
             except DataError as e:
