@@ -26,44 +26,45 @@ def flatten(iterable):
         else:
             yield e
 
-    POST: /verify_login
+
 def verify_login():
     """
-        password: <password
+    POST: /verify_login
     Request Body:
-
-    }
+    {
         is_owner: <true/false>,
         email: <email>,
-    {
+        password: <password
+    }
+
     Returns 400 if a request param was missing, 401 if the login was invalid, or 204 if it was valid
     """
     json_data = request.get_json()
-    password = json_data.get("password")
-    email = json_data.get("email")
     is_owner = json_data.get("is_owner")
+    email = json_data.get("email")
+    password = json_data.get("password")
 
     if is_owner == None or email == None or password == None:
         return "Missing necessary parameter in request body", 400
 
     if is_owner == True:
-            with c.cursor() as cur:
         with conn as c:
+            with c.cursor() as cur:
                 cur.execute("""
                     SELECT * 
                     FROM "Owner" 
                     WHERE email = %s AND hashedpass = %s""", (email, password))
-                row = cur.fetchone()
 
+                row = cur.fetchone()
                 if row == None:
-                else:
                     return "Invalid Login", 401
+                else:
                     return Response(status=204)
     else:
         with conn as c:
             with c.cursor() as cur:
-                    SELECT * 
                 cur.execute("""
+                    SELECT * 
                     FROM "User" 
                     WHERE email = %s AND hashedpass = %s""", (email, password))
 
@@ -72,7 +73,6 @@ def verify_login():
                     return "Invalid Login", 401
                 else:
                     return Response(status=204)
-
 
 
 
