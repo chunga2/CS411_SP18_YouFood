@@ -314,8 +314,7 @@ class RestaurantAPI(MethodView):
                 "name": "name = %s",
                 "address": "address = %s",
                 "pricelt": "pricerange < %s",
-                "priceeq": "pricerange = %s",
-                "category": "category = %s"
+                "priceeq": "pricerange = %s"
             }
             selections = []
             params = []
