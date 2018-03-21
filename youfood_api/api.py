@@ -619,6 +619,36 @@ class BudgetAPI(MethodView):
                                     VALUES (%s, %s, %s)""", insert_params)
                 return Response(status=201)
 
+    def put(self):
+        """
+        PUT: /budget
+
+        JSON request payload
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "amount": <amount>
+        }
+        """
+        json_data = request.get_json()
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        total = json_data.get("amount")
+
+        if date is None or useremail is None or total is None:
+            return "Missing request", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    UPDATE "Budget"
+                    SET total=%s
+                    WHERE useremail=%s
+                    AND date = %s""", 
+                    (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
+
 
 class RecommendationAPI(MethodView):
     def convert_to_json(self, rows):
@@ -906,7 +936,7 @@ review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 budget_view = BudgetAPI.as_view('budget_api')
-app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST'])
+app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST', 'PUT'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
