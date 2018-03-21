@@ -4,21 +4,15 @@ CREATE TABLE "Restaurant"(
     name text NOT NULL,
     phone text NOT NULL,
     image_url text NOT NULL,
-    owner_email citext REFERENCES "Owner"(email), 
+    owner_email citext REFERENCES "User"(email), 
     PRIMARY KEY (address, name)
-);
-CREATE TABLE "Owner"(
-    email citext
-        CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
-    name text NOT NULL,
-    hashedpass char(20) NOT NULL,
-    PRIMARY KEY (email)
 );
 CREATE TABLE "User"(
     email citext
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
-    hashedpass char(20) NOT NULL
+    hashedpass char(20) NOT NULL,
+    is_owner boolean NOT NULL
 );
 CREATE TABLE "Budget"(
     date timestamp NOT NULL,
