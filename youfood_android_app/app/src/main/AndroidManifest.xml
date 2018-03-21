@@ -12,16 +12,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity
-            android:name="com.cs411.droptableuser.youfood_android_app.MainActivity"
+        <activity android:name=".LoginActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.cs411.droptableuser.youfood_android_app.RestaurantDetailActivity"
+        <activity
+            android:name="com.cs411.droptableuser.youfood_android_app.MainActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.cs411.droptableuser.youfood_android_app.RestaurantDetailActivity"
             android:screenOrientation="portrait"/>
 
         <meta-data
