@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import butterknife.BindView;
@@ -16,6 +17,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     TextView textViewSignUp;
     @BindView(R.id.button_login_guest)
     Button buttonContinueAsGuest;
+    @BindView(R.id.button_login_signin)
+    Button buttonSignIn;
+    @BindView(R.id.edittext_login_username)
+    EditText editTextUsername;
+    @BindView(R.id.edittext_login_password)
+    EditText editTextPassword;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
