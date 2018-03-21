@@ -229,7 +229,7 @@ class PromotionAPI(MethodView):
                         'date': date.strftime("%d-%m-%Y %H:%M:%S"),
                         'description': description
                     } 
-                    jsonobjects.append(json_obj)
+                    json_objects.append(json_obj)
 
                 return jsonify(json_objects), 200
 
