@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app.endpoints;
 
+import com.cs411.droptableuser.youfood_android_app.requests.POSTUserRequest;
 import com.cs411.droptableuser.youfood_android_app.requests.PUTUserRequest;
 import com.cs411.droptableuser.youfood_android_app.requests.VerifyLoginRequest;
 import com.cs411.droptableuser.youfood_android_app.responses.GETUserResponse;
