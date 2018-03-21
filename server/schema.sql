@@ -12,7 +12,7 @@ CREATE TABLE "User"(
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
-    is_owner boolean NOT NULL DEFAULT FALSE;
+    is_owner boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "Budget"(
     date timestamp NOT NULL,
