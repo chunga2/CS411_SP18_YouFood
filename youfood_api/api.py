@@ -500,6 +500,36 @@ class TransactionAPI(MethodView):
                                     VALUES (%s, %s, %s, %s, %s)""", insert_params)
                 return Response(status=201)
 
+    def put(self):
+        """
+        PUT: /transactions
+
+        JSON request payload
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "amount": <amount>
+        }
+        """
+
+        json_data = request.get_json()
+        date = json_data["data"]
+        useremail = json_data["useremail"]
+        amount = json_data["amount"]
+
+        if date is None or useremail is None or amount is None:
+            return "Missing request", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    UPDATE "Transaction"
+                    SET amount=%s
+                    WHERE useremail=%s
+                    AND date = %s""", 
+                    (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+
+
 
 def format_budget(transaction_tuple: Tuple) -> Dict[str, str]:
     date, user, total = transaction_tuple
