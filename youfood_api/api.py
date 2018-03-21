@@ -49,7 +49,7 @@ def verify_login():
         with c.cursor() as cur:
             cur.execute("""
                 SELECT is_owner 
-                FROM "Owner" 
+                FROM "User" 
                 WHERE email = %s AND hashedpass = %s""", (email, password))
 
             row = cur.fetchone()
