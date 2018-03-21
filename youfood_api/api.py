@@ -198,7 +198,7 @@ class PromotionAPI(MethodView):
 
     def get(self):
         """
-        GET: /users?email=<emali>
+        GET: /promotions?restaurant_name=<name>&restaurant_address=<address>&date=<date>&description=<description>
         Gets user info for a given specified email address that is a URL query parameter
         """
         restaurant_name = request.args.get("restaurant_name")
