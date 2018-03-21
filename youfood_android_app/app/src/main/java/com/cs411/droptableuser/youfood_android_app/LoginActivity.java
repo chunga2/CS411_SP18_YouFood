@@ -6,11 +6,14 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+    @BindView(R.id.textview_login_signup)
+    TextView textViewSignUp;
     @BindView(R.id.button_login_guest)
     Button buttonContinueAsGuest;
     @Override
@@ -21,14 +24,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
 
+        textViewSignUp.setOnClickListener(this);
         buttonContinueAsGuest.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.textview_login_signup:
+                Intent intent = new Intent(this, SignUpActivity.class);
+                startActivity(intent);
+                break;
             case R.id.button_login_guest:
-                Intent intent = new Intent(this, MainActivity.class);
+                intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 break;
         }

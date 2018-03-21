@@ -1,26 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="@drawable/login_background">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_background"
+    tools:layout_editor_absoluteY="25dp">
+
+    <EditText
+        android:id="@+id/edittext_login_username"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="172dp"
+        android:background="@drawable/login_username"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="@string/username"
+        android:inputType="textEmailAddress"
+        android:paddingEnd="58dp"
+        android:paddingStart="58dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        tools:layout_editor_absoluteX="72dp"
+        tools:layout_editor_absoluteY="198dp" />
+
+    <EditText
+        android:id="@+id/edittext_login_password"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_below="@+id/edittext_login_username"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/login_password"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        android:paddingEnd="58dp"
+        android:paddingStart="58dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        tools:layout_editor_absoluteX="72dp"
+        tools:layout_editor_absoluteY="260dp" />
+
+    <TextView
+        android:id="@+id/text_login_signup_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/edittext_login_password"
+        android:layout_below="@+id/edittext_login_password"
+        android:layout_marginBottom="7dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="7dp"
+        android:fontFamily="@font/roboto_medium"
+        android:text="@string/login_signup_header"
+        android:textColor="@android:color/white"
+        tools:layout_editor_absoluteX="72dp"
+        tools:layout_editor_absoluteY="317dp" />
+
+    <TextView
+        android:id="@+id/textview_login_signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/text_login_signup_header"
+        android:layout_alignBottom="@+id/text_login_signup_header"
+        android:layout_marginStart="2dp"
+        android:layout_toEndOf="@+id/text_login_signup_header"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/roboto_medium"
+        android:text="@string/sign_up"
+        android:textColor="#304FFE"
+        tools:layout_editor_absoluteX="207dp"
+        tools:layout_editor_absoluteY="317dp" />
 
     <Button
-    android:id="@+id/button_login_guest"
-    style="@style/Widget.AppCompat.Button.Borderless"
-    android:layout_width="0dp"
-    android:layout_height="44dp"
-    android:fontFamily="@font/roboto_light"
-    android:text="@string/continue_as_guest"
-    android:textAlignment="center"
-    android:textAllCaps="false"
-    android:textColor="@android:color/white"
-    android:textSize="12sp"
-    android:visibility="visible"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.0"
-    app:layout_constraintStart_toStartOf="parent" />
-</android.support.constraint.ConstraintLayout>
+        android:id="@+id/button_login_signin"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_below="@+id/text_login_signup_header"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/login_signin_button" />
+
+    <Button
+        android:id="@+id/button_login_guest"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/roboto_light"
+        android:text="@string/continue_as_guest"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:visibility="visible"
+        tools:layout_editor_absoluteY="523dp" />
+
+</RelativeLayout>
