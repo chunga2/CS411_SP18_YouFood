@@ -513,9 +513,9 @@ class TransactionAPI(MethodView):
         """
 
         json_data = request.get_json()
-        date = json_data["data"]
-        useremail = json_data["useremail"]
-        amount = json_data["amount"]
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        amount = json_data.get("amount")
 
         if date is None or useremail is None or amount is None:
             return "Missing request", 400
@@ -528,6 +528,7 @@ class TransactionAPI(MethodView):
                     WHERE useremail=%s
                     AND date = %s""", 
                     (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
 
 
 
