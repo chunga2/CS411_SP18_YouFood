@@ -424,7 +424,7 @@ def format_transaction(transaction_tuple: Tuple) -> Dict[str, str]:
 class TransactionAPI(MethodView):
     def get(self):
         """
-        Respond to API call /transactions?params with a list of all transactions matching the params.
+        GET /transactions?params with a list of all transactions matching the params.
         :return: JSON response, formatted by format_restaurant.
         """
 
@@ -528,6 +528,23 @@ class TransactionAPI(MethodView):
                     WHERE useremail=%s
                     AND date = %s""", 
                     (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE: /transactions?useremail=<email>&date=<date>
+        """
+        useremail = request.args.get("useremail")
+        date = request.args.get("date")
+        if useremail is None or date is None:
+            return Response(status=400)
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM "Transaction"
+                    WHERE useremail=%s 
+                    AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
 
 
