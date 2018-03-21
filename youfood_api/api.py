@@ -32,7 +32,6 @@ def verify_login():
     POST: /verify_login
     Request Body:
     {
-        is_owner: <true/false>,
         email: <email>,
         password: <password
     }
@@ -40,40 +39,24 @@ def verify_login():
     Returns 400 if a request param was missing, 401 if the login was invalid, or 204 if it was valid
     """
     json_data = request.get_json()
-    is_owner = json_data.get("is_owner")
     email = json_data.get("email")
     password = json_data.get("password")
 
-    if is_owner == None or email == None or password == None:
+    if email == None or password == None:
         return "Missing necessary parameter in request body", 400
 
-    if is_owner == True:
-        with conn as c:
-            with c.cursor() as cur:
-                cur.execute("""
-                    SELECT * 
-                    FROM "Owner" 
-                    WHERE email = %s AND hashedpass = %s""", (email, password))
+    with conn as c:
+        with c.cursor() as cur:
+            cur.execute("""
+                SELECT is_owner 
+                FROM "Owner" 
+                WHERE email = %s AND hashedpass = %s""", (email, password))
 
-                row = cur.fetchone()
-                if row == None:
-                    return "Invalid Login", 401
-                else:
-                    return Response(status=204)
-    else:
-        with conn as c:
-            with c.cursor() as cur:
-                cur.execute("""
-                    SELECT * 
-                    FROM "User" 
-                    WHERE email = %s AND hashedpass = %s""", (email, password))
-
-                row = cur.fetchone()
-                if row == None:
-                    return "Invalid Login", 401
-                else:
-                    return Response(status=204)
-
+            row = cur.fetchone()
+            if row == None:
+                return "Invalid Login", 401
+            else:
+                return jsonify({'is_owner': row[0]}), 200
 
 
 def parse_date(date: str) -> datetime:
@@ -207,173 +190,6 @@ class UserAPI(MethodView):
                     return jsonify({'error': 'No user with that email exists'}), 400
 
                 return Response(status=204)
-
-
-class OwnerAPI(MethodView):
-
-    def get(self):
-        """
-        GET: /users?email=<emali>
-        Gets user info for a given specified email address that is a URL query parameter
-        """
-
-        email = request.args.get("email")
-        restaurant_name = request.args.get("restaurant_name")
-        restaurant_address = request.args.get("restaurant_address")
-
-        if email is None:
-            return jsonify({'error': 'No email address specified'}), 400
-        if restaurant_name is None:
-            return jsonify({'error': 'No restaurant_name specified'}), 400
-        if restaurant_address is None:
-            return jsonify({'error': 'No restaurant_address specified'}), 400
-
-        cur = conn.cursor()
-        cur.execute("SELECT * "
-                    "FROM \"Owner\" "
-                    "WHERE email=%s AND "
-                    "restaurant_name=%s AND "
-                    "restaurant_address=%s;",
-                    (email, restaurant_name, restaurant_address))
-
-        row = cur.fetchone()
-        # Executes if no user with that email address was found
-        if row is None:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No owner with that key exists'}), 400
-
-        data = {
-            'email': row[0],
-            'name': row[1],
-            'restaurant_name': row[3],
-            'restaurant_address': row[4]
-        }
-
-        cur.close()
-        return jsonify(data), 200
-
-    def post(self):
-        """
-        POST: /owners
-
-        JSON request payload:
-        {
-            "email" : <email>
-            "name" : <name>
-            "password" : <password>
-            "restaurant_name": <restaurant_name>
-            "restaurant_address": <restaurant_address>
-        }
-        """
-        json_data = request.get_json()
-        email = json_data.get("email")
-        name = json_data.get("name")
-        password = json_data.get("password")
-        restaurant_name = json_data.get("restaurant_name")
-        restaurant_address = json_data.get("restaurant_address")
-
-        if email is None or name is None or password is None or restaurant_name is None or restaurant_address is None:
-            return Response(status=400)
-
-        cur = conn.cursor()
-        try:
-            cur.execute("INSERT INTO \"Owner\" "
-                        "(email, name, hashedpass, restaurant_name, restaurant_address) "
-                        "VALUES (%s, %s, %s);",
-                        (email, name, password, restaurant_name, restaurant_address))
-            conn.commit()
-        except IntegrityError:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'Owner with that key already exists'}), 400
-
-        cur.close()
-        return Response(status=201)
-
-    def put(self):
-        """
-        PUT: /users
-
-        JSON request payload (email is required, at least 1 of name or password is also required)
-        {
-            "email" : <email>
-            "name" : <name>
-            "password" : <password>
-        }
-        """
-        json_data = request.get_json()
-        email = json_data.get("email")
-        name = json_data.get("name")
-        password = json_data.get("password")
-
-        if email is None or restaurant_name is None or restaurant_address is None or \
-            (name is None and password is None):
-            return jsonify({'error': 'Missing email, restaurant_name, or restaurant_address'
-                                     'rest or both name and password'}), 400
-
-        cur = conn.cursor()
-        if name is not None:
-            cur.execute("UPDATE \"Owner\" SET name = %s "
-                        "WHERE email=%s AND "
-                        "restaurant_name=%s AND "
-                        "restaurant_address=%s;",
-                        (name, email, restaurant_name, restaurant_address))
-            if cur.rowcount == 0:
-                conn.rollback()
-                cur.close()
-                return jsonify({'error': 'No owner with that key exists'}), 400
-
-        if password is not None:
-            cur.execute("UPDATE \"Owner\" SET hashedpass = %s "
-                       "WHERE email=%s AND "
-                        "restaurant_name=%s AND "
-                        "restaurant_address=%s;",
-                        (password, email, restaurant_name, restaurant_address))
-            if cur.rowcount == 0:
-                conn.rollback()
-                cur.close()
-                return jsonify({'error': 'No owner with that key exists'}), 400
-
-        conn.commit()
-        cur.close()
-        return Response(status=204)
-
-    def delete(self):
-        """
-        DELETE: /users?email=<email>
-        Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
-        entered can correspond to at most 1 user
-        """
-
-        email = request.args.get("email")
-        restaurant_name = request.args.get("restaurant_name")
-        restaurant_address = request.args.get("restaurant_address")
-
-        if email is None:
-            return jsonify({'error': 'No email address specified'}), 400
-        if restaurant_name is None:
-            return jsonify({'error': 'No restaurant_name specified'}), 400
-        if restaurant_address is None:
-            return jsonify({'error': 'No restaurant_address specified'}), 400
-
-        cur = conn.cursor()
-        cur.execute("DELETE "
-                    "FROM \"Owner\" "
-                    "WHERE email=%s AND "
-                    "restaurant_name=%s AND "
-                    "restaurant_address=%s;",
-                    (email, restaurant_name, restaurant_address))
-
-        if cur.rowcount == 0:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No owner with that key exists'}), 400
-
-        conn.commit()
-        cur.close()
-        return Response(status=204)
-
 
 class PromotionAPI(MethodView):
 
@@ -1042,8 +858,8 @@ app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST']
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
-owner_view = OwnerAPI.as_view('owner_api')
-app.add_url_rule('/owners', view_func=owner_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
+promotion_view = PromotionAPI.as_view('owner_api')
+app.add_url_rule('/promotions', view_func=promotion_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
