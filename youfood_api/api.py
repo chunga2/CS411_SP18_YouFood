@@ -242,15 +242,14 @@ class PromotionAPI(MethodView):
 
     def post(self):
         """
-        POST: /users
+        POST: /promotions
 
         JSON request payload:
         {
-            "email" : <email>
-            "name" : <name>
-            "password" : <password>
-            "restaurant_name": <restaurant_name>
-            "restaurant_address": <restaurant_address>
+            "restaurant_name": <restaurant_name>,
+            "restaurant_address": <restaurant_address>,
+            "date": <date>,
+            "description": <description>
         }
         """
         json_data = request.get_json()
@@ -259,25 +258,17 @@ class PromotionAPI(MethodView):
         date = json_data.get("date")
         description = json_data.get("description")
 
-        if restaurant_name is None or restaurant_address is None or \
-            date is None or description is None:
+        if restaurant_name is None or restaurant_address is None or date is None or description is None:
             return Response(status=400)
 
-        cur = conn.cursor()
-        try:
-            cur.execute("INSERT INTO \"Promotion\" "
-                        "(restaurant_name, restaurant_address, date, description) "
-                        "VALUES (%s, %s, %s, %s);",
-                        (restaurant_name, restaurant_address,
-                         datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
-            conn.commit()
-        except IntegrityError:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'Promotion with that key already exists'}), 400
-
-        cur.close()
-        return Response(status=201)
+        with conn as c:
+            with c.cursor() as cur: 
+                cur.execute("INSERT INTO \"Promotion\" "
+                            "(restaurant_name, restaurant_address, date, description) "
+                            "VALUES (%s, %s, %s, %s);",
+                            (restaurant_name, restaurant_address,
+                             datetime.strptime(date, "%d-%m-%Y %H:%M:%S"), description))
+                return Response(status=201)
 
     def delete(self):
         """
