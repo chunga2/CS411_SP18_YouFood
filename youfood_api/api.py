@@ -304,7 +304,7 @@ class RestaurantAPI(MethodView):
 
     def get(self):
         """
-        Respond to API call /restaurants?params with a list of all restaurants, encoded as JSON.
+        GET /restaurants?params with a list of all restaurants, encoded as JSON.
         Accepts params as GET arguments, which are documented in build_where.
         :return: JSON response, formatted by format_restaurant.
         """
@@ -339,6 +339,38 @@ class RestaurantAPI(MethodView):
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects), 200
+
+    def put(self):
+        """
+        PUT /restaurants
+        {
+            'restaurant_address': <address>,
+            'restaurant_name': <name>,
+            'owner_email': <email>
+        }
+        """
+        json_data = request.get_json()
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+        owner_email = json_data.get("owner_email")
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    SELECT is_owner
+                    FROM "User"
+                    WHERE email=%s;""", (owner_email,))
+
+                row = cur.fetchone()
+                if row is None or row[0] == False:
+                    return "Not an owner", 400
+
+                cur.execute("""
+                    UPDATE "Restaurant"
+                    SET owner_email = %s
+                    WHERE name = %s AND address = %s;""", (owner_email, restaurant_name, restaurant_address))
+                return Response(status=204)
+
 
 
 class RestaurantCategoriesAPI(MethodView):
@@ -842,7 +874,7 @@ promotion_view = PromotionAPI.as_view('owner_api')
 app.add_url_rule('/promotions', view_func=promotion_view, methods=['GET', 'POST', 'DELETE'])
 
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
-app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
+app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET', 'PUT'])
 
 restaurant_categories_view = RestaurantCategoriesAPI.as_view('restaurant_categories_api')
 app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view, methods=['GET'])
