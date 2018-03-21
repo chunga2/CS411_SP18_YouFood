@@ -586,9 +586,9 @@ class BudgetAPI(MethodView):
                     print(e)
                     return "Invalid query data!", 500
 
-    def put(self):
+    def post(self):
         """
-        PUT: /budget
+        POST: /budget
 
         JSON request payload
         {
@@ -913,7 +913,7 @@ review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 budget_view = BudgetAPI.as_view('budget_api')
-app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'PUT'])
+app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
