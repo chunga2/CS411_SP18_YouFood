@@ -203,17 +203,11 @@ class PromotionAPI(MethodView):
         """
         restaurant_name = request.args.get("restaurant_name")
         restaurant_address = request.args.get("restaurant_address")
-        date = request.args.get("date")
-        description = request.args.get("description")
 
         if restaurant_name is None:
             return jsonify({'error': 'No restaurant_name specified'}), 400
         if restaurant_address is None:
             return jsonify({'error': 'No restaurant_address specified'}), 400
-        if date is None:
-            return jsonify({'error': 'No date specified'}), 400
-        if description is None:
-            return jsonify({'error': 'No description specified'}), 400
 
         with conn as c:
             with c.cursor() as cur:
@@ -221,24 +215,23 @@ class PromotionAPI(MethodView):
                 cur.execute("""SELECT restaurant_name, restaurant_address, date, description
                             FROM "Promotion"
                             WHERE restaurant_name=%s AND
-                            restaurant_address=%s AND
-                            date=%s AND
-                            description=%s;""",
-                            (restaurant_name, restaurant_address, datetime.strptime(date, "%d-%m-%Y %H:%M:%S"), description))
+                            restaurant_address=%s;""",
+                            (restaurant_name, restaurant_address))
 
-                row = cur.fetchone()
-                # Executes if no user with that email address was found
-                if row is None:
-                    return jsonify({'error': 'No promotion with that key exists'}), 400
+                rows = cur.fetchall()
 
-                data = {
-                    'restaurant_name': row[0],
-                    'restaurant_address': row[1],
-                    'date': row[2],
-                    'description': row[3]
-                }
+                json_objects = []
+                for row in rows:
+                    name, address, date, description = row
+                    json_obj = {
+                        'restaurant_name': name,
+                        'restaurant_address': address,
+                        'date': date.strftime("%d-%m-%Y %H:%M:%S"),
+                        'description': description
+                    } 
+                    jsonobjects.append(json_obj)
 
-                return jsonify(data), 200
+                return jsonify(json_objects), 200
 
     def post(self):
         """
