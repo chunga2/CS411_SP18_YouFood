@@ -215,32 +215,30 @@ class PromotionAPI(MethodView):
         if description is None:
             return jsonify({'error': 'No description specified'}), 400
 
-        cur = conn.cursor()
-        cur.execute("SELECT * "
-                    "FROM \"Promotion\" "
-                    "WHERE restaurant_name=%s AND "
-                    "restaurant_address=%s AND"
-                    "date=%s AND"
-                    "description=%s;",
-                    (restaurant_name, restaurant_address,
-                     datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
+        with conn as c:
+            with c.cursor() as cur:
+                cur = conn.cursor()
+                cur.execute("""SELECT restaurant_name, restaurant_address, date, description
+                            FROM "Promotion"
+                            WHERE restaurant_name=%s AND
+                            restaurant_address=%s AND
+                            date=%s AND
+                            description=%s;""",
+                            (restaurant_name, restaurant_address, datetime.strptime(date, "%d-%m-%Y %H:%M:%S"), description))
 
-        row = cur.fetchone()
-        # Executes if no user with that email address was found
-        if row is None:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No promotion with that key exists'}), 400
+                row = cur.fetchone()
+                # Executes if no user with that email address was found
+                if row is None:
+                    return jsonify({'error': 'No promotion with that key exists'}), 400
 
-        data = {
-            'restaurant_name': row[0],
-            'restaurant_address': row[1],
-            'date': row[2],
-            'description': row[3]
-        }
+                data = {
+                    'restaurant_name': row[0],
+                    'restaurant_address': row[1],
+                    'date': row[2],
+                    'description': row[3]
+                }
 
-        cur.close()
-        return jsonify(data), 200
+                return jsonify(data), 200
 
     def post(self):
         """
@@ -862,7 +860,7 @@ user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 promotion_view = PromotionAPI.as_view('owner_api')
-app.add_url_rule('/promotions', view_func=promotion_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
+app.add_url_rule('/promotions', view_func=promotion_view, methods=['GET', 'POST', 'DELETE'])
 
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
