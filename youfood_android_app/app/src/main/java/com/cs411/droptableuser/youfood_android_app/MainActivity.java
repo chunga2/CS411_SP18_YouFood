@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setActionBar() {
         toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setBackgroundResource(R.color.colorPrimary);
         setSupportActionBar(toolbar);
     }
 }
