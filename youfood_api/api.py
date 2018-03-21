@@ -465,9 +465,9 @@ class TransactionAPI(MethodView):
                     print(e)
                     return "Invalid query data!", 500
 
-    def put(self):
+    def post(self):
         """
-        PUT: /transactions
+        POST: /transactions
 
         JSON request payload
         {
@@ -496,16 +496,9 @@ class TransactionAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                try:
-                    cur.execute("""INSERT INTO "Transaction"(date, useremail, amount, restaurant_name, restaurant_address)
+                cur.execute("""INSERT INTO "Transaction"(date, useremail, amount, restaurant_name, restaurant_address)
                                     VALUES (%s, %s, %s, %s, %s)""", insert_params)
-                    conn.commit()
-                    return "OK", 200
-                except DataError as e:
-                    print(e)
-                    return "Invalid data type!", 500
-                except IntegrityError as e:
-                    return f"Integrity violation: {e}", 500
+                return Response(status=201)
 
 
 def format_budget(transaction_tuple: Tuple) -> Dict[str, str]:
@@ -881,8 +874,9 @@ app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view,
 
 recommendation_view = RecommendationAPI.as_view('recommendation_api')
 app.add_url_rule('/recommendations', view_func=recommendation_view, methods=['GET', 'POST', 'DELETE'])
+
 transaction_view = TransactionAPI.as_view('transaction_api')
-app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'PUT'])
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST'])
 
 review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
