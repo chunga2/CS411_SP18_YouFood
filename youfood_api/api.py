@@ -255,7 +255,7 @@ class OwnerAPI(MethodView):
 
     def post(self):
         """
-        POST: /users
+        POST: /owners
 
         JSON request payload:
         {
@@ -1042,6 +1042,9 @@ app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST']
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
+owner_view = OwnerAPI.as_view('owner_api')
+app.add_url_rule('/owners', view_func=owner_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
+
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
 app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
 
@@ -1055,7 +1058,6 @@ app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'P
 
 review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
-
 
 budget_view = BudgetAPI.as_view('budget_api')
 app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'PUT'])
