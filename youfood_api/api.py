@@ -460,7 +460,7 @@ class TransactionAPI(MethodView):
                             {where_clause} ORDER BY date ASC""", where_params)
                     rv = cur.fetchall()
                     jsonobjects = [format_transaction(x) for x in rv]
-                    return jsonify(jsonobjects)
+                    return jsonify(jsonobjects), 200
                 except DataError as e:
                     print(e)
                     return "Invalid query data!", 500
