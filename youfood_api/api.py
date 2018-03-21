@@ -80,6 +80,30 @@ def parse_date(date: str) -> datetime:
     return datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
 
 
+def format_restaurants(restaurant_tuples):
+    json_objects = []
+    i = 0
+    while i < len(restaurant_tuples):
+        rest_tuple = restaurant_tuples[i]
+        address, name, pricerange, phone, image_url, category = rest_tuple
+        json_obj = {
+            "address": address,
+            "name": name,
+            "pricerange": pricerange,
+            "phone": phone,
+            "image_url": image_url,
+            "categories": [category]
+        }
+
+        while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
+            json_obj["categories"].append(restaurant_tuples[i+1][5])
+            i = i + 1
+
+        json_objects.append(json_obj)
+        i = i + 1
+
+    return json_objects
+
 class UserAPI(MethodView):
 
     def get(self):
@@ -185,30 +209,299 @@ class UserAPI(MethodView):
                 return Response(status=204)
 
 
-def format_restaurants(restaurant_tuples):
-    json_objects = []
-    i = 0
-    while i < len(restaurant_tuples):
-        rest_tuple = restaurant_tuples[i]
-        address, name, pricerange, phone, image_url, category = rest_tuple
-        json_obj = {
-            "address": address,
-            "name": name,
-            "pricerange": pricerange,
-            "phone": phone,
-            "image_url": image_url,
-            "categories": [category]
+class OwnerAPI(MethodView):
+
+    def get(self):
+        """
+        GET: /users?email=<emali>
+        Gets user info for a given specified email address that is a URL query parameter
+        """
+
+        email = request.args.get("email")
+        restaurant_name = request.args.get("restaurant_name")
+        restaurant_address = request.args.get("restaurant_address")
+
+        if email is None:
+            return jsonify({'error': 'No email address specified'}), 400
+        if restaurant_name is None:
+            return jsonify({'error': 'No restaurant_name specified'}), 400
+        if restaurant_address is None:
+            return jsonify({'error': 'No restaurant_address specified'}), 400
+
+        cur = conn.cursor()
+        cur.execute("SELECT * "
+                    "FROM \"Owner\" "
+                    "WHERE email=%s AND "
+                    "restaurant_name=%s AND "
+                    "restaurant_address=%s;",
+                    (email, restaurant_name, restaurant_address))
+
+        row = cur.fetchone()
+        # Executes if no user with that email address was found
+        if row is None:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'No owner with that key exists'}), 400
+
+        data = {
+            'email': row[0],
+            'name': row[1],
+            'restaurant_name': row[3],
+            'restaurant_address': row[4]
         }
 
-        while (i + 1) < len(restaurant_tuples) and address == restaurant_tuples[i + 1][0] and name == \
-                restaurant_tuples[i + 1][1]:
-            json_obj["categories"].append(restaurant_tuples[i + 1][5])
-            i = i + 1
+        cur.close()
+        return jsonify(data), 200
 
-        json_objects.append(json_obj)
-        i = i + 1
+    def post(self):
+        """
+        POST: /users
 
-    return json_objects
+        JSON request payload:
+        {
+            "email" : <email>
+            "name" : <name>
+            "password" : <password>
+            "restaurant_name": <restaurant_name>
+            "restaurant_address": <restaurant_address>
+        }
+        """
+        json_data = request.get_json()
+        email = json_data.get("email")
+        name = json_data.get("name")
+        password = json_data.get("password")
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+
+        if email is None or name is None or password is None or \
+                restaurant_name is None or restaurant_address is None:
+            return Response(status=400)
+
+        cur = conn.cursor()
+        try:
+            cur.execute("INSERT INTO \"Owner\" "
+                        "(email, name, hashedpass, restaurant_name, restaurant_address) "
+                        "VALUES (%s, %s, %s);",
+                        (email, name, password, restaurant_name, restaurant_address))
+            conn.commit()
+        except IntegrityError:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'Owner with that key already exists'}), 400
+
+        cur.close()
+        return Response(status=201)
+
+    def put(self):
+        """
+        PUT: /users
+
+        JSON request payload (email is required, at least 1 of name or password is also required)
+        {
+            "email" : <email>
+            "name" : <name>
+            "password" : <password>
+        }
+        """
+        json_data = request.get_json()
+        email = json_data.get("email")
+        name = json_data.get("name")
+        password = json_data.get("password")
+
+        if email is None or or restaurant_name is None or restaurant_address is None or \
+            (name is None and password is None):
+            return jsonify({'error': 'Missing email, restaurant_name, or restaurant_address'
+                                     'rest or both name and password'}), 400
+
+        cur = conn.cursor()
+        if name is not None:
+            cur.execute("UPDATE \"Owner\" SET name = %s "
+                        "WHERE email=%s AND "
+                        "restaurant_name=%s AND "
+                        "restaurant_address=%s;",
+                        (name, email, restaurant_name, restaurant_address))
+            if cur.rowcount == 0:
+                conn.rollback()
+                cur.close()
+                return jsonify({'error': 'No owner with that key exists'}), 400
+
+        if password is not None:
+            cur.execute("UPDATE \"Owner\" SET hashedpass = %s "
+                       "WHERE email=%s AND "
+                        "restaurant_name=%s AND "
+                        "restaurant_address=%s;",
+                        (password, email, restaurant_name, restaurant_address))
+            if cur.rowcount == 0:
+                conn.rollback()
+                cur.close()
+                return jsonify({'error': 'No owner with that key exists'}), 400
+
+        conn.commit()
+        cur.close()
+        return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE: /users?email=<email>
+        Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
+        entered can correspond to at most 1 user
+        """
+
+        email = request.args.get("email")
+        restaurant_name = request.args.get("restaurant_name")
+        restaurant_address = request.args.get("restaurant_address")
+
+        if email is None:
+            return jsonify({'error': 'No email address specified'}), 400
+        if restaurant_name is None:
+            return jsonify({'error': 'No restaurant_name specified'}), 400
+        if restaurant_address is None:
+            return jsonify({'error': 'No restaurant_address specified'}), 400
+
+        cur = conn.cursor()
+        cur.execute("DELETE "
+                    "FROM \"Owner\" "
+                    "WHERE email=%s AND "
+                    "restaurant_name=%s AND "
+                    "restaurant_address=%s;",
+                    (email, restaurant_name, restaurant_address))
+
+        if cur.rowcount == 0:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'No owner with that key exists'}), 400
+
+        conn.commit()
+        cur.close()
+        return Response(status=204)
+
+
+class PromotionAPI(MethodView):
+
+    def get(self):
+        """
+        GET: /users?email=<emali>
+        Gets user info for a given specified email address that is a URL query parameter
+        """
+        restaurant_name = request.args.get("restaurant_name")
+        restaurant_address = request.args.get("restaurant_address")
+        date = request.args.get("date")
+        description = request.args.get("description")
+
+        if restaurant_name is None:
+            return jsonify({'error': 'No restaurant_name specified'}), 400
+        if restaurant_address is None:
+            return jsonify({'error': 'No restaurant_address specified'}), 400
+        if date is None:
+            return jsonify({'error': 'No date specified'}), 400
+        if description is None:
+            return jsonify({'error': 'No description specified'}), 400
+
+        cur = conn.cursor()
+        cur.execute("SELECT * "
+                    "FROM \"Promotion\" "
+                    "WHERE restaurant_name=%s AND "
+                    "restaurant_address=%s AND"
+                    "date=%s AND"
+                    "description=%s;",
+                    (restaurant_name, restaurant_address,
+                     datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
+
+        row = cur.fetchone()
+        # Executes if no user with that email address was found
+        if row is None:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'No promotion with that key exists'}), 400
+
+        data = {
+            'restaurant_name': row[0],
+            'restaurant_address': row[1],
+            'date': row[2],
+            'description': row[3]
+        }
+
+        cur.close()
+        return jsonify(data), 200
+
+    def post(self):
+        """
+        POST: /users
+
+        JSON request payload:
+        {
+            "email" : <email>
+            "name" : <name>
+            "password" : <password>
+            "restaurant_name": <restaurant_name>
+            "restaurant_address": <restaurant_address>
+        }
+        """
+        json_data = request.get_json()
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+        date = json_data.get("date")
+        description = json_data.get("description")
+
+        if restaurant_name is None or restaurant_address is None or \
+            date is None or description is None:
+            return Response(status=400)
+
+        cur = conn.cursor()
+        try:
+            cur.execute("INSERT INTO \"Promotion\" "
+                        "(restaurant_name, restaurant_address, date, description) "
+                        "VALUES (%s, %s, %s, %s);",
+                        (restaurant_name, restaurant_address,
+                         datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
+            conn.commit()
+        except IntegrityError:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'Promotion with that key already exists'}), 400
+
+        cur.close()
+        return Response(status=201)
+
+    def delete(self):
+        """
+        DELETE: /users?email=<email>
+        Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
+        entered can correspond to at most 1 user
+        """
+
+        restaurant_name = request.args.get("restaurant_name")
+        restaurant_address = request.args.get("restaurant_address")
+        date = request.args.get("date")
+        description = request.args.get("description")
+
+        if restaurant_name is None:
+            return jsonify({'error': 'No restaurant_name specified'}), 400
+        if restaurant_address is None:
+            return jsonify({'error': 'No restaurant_address specified'}), 400
+        if date is None:
+            return jsonify({'error': 'No date specified'}), 400
+        if description is None:
+            return jsonify({'error': 'No description specified'}), 400
+
+        cur = conn.cursor()
+        cur.execute("DELETE "
+                    "FROM \"Promotion\" "
+                    "WHERE restaurant_name=%s AND "
+                    "restaurant_address=%s AND"
+                    "date=%s AND"
+                    "description=%s;",
+                    (restaurant_name, restaurant_address,
+                     datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
+
+        if cur.rowcount == 0:
+            conn.rollback()
+            cur.close()
+            return jsonify({'error': 'No owner with that key exists'}), 400
+
+        conn.commit()
+        cur.close()
+        return Response(status=204)
 
 
 class RestaurantAPI(MethodView):
