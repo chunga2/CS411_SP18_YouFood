@@ -13,4 +13,6 @@
     <string name="temp_restaurant_price_range">$$$$$</string>
     <string name="temp_restaurant_num_votes">1334 Votes</string>
     <string name="continue_as_guest">Continue as Guest</string>
+    <string name="restaurant_detail_activity_reviews_header">Reviews</string>
+    <string name="restaurant_detail_write_your_review">Write your review...</string>
 </resources>
