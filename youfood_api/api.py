@@ -314,7 +314,7 @@ class RestaurantAPI(MethodView):
                 "name": "name = %s",
                 "address": "address = %s",
                 "pricelt": "pricerange < %s",
-                "priceeq": "pricerange = %s"
+                "priceeq": "pricerange = %s",
             }
             selections = []
             params = []
@@ -325,7 +325,7 @@ class RestaurantAPI(MethodView):
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
-            return "WHERE", []
+            return "", ""
 
         where_clause, where_params = build_where(request.args)
         with conn as c:
@@ -333,9 +333,9 @@ class RestaurantAPI(MethodView):
                 cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
                     "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
                     FROM "Restaurant", "RestaurantCategories"
-                    {where_clause} name = restaurant_name
-                    AND address = restaurant_address
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""", where_params)
+                    {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects), 200
