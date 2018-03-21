@@ -433,7 +433,7 @@ class TransactionAPI(MethodView):
                 "start": "date > %s",
                 "end": "date < %s",
                 "user": "useremail = %s",
-                "amount": "money = %s",
+                "amount": "amount = %s",
             }
             selections = []
             params = []
