@@ -12,4 +12,5 @@
     <string name="temp_restaurant_average_cost">$30 for two people (approx.)</string>
     <string name="temp_restaurant_price_range">$$$$$</string>
     <string name="temp_restaurant_num_votes">1334 Votes</string>
+    <string name="google_maps_key">AIzaSyArjeAfpmmBG9EvwjISIP4J6hF2aKXWFgc</string>
 </resources>
