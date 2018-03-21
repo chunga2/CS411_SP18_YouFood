@@ -643,10 +643,26 @@ class BudgetAPI(MethodView):
                 cur.execute("""
                     UPDATE "Budget"
                     SET total=%s
-                    WHERE useremail=%s
+                    WHERE useremail=%s 
                     AND date = %s""", 
                     (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE: /budget?useremail=<email>&date=<date>
+        """
+        useremail = request.args.get("useremail")
+        date = request.args.get("date")
+        if useremail is None or date is None:
+            return Response(status=400)
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM "Budget"
+                    WHERE useremail=%s 
+                    AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
 
 
 
@@ -930,13 +946,13 @@ recommendation_view = RecommendationAPI.as_view('recommendation_api')
 app.add_url_rule('/recommendations', view_func=recommendation_view, methods=['GET', 'POST', 'DELETE'])
 
 transaction_view = TransactionAPI.as_view('transaction_api')
-app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST', 'PUT'])
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 budget_view = BudgetAPI.as_view('budget_api')
-app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST', 'PUT'])
+app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
