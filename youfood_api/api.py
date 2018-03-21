@@ -102,7 +102,7 @@ class UserAPI(MethodView):
         cur = conn.cursor()
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("SELECT * FROM \"User\" WHERE email=%s;", (email,))
+                cur.execute("SELECT email, name, is_owner FROM \"User\" WHERE email=%s;", (email,))
                 row = cur.fetchone()
                 # Executes if no user with that email address was found
                 if row == None:
@@ -110,7 +110,8 @@ class UserAPI(MethodView):
 
                 data = {
                     'email' : row[0],
-                    'name' : row[1]
+                    'name' : row[1],
+                    'is_owner': row[2]
                 }
 
                 return jsonify(data), 200
