@@ -615,16 +615,9 @@ class BudgetAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                try:
-                    cur.execute("""INSERT INTO "Budget"(date, useremail, total)
+                cur.execute("""INSERT INTO "Budget"(date, useremail, total)
                                     VALUES (%s, %s, %s)""", insert_params)
-                    conn.commit()
-                    return "OK", 200
-                except DataError as e:
-                    print(e)
-                    return "Invalid data type!", 500
-                except IntegrityError as e:
-                    return f"Integrity violation: {e}", 500
+                return Response(status=201)
 
 
 class RecommendationAPI(MethodView):
