@@ -906,7 +906,7 @@ recommendation_view = RecommendationAPI.as_view('recommendation_api')
 app.add_url_rule('/recommendations', view_func=recommendation_view, methods=['GET', 'POST', 'DELETE'])
 
 transaction_view = TransactionAPI.as_view('transaction_api')
-app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST'])
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST', 'PUT'])
 
 review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
