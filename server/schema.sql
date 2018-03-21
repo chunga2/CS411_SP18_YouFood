@@ -4,6 +4,7 @@ CREATE TABLE "Restaurant"(
     name text NOT NULL,
     phone text NOT NULL,
     image_url text NOT NULL,
+    owner_email citext REFERENCES "Owner"(email), 
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Owner"(
