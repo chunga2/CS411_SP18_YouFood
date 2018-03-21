@@ -304,7 +304,7 @@ class RestaurantAPI(MethodView):
 
     def get(self):
         """
-        Respond to API call /restaurants?params with a list of all restaurants, encoded as JSON.
+        GET /restaurants?params with a list of all restaurants, encoded as JSON.
         Accepts params as GET arguments, which are documented in build_where.
         :return: JSON response, formatted by format_restaurant.
         """
@@ -314,7 +314,7 @@ class RestaurantAPI(MethodView):
                 "name": "name = %s",
                 "address": "address = %s",
                 "pricelt": "pricerange < %s",
-                "priceeq": "pricerange = %s"
+                "priceeq": "pricerange = %s",
             }
             selections = []
             params = []
@@ -325,7 +325,7 @@ class RestaurantAPI(MethodView):
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
-            return "WHERE", []
+            return "", ""
 
         where_clause, where_params = build_where(request.args)
         with conn as c:
@@ -333,18 +333,50 @@ class RestaurantAPI(MethodView):
                 cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
                     "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
                     FROM "Restaurant", "RestaurantCategories"
-                    {where_clause} name = restaurant_name
-                    AND address = restaurant_address
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""", where_params)
+                    {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects), 200
+
+    def put(self):
+        """
+        PUT /restaurants
+        {
+            'restaurant_address': <address>,
+            'restaurant_name': <name>,
+            'owner_email': <email>
+        }
+        """
+        json_data = request.get_json()
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+        owner_email = json_data.get("owner_email")
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    SELECT is_owner
+                    FROM "User"
+                    WHERE email=%s;""", (owner_email,))
+
+                row = cur.fetchone()
+                if row is None or row[0] == False:
+                    return "Not an owner", 400
+
+                cur.execute("""
+                    UPDATE "Restaurant"
+                    SET owner_email = %s
+                    WHERE name = %s AND address = %s;""", (owner_email, restaurant_name, restaurant_address))
+                return Response(status=204)
+
 
 
 class RestaurantCategoriesAPI(MethodView):
     def get(self):
         """
-        Respond to API call /restaurant_categories?category=<category>
+        GET /restaurant_categories?category=<category>
         :return: JSON response, formatted by format_restaurant.
         """
         category = request.args.get("category")
@@ -392,7 +424,7 @@ def format_transaction(transaction_tuple: Tuple) -> Dict[str, str]:
 class TransactionAPI(MethodView):
     def get(self):
         """
-        Respond to API call /transactions?params with a list of all transactions matching the params.
+        GET /transactions?params with a list of all transactions matching the params.
         :return: JSON response, formatted by format_restaurant.
         """
 
@@ -428,14 +460,14 @@ class TransactionAPI(MethodView):
                             {where_clause} ORDER BY date ASC""", where_params)
                     rv = cur.fetchall()
                     jsonobjects = [format_transaction(x) for x in rv]
-                    return jsonify(jsonobjects)
+                    return jsonify(jsonobjects), 200
                 except DataError as e:
                     print(e)
                     return "Invalid query data!", 500
 
-    def put(self):
+    def post(self):
         """
-        PUT: /transactions
+        POST: /transactions
 
         JSON request payload
         {
@@ -464,16 +496,57 @@ class TransactionAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                try:
-                    cur.execute("""INSERT INTO "Transaction"(date, useremail, amount, restaurant_name, restaurant_address)
+                cur.execute("""INSERT INTO "Transaction"(date, useremail, amount, restaurant_name, restaurant_address)
                                     VALUES (%s, %s, %s, %s, %s)""", insert_params)
-                    conn.commit()
-                    return "OK", 200
-                except DataError as e:
-                    print(e)
-                    return "Invalid data type!", 500
-                except IntegrityError as e:
-                    return f"Integrity violation: {e}", 500
+                return Response(status=201)
+
+    def put(self):
+        """
+        PUT: /transactions
+
+        JSON request payload
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "amount": <amount>
+        }
+        """
+
+        json_data = request.get_json()
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        amount = json_data.get("amount")
+
+        if date is None or useremail is None or amount is None:
+            return "Missing request", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    UPDATE "Transaction"
+                    SET amount=%s
+                    WHERE useremail=%s
+                    AND date = %s""", 
+                    (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE: /transactions?useremail=<email>&date=<date>
+        """
+        useremail = request.args.get("useremail")
+        date = request.args.get("date")
+        if useremail is None or date is None:
+            return Response(status=400)
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM "Transaction"
+                    WHERE useremail=%s 
+                    AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
 
 
 def format_budget(transaction_tuple: Tuple) -> Dict[str, str]:
@@ -530,9 +603,9 @@ class BudgetAPI(MethodView):
                     print(e)
                     return "Invalid query data!", 500
 
-    def put(self):
+    def post(self):
         """
-        PUT: /budget
+        POST: /budget
 
         JSON request payload
         {
@@ -559,16 +632,56 @@ class BudgetAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                try:
-                    cur.execute("""INSERT INTO "Budget"(date, useremail, total)
+                cur.execute("""INSERT INTO "Budget"(date, useremail, total)
                                     VALUES (%s, %s, %s)""", insert_params)
-                    conn.commit()
-                    return "OK", 200
-                except DataError as e:
-                    print(e)
-                    return "Invalid data type!", 500
-                except IntegrityError as e:
-                    return f"Integrity violation: {e}", 500
+                return Response(status=201)
+
+    def put(self):
+        """
+        PUT: /budget
+
+        JSON request payload
+        {
+            "date": <date>,
+            "useremail": <user>,
+            "amount": <amount>
+        }
+        """
+        json_data = request.get_json()
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        total = json_data.get("amount")
+
+        if date is None or useremail is None or total is None:
+            return "Missing request", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    UPDATE "Budget"
+                    SET total=%s
+                    WHERE useremail=%s 
+                    AND date = %s""", 
+                    (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE: /budget?useremail=<email>&date=<date>
+        """
+        useremail = request.args.get("useremail")
+        date = request.args.get("date")
+        if useremail is None or date is None:
+            return Response(status=400)
+
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM "Budget"
+                    WHERE useremail=%s 
+                    AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
+
 
 
 class RecommendationAPI(MethodView):
@@ -842,21 +955,22 @@ promotion_view = PromotionAPI.as_view('owner_api')
 app.add_url_rule('/promotions', view_func=promotion_view, methods=['GET', 'POST', 'DELETE'])
 
 restaurant_view = RestaurantAPI.as_view('restaurant_api')
-app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET'])
+app.add_url_rule('/restaurants', view_func=restaurant_view, methods=['GET', 'PUT'])
 
 restaurant_categories_view = RestaurantCategoriesAPI.as_view('restaurant_categories_api')
 app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view, methods=['GET'])
 
 recommendation_view = RecommendationAPI.as_view('recommendation_api')
 app.add_url_rule('/recommendations', view_func=recommendation_view, methods=['GET', 'POST', 'DELETE'])
+
 transaction_view = TransactionAPI.as_view('transaction_api')
-app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'PUT'])
+app.add_url_rule('/transactions', view_func=transaction_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 review_view = ReviewAPI.as_view('review_api')
 app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 budget_view = BudgetAPI.as_view('budget_api')
-app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'PUT'])
+app.add_url_rule('/budgets', view_func=budget_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
