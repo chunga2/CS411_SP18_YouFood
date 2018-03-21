@@ -1,6 +1,7 @@
 package com.cs411.droptableuser.youfood_android_app.endpoints;
 
 import com.cs411.droptableuser.youfood_android_app.requests.POSTPromotionRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETPromotionResponse;
 
 import java.util.ArrayList;
 
