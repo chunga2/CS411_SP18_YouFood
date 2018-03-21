@@ -1,3 +1,10 @@
+CREATE TABLE "User"(
+    email citext
+        CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
+    name text NOT NULL,
+    hashedpass char(20) NOT NULL,
+    is_owner boolean NOT NULL DEFAULT FALSE
+);
 CREATE TABLE "Restaurant"(
     address text NOT NULL,
     name text NOT NULL,
@@ -6,13 +13,6 @@ CREATE TABLE "Restaurant"(
     image_url text NOT NULL,
     owner_email citext REFERENCES "User"(email), 
     PRIMARY KEY (address, name)
-);
-CREATE TABLE "User"(
-    email citext
-        CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
-    name text NOT NULL,
-    hashedpass char(20) NOT NULL,
-    is_owner boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "Budget"(
     date timestamp NOT NULL,
