@@ -124,20 +124,22 @@ class UserAPI(MethodView):
         {
             "email" : <email>
             "name" : <name>
-            "password" : <password>
+            "password" : <password>,
+            "is_owner": <is_owner>
         }
         """
         json_data = request.get_json()
         email = json_data.get("email")
         name = json_data.get("name")
         password = json_data.get("password")
+        is_owner = json_data.get("is_owner")
 
-        if email == None or name == None or password == None:
+        if email == None or name == None or password == None or is_owner == None:
             return Response(status=400)
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", (email, name, password))
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", (email, name, password, is_owner))
                 return Response(status=201)
 
     def put(self):
