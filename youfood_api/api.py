@@ -663,6 +663,7 @@ class BudgetAPI(MethodView):
                     DELETE FROM "Budget"
                     WHERE useremail=%s 
                     AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                return Response(status=204)
 
 
 
