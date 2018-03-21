@@ -273,8 +273,7 @@ class OwnerAPI(MethodView):
         restaurant_name = json_data.get("restaurant_name")
         restaurant_address = json_data.get("restaurant_address")
 
-        if email is None or name is None or password is None or \
-                restaurant_name is None or restaurant_address is None:
+        if email is None or name is None or password is None or restaurant_name is None or restaurant_address is None:
             return Response(status=400)
 
         cur = conn.cursor()
@@ -308,7 +307,7 @@ class OwnerAPI(MethodView):
         name = json_data.get("name")
         password = json_data.get("password")
 
-        if email is None or or restaurant_name is None or restaurant_address is None or \
+        if email is None or restaurant_name is None or restaurant_address is None or \
             (name is None and password is None):
             return jsonify({'error': 'Missing email, restaurant_name, or restaurant_address'
                                      'rest or both name and password'}), 400
