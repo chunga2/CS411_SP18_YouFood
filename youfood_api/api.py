@@ -376,7 +376,7 @@ class RestaurantAPI(MethodView):
 class RestaurantCategoriesAPI(MethodView):
     def get(self):
         """
-        Respond to API call /restaurant_categories?category=<category>
+        GET /restaurant_categories?category=<category>
         :return: JSON response, formatted by format_restaurant.
         """
         category = request.args.get("category")
