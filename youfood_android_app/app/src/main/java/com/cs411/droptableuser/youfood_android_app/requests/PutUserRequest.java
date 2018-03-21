@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by raajesharunachalam on 3/21/18.
  */
 
-public class PutUserRequest {
+public class PUTUserRequest {
     @SerializedName("email")
     private String email;
 
@@ -16,7 +16,7 @@ public class PutUserRequest {
     @SerializedName("password")
     private String password;
 
-    public PutUserRequest(String email, String name, String password) {
+    public PUTUserRequest(String email, String name, String password) {
         this.email = email;
         this.name = name;
         this.password = password;

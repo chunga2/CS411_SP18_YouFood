@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by raajesharunachalam on 3/21/18.
  */
 
-public class PostUserRequest {
+public class POSTUserRequest {
     @SerializedName("email")
     private String email;
 
@@ -19,7 +19,7 @@ public class PostUserRequest {
     @SerializedName("is_owner")
     private boolean isOwner;
 
-    public PostUserRequest(String email, String name, String password, boolean isOwner) {
+    public POSTUserRequest(String email, String name, String password, boolean isOwner) {
         this.email = email;
         this.name = name;
         this.password = password;

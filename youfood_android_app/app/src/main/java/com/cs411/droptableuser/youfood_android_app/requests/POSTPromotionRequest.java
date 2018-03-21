@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by raajesharunachalam on 3/21/18.
  */
 
-public class CreatePromotionRequest {
+public class POSTPromotionRequest {
     @SerializedName("restaurant_name")
     private String name;
 
@@ -19,7 +19,7 @@ public class CreatePromotionRequest {
     @SerializedName("description")
     private String description;
 
-    public CreatePromotionRequest(String name, String address, String date, String description) {
+    public POSTPromotionRequest(String name, String address, String date, String description) {
         this.name = name;
         this.address = address;
         this.date = date;

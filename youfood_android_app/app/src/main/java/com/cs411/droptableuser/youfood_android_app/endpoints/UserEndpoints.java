@@ -1,9 +1,9 @@
 package com.cs411.droptableuser.youfood_android_app.endpoints;
 
-import com.cs411.droptableuser.youfood_android_app.requests.PostUserRequest;
-import com.cs411.droptableuser.youfood_android_app.requests.PutUserRequest;
+import com.cs411.droptableuser.youfood_android_app.requests.POSTUserRequest;
+import com.cs411.droptableuser.youfood_android_app.requests.PUTUserRequest;
 import com.cs411.droptableuser.youfood_android_app.requests.VerifyLoginRequest;
-import com.cs411.droptableuser.youfood_android_app.responses.GetUserResponse;
+import com.cs411.droptableuser.youfood_android_app.responses.GETUserResponse;
 import com.cs411.droptableuser.youfood_android_app.responses.VerifyLoginResponse;
 
 import retrofit2.Call;
@@ -25,13 +25,13 @@ public interface UserEndpoints {
     Call<VerifyLoginResponse> verifyLogin(@Body VerifyLoginRequest verifyLoginRequest);
 
     @GET("/users")
-    Call<GetUserResponse> getUser(@Query("email") String email);
+    Call<GETUserResponse> getUser(@Query("email") String email);
 
     @POST("/users")
-    Call<Void> createUser(@Body PostUserRequest postUserRequest);
+    Call<Void> createUser(@Body POSTUserRequest postUserRequest);
 
     @PUT("/users")
-    Call<Void> updateUser(@Body PutUserRequest putUserRequest);
+    Call<Void> updateUser(@Body PUTUserRequest putUserRequest);
 
     @DELETE("/users")
     Call<Void> deleteUser(@Query("email") String email);

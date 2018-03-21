@@ -1,7 +1,7 @@
 package com.cs411.droptableuser.youfood_android_app.endpoints;
 
-import com.cs411.droptableuser.youfood_android_app.requests.CreatePromotionRequest;
-import com.cs411.droptableuser.youfood_android_app.responses.GetPromotionResponse;
+import com.cs411.droptableuser.youfood_android_app.requests.POSTPromotionRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETPromotionResponse;
 
 import java.util.ArrayList;
 
@@ -21,11 +21,11 @@ import retrofit2.http.Query;
 public interface PromotionEndpoints {
 
     @GET("/promotions")
-    Call<ArrayList<GetPromotionResponse>> getPromotionsForRestaurant(
+    Call<ArrayList<GETPromotionResponse>> getPromotionsForRestaurant(
             @Query("restaurant_name") String name, @Query("restaurant_address") String address);
 
     @POST("/promotions")
-    Call<Void> createPromotion(@Body CreatePromotionRequest createPromotionRequest);
+    Call<Void> createPromotion(@Body POSTPromotionRequest createPromotionRequest);
 
     @DELETE("/promotions")
     Call<Void> deletePromotion(@Query("restaurant_name") String name,

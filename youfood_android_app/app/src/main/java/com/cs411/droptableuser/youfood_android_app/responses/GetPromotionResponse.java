@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by raajesharunachalam on 3/21/18.
  */
 
-public class GetPromotionResponse {
+public class GETPromotionResponse {
     @SerializedName("date")
     private String date;
 
