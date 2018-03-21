@@ -198,7 +198,7 @@ class PromotionAPI(MethodView):
 
     def get(self):
         """
-        GET: /promotions?restaurant_name=<name>&restaurant_address=<address>&date=<date>&description=<description>
+        GET: /promotions?restaurant_name=<name>&restaurant_address=<address>
         Gets user info for a given specified email address that is a URL query parameter
         """
         restaurant_name = request.args.get("restaurant_name")
@@ -265,9 +265,8 @@ class PromotionAPI(MethodView):
 
     def delete(self):
         """
-        DELETE: /users?email=<email>
-        Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
-        entered can correspond to at most 1 user
+        DELETE: /promotions?restaurant_name=<name>&restaurant_address=<address>&date=<date>&description=<description>
+        Deletes a user with a given email address. It is only 1 Promotion because 4 attributes are a primary key.
         """
 
         restaurant_name = request.args.get("restaurant_name")
@@ -284,24 +283,21 @@ class PromotionAPI(MethodView):
         if description is None:
             return jsonify({'error': 'No description specified'}), 400
 
-        cur = conn.cursor()
-        cur.execute("DELETE "
-                    "FROM \"Promotion\" "
-                    "WHERE restaurant_name=%s AND "
-                    "restaurant_address=%s AND"
-                    "date=%s AND"
-                    "description=%s;",
-                    (restaurant_name, restaurant_address,
-                     datetime.strptime(date, "%Y-%m-%dT%H:%M:%S+00:00"), description))
+        with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""DELETE
+                            FROM "Promotion"
+                            WHERE restaurant_name=%s AND
+                            restaurant_address=%s AND
+                            date=%s AND
+                            description=%s;""",
+                            (restaurant_name, restaurant_address,
+                             datetime.strptime(date, "%d-%m-%Y %H:%M:%S"), description))
 
-        if cur.rowcount == 0:
-            conn.rollback()
-            cur.close()
-            return jsonify({'error': 'No owner with that key exists'}), 400
+                if cur.rowcount == 0:
+                    return jsonify({'error': 'No promotion with that key exists'}), 400
 
-        conn.commit()
-        cur.close()
-        return Response(status=204)
+                return Response(status=204)
 
 
 class RestaurantAPI(MethodView):
