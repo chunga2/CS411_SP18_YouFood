@@ -345,7 +345,7 @@ class RecommendationAPI(MethodView):
 
     def delete(self):
         """
-        DELETE /recommendations?usermail=<usermail>&restaurant_name=<name>&restaurant_address=Maddress>
+        DELETE /recommendations?usermail=<usermail>&restaurant_name=<name>&restaurant_address=Maddress>&date=<date>
         Response is 400 if missing arg, 500 if error, 204 NO CONTENT
         """
         date = request.args.get("date")
@@ -353,7 +353,7 @@ class RecommendationAPI(MethodView):
         restaurant_name = request.args.get("restaurant_name")
         restaurant_address = request.args.get("restaurant_address")
 
-        if useremail == None or restaurant_name == None or restaurant_address == None:
+        if useremail == None or restaurant_name == None or restaurant_address == None or date == None:
             return "Missing request arg", 400
 
         with conn as c:
@@ -366,8 +366,176 @@ class RecommendationAPI(MethodView):
                     AND restaurant_name=%s
                     AND restaurant_address=%s
                     """, (formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                if cur.rowcount == 0:
+                    return jsonify({'error': 'No record to delete'}), 400
                 return Response(status=204)
 
+
+class ReviewAPI(MethodView):
+    def convert_to_json(self, rows):
+        json_objects = []
+        for row in rows:
+            useremail, restaurant_name, restaurant_address, description, rating, date = row
+            json_obj = {
+                'useremail': useremail,
+                'restaurant_name': restaurant_name,
+                'restaurant_address': restaurant_address,
+                'description': description,
+                'rating': int(rating),
+                'date': date.strftime("%d-%m-%Y %H:%M:%S")
+            }
+            json_objects.append(json_obj)
+
+        return json_objects
+
+    def get(self):
+        """
+        GET /reviews?search_user=<bool>...
+        if search_user='True': &useremail=<email>
+        if search_user='False': &restaurant_name=<name> &restaurant_address=<address>
+        """
+        search_user = request.args.get("search_user")
+        if search_user == None:
+            return "Missing Request Arg", 400
+
+        if search_user == 'True':
+            useremail = request.args.get("useremail")
+            if useremail == None:
+                return "Missing Request Arg", 400
+
+            with conn as c:
+                with c.cursor() as cur:
+                    cur.execute("""
+                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review"
+                        WHERE useremail=%s;""", (useremail,))
+                    rows = cur.fetchall()
+                    json_objects = self.convert_to_json(rows)
+                    return jsonify(json_objects), 200
+        else:
+            restaurant_name = request.args.get("restaurant_name")
+            restaurant_address = request.args.get("restaurant_address")
+            if restaurant_name == None or restaurant_address == None:
+                return "Missing Request Arg", 400
+
+            with conn as c:
+                with c.cursor() as cur:
+                    cur.execute("""
+                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review"
+                        WHERE restaurant_name=%s
+                        AND restaurant_address=%s;""", (restaurant_name, restaurant_address))
+                    rows = cur.fetchall()
+                    json_objects = self.convert_to_json(rows)
+                    return jsonify(json_objects), 200
+
+    def post(self):
+        """
+        POST /recommendations
+        Request:
+        {
+            "date": <"%d-%m-%Y %H:%M:%S">
+            "useremail": <useremail>,
+            "restaurant_name": <name>,
+            "restaurant_address": <address>,
+            "description": <description>,
+            "rating": <rating>
+        }
+        """
+        json_data = request.get_json()
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+        description = json_data.get("description")
+        rating = json_data.get("rating")
+
+        if date == None or useremail == None or restaurant_name == None or restaurant_address == None or description == None or rating == None:
+            return "Missing request arg", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                formatted_date_obj = datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
+                cur.execute("""
+                    INSERT INTO
+                    "Review" (date, useremail, restaurant_name, restaurant_address, description, rating)
+                    VALUES (%s, %s, %s, %s, %s, %s);""", (formatted_date_obj, useremail, restaurant_name, restaurant_address, description, rating))
+                return Response(status=201)
+
+    def put(self):
+        """
+        PUT /recommendations
+        Request (first 4 params used to identify what to update, last 2 are attributes that can be updated)
+        {
+            "date": <"%d-%m-%Y %H:%M:%S">
+            "useremail": <useremail>,
+            "restaurant_name": <name>,
+            "restaurant_address": <address>,
+            "description": <description>,
+            "rating": <rating>
+        }
+        """
+        json_data = request.get_json()
+        date = json_data.get("date")
+        useremail = json_data.get("useremail")
+        restaurant_name = json_data.get("restaurant_name")
+        restaurant_address = json_data.get("restaurant_address")
+        description = json_data.get("description")
+        rating = json_data.get("rating")
+
+        if date == None or useremail == None or restaurant_name == None or restaurant_address == None or (description == None and rating == None):
+            return "Missing request arg", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                formatted_date_obj = datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
+                
+                if description != None:
+                    cur.execute("""
+                        UPDATE "Review"
+                        SET description = %s
+                        WHERE date = %s AND useremail = %s AND restaurant_name = %s
+                        AND restaurant_address = %s;""", (description, formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                    if cur.rowcount == 0:
+                        return "Record Not Found", 400
+
+                if rating != None:
+                    cur.execute("""
+                        UPDATE "Review"
+                        SET rating = %s
+                        WHERE date = %s AND useremail = %s AND restaurant_name = %s
+                        AND restaurant_address = %s;""", (rating, formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                    if cur.rowcount == 0:
+                        return "Record Not Found", 400
+
+                return Response(status=204)
+
+    def delete(self):
+        """
+        DELETE /recommendations?usermail=<usermail>&restaurant_name=<name>&restaurant_address=Maddress>&date=<date>
+        Response is 400 if missing arg, 500 if error, 204 NO CONTENT
+        """
+        date = request.args.get("date")
+        useremail = request.args.get("useremail")
+        restaurant_name = request.args.get("restaurant_name")
+        restaurant_address = request.args.get("restaurant_address")
+
+        if useremail == None or restaurant_name == None or restaurant_address == None or date == None:
+            return "Missing request arg", 400
+
+        with conn as c:
+            with c.cursor() as cur:
+                formatted_date_obj = datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
+                cur.execute("""
+                    DELETE FROM "Review"
+                    WHERE date = %s
+                    AND useremail=%s
+                    AND restaurant_name=%s
+                    AND restaurant_address=%s
+                    """, (formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                if cur.rowcount == 0:
+                    return jsonify({'error': 'No record to delete'}), 400
+                return Response(status=204)
 
 
 
@@ -385,6 +553,9 @@ app.add_url_rule('/restaurant_categories', view_func=restaurant_categories_view,
 
 recommendation_view = RecommendationAPI.as_view('recommendation_api')
 app.add_url_rule('/recommendations', view_func=recommendation_view, methods=['GET', 'POST', 'DELETE'])
+
+review_view = ReviewAPI.as_view('review_api')
+app.add_url_rule('/reviews', view_func=review_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 
 if __name__ == "__main__":
