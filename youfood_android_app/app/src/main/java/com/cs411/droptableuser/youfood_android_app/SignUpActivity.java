@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.cs411.droptableuser.youfood_android_app.endpoints.UserEndpoints;
@@ -26,6 +27,8 @@ import retrofit2.Response;
 
 public class SignUpActivity extends AppCompatActivity {
     public static final String TAG = "SignUpActivity";
+
+    private boolean isOwner;
 
     @BindView(R.id.edittext_signup_username)
     EditText editTextUserName;
@@ -50,7 +53,6 @@ public class SignUpActivity extends AppCompatActivity {
                 String email = editTextEmail.getText().toString();
                 String password = editTextPassword.getText().toString();
                 String userName = editTextUserName.getText().toString();
-                boolean isOwner = false;
                 Call<Void> call
                         = UserEndpoints.userEndpoints.createUser(
                                 new POSTUserRequest(email, userName, password, isOwner));
@@ -59,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if(response.code() == 201) {
+                            Log.d(TAG, Boolean.toString(isOwner));
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                         } else {
@@ -77,5 +80,21 @@ public class SignUpActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    public void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+
+        switch(view.getId()) {
+            case R.id.radio_button_signup_user:
+                if (checked) {
+                    isOwner = false;
+                }
+                break;
+            case R.id.radio_button_signup_owner:
+                if (checked) {
+                    isOwner = true;
+                }
+        }
     }
 }

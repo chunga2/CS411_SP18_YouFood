@@ -22,4 +22,6 @@
     <string name="sign_up">Sign up</string>
     <string name="signup_button_title">Create an account</string>
     <string name="email">Email</string>
+    <string name="user">User</string>
+    <string name="owner">Owner</string>
 </resources>
