@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         call.enqueue(new Callback<VerifyLoginResponse>() {
             @Override
             public void onResponse(@NonNull Call<VerifyLoginResponse> call, @NonNull Response<VerifyLoginResponse> response) {
-                if(response.code() == 200) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
                 } else {
@@ -80,7 +80,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onFailure(Call<VerifyLoginResponse> call, Throwable t) {
-
+                Toast.makeText(LoginActivity.this, getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
             }
         });
     }
