@@ -11,7 +11,7 @@ CREATE TABLE "Restaurant"(
     pricerange int,
     phone text NOT NULL,
     image_url text NOT NULL,
-    owner_email citext REFERENCES "User"(email), 
+    owner_email citext REFERENCES "User"(email) ON DELETE SET NULL, 
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Budget"(
