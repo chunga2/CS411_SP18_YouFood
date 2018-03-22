@@ -11,18 +11,18 @@ CREATE TABLE "Restaurant"(
     pricerange int,
     phone text NOT NULL,
     image_url text NOT NULL,
-    owner_email citext REFERENCES "User"(email), 
+    owner_email citext REFERENCES "User"(email) ON DELETE CASCADE, 
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Budget"(
     date timestamp NOT NULL,
-    useremail citext REFERENCES "User"(email),
+    useremail citext REFERENCES "User"(email) ON DELETE CASCADE,
     total money NOT NULL,
     PRIMARY KEY (useremail, date)
 );
 CREATE TABLE "Transaction"(
     date timestamp NOT NULL,
-    useremail citext REFERENCES "User"(email),
+    useremail citext REFERENCES "User"(email) ON DELETE CASCADE,
     amount money NOT NULL,
     restaurant_name text,
     restaurant_address text,
@@ -32,7 +32,7 @@ CREATE TABLE "Transaction"(
 
 CREATE TABLE "Recommendation"(
     date timestamp NOT NULL,
-    useremail citext REFERENCES "User"(email),
+    useremail citext REFERENCES "User"(email) ON DELETE CASCADE,
     restaurant_name text,
     restaurant_address text,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
@@ -40,7 +40,7 @@ CREATE TABLE "Recommendation"(
 );
 
 CREATE TABLE "Review"(
-    useremail citext REFERENCES "User"(email),
+    useremail citext REFERENCES "User"(email) ON DELETE CASCADE,
     restaurant_name text,
     restaurant_address text,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
