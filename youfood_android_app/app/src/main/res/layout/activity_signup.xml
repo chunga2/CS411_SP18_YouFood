@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#616161"
+    android:background="@color/white"
     tools:layout_editor_absoluteY="81dp">
 
     <android.support.v7.widget.Toolbar
@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:background="?attr/colorPrimary"
+        android:background="@drawable/app_bar_background"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintBottom_toTopOf="@+id/textview_signup_username_title"
@@ -21,6 +21,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:layout_constraintVertical_chainStyle="packed"
+        app:titleTextColor="@color/white"
         app:title="Register" />
 
     <TextView
@@ -54,7 +55,7 @@
             android:id="@+id/edittext_signup_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey_800"
+            android:background="@color/pink_50"
             android:fontFamily="@font/roboto"
             android:hint="What should everyone call you?"
             android:inputType="textPersonName"
@@ -96,7 +97,7 @@
             android:id="@+id/edittext_signup_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey_800"
+            android:background="@color/pink_50"
             android:ems="10"
             android:fontFamily="@font/roboto"
             android:hint="@string/email"
@@ -131,7 +132,7 @@
             android:id="@+id/edittext_signup_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey_800"
+            android:background="@color/pink_50"
             android:ems="10"
             android:fontFamily="@font/roboto"
             android:hint="@string/password"
