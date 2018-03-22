@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.cs411.droptableuser.youfood_android_app.endpoints.UserEndpoints;
 import com.cs411.droptableuser.youfood_android_app.requests.VerifyLoginRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETUserResponse;
 import com.cs411.droptableuser.youfood_android_app.responses.VerifyLoginResponse;
 
 import butterknife.BindView;
@@ -37,6 +38,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        // This is always the first activity, so initialize the shared prefs cache
+        UtilsCache.initialize(this.getApplicationContext());
 
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
 
@@ -59,7 +62,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void verifyUser() {
-        String email = editTextUsername.getText().toString();
+        final String email = editTextUsername.getText().toString();
         String password = editTextPassword.getText().toString();
         Call<VerifyLoginResponse> call
                 = UserEndpoints.userEndpoints.verifyLogin(new VerifyLoginRequest(email, password));
@@ -68,6 +71,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onResponse(@NonNull Call<VerifyLoginResponse> call, @NonNull Response<VerifyLoginResponse> response) {
                 if(response.code() == ResponseCodes.HTTP_OK) {
+                    // Store user details in cache
+                    VerifyLoginResponse loginResponse = response.body();
+                    UtilsCache.storeName(loginResponse.getName());
+                    UtilsCache.storeEmail(loginResponse.getEmail());
+                    UtilsCache.storeIsOwner(loginResponse.isOwner());
+
+                    // Move on to next activity
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
                 } else {
