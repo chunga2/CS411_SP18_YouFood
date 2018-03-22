@@ -317,7 +317,7 @@ class RestaurantAPI(MethodView):
         def build_where(query_params):
             subqueries = {
                 "name": "name = %s",
-                "address": "address = %s",
+                "city": "address LIKE %%%s%%",
                 "pricelt": "pricerange < %s",
                 "priceeq": "pricerange = %s",
             }
