@@ -99,7 +99,7 @@ def verify_login():
     with conn as c:
         with c.cursor() as cur:
             cur.execute("""
-                SELECT is_owner 
+                SELECT email, name, is_owner 
                 FROM "User" 
                 WHERE email = %s AND hashedpass = %s""", (email, password))
 
@@ -107,7 +107,12 @@ def verify_login():
             if row == None:
                 return "Invalid Login", 401
             else:
-                return jsonify({'is_owner': row[0]}), 200
+                user_data = {
+                    "email": row[0],
+                    "name": row[1],
+                    "is_owner": row[2]
+                }
+                return jsonify(user_data), 200
 
 
 def parse_date(date: str) -> datetime:

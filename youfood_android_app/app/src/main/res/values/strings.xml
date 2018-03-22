@@ -20,4 +20,9 @@
     <string name="password">Password</string>
     <string name="login_signup_header">Don\'t have an account?</string>
     <string name="sign_up">Sign up</string>
+    <string name="signup_button_title">Create an account</string>
+    <string name="email">Email</string>
+    <string name="user">User</string>
+    <string name="owner">Owner</string>
+    <string name="network_failed_message">Network Request Failed. Check Network Connection And Try Again!</string>
 </resources>
