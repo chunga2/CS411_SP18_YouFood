@@ -23,6 +23,12 @@ public class UtilsCache {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
+    static void clear() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.apply();
+    }
+
     static void storeName(String name) {
         SharedPreferences.Editor prefsEditor = prefs.edit();
         prefsEditor.putString(NAME_KEY, name);

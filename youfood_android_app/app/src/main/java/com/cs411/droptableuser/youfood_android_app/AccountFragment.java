@@ -82,10 +82,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 deleteAccount();
                 break;
             case R.id.button_account_logout:
-                SharedPreferences.Editor editor = UtilsCache.prefs.edit();
-                editor.clear();
-                editor.apply();
-
+                UtilsCache.clear();
                 Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -120,9 +117,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                    SharedPreferences.Editor editor = UtilsCache.prefs.edit();
-                    editor.clear();
-                    editor.apply();
+                    UtilsCache.clear();
 
                     Toast.makeText(
                             AccountFragment.this.getContext(),
