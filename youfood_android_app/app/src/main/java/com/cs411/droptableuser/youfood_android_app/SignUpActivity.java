@@ -53,13 +53,13 @@ public class SignUpActivity extends AppCompatActivity {
                 boolean isOwner = false;
                 Call<Void> call
                         = UserEndpoints.userEndpoints.createUser(
-                                new POSTUserRequest(userName, email, password, isOwner));
+                                new POSTUserRequest(email, userName, password, isOwner));
 
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if(response.code() == 201) {
-                            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                         } else {
                             Log.d(TAG, String.valueOf(response.code()));
