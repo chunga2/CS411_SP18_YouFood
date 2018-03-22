@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.cs411.droptableuser.youfood_android_app.endpoints.UserEndpoints;
 import com.cs411.droptableuser.youfood_android_app.requests.PUTUserRequest;
@@ -32,8 +33,12 @@ public class EditNameActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.edittext_editname)
     EditText editTextUserName;
-    @BindView(R.id.text_layout_editname)
+    @BindView(R.id.text_editname_layout_editname)
     TextInputLayout textInputLayoutUserName;
+    @BindView(R.id.edittext_editpassword)
+    EditText editTextPassword;
+    @BindView(R.id.text_editname_layout_editpassword)
+    TextInputLayout textInputLayoutPassword;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,13 +53,8 @@ public class EditNameActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        Bundle extras = getIntent().getExtras();
-        String userName = EMPTY_STRING;
-        if (extras != null) {
-            userName = extras.getString("username");
-        }
-
-        editTextUserName.setText(userName);
+        editTextUserName.setText(UtilsCache.getName());
+        editTextPassword.setText(UtilsCache.getPassword());
     }
 
     /**
@@ -78,7 +78,7 @@ public class EditNameActivity extends AppCompatActivity {
      *
      * If the username is valid, the method uses updateUserName() to modify the username.
      *
-     * @see EditNameActivity#updateUserName(String)
+     * @see EditNameActivity#updateAccount(String, String)
      * @param item The menu item that was selected
      * @return Return false to allow normal menu processing to proceed, true to consume it here.
      */
@@ -88,10 +88,16 @@ public class EditNameActivity extends AppCompatActivity {
 
         if (id == R.id.menu_item_send) {
             String userName = editTextUserName.getText().toString();
+            String password = editTextPassword.getText().toString();
             if (userName.length() == 0) {
-                textInputLayoutUserName.setError("Please enter your textViewUserName.");
-            } else {
-                updateUserName(userName);
+                textInputLayoutUserName.setError("Name cannot be updated to empty");
+            }
+            if(password.length() == 0) {
+                textInputLayoutPassword.setError("Password cannot be updated to empty");
+            }
+
+            if((userName.length() != 0) && (password.length() != 0)) {
+                updateAccount(userName, password);
             }
         }
 
@@ -105,28 +111,29 @@ public class EditNameActivity extends AppCompatActivity {
      *
      * @param userName The new user textViewUserName.
      */
-    private void updateUserName(final String userName) {
+    private void updateAccount(final String userName, final String password) {
         Call<Void> call
                 = UserEndpoints.userEndpoints.updateUser(
-                new PUTUserRequest(UtilsCache.getEmail(), userName, null));
+                new PUTUserRequest(UtilsCache.getEmail(), userName, password));
 
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if(response.code() == 204) {
+                if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
                     UtilsCache.storeName(userName);
-
+                    UtilsCache.storePassword(password);
                     Intent intent = new Intent();
-                    intent.putExtra("username", userName);
 
                     setResult(response.code(), intent);
                     finish();
+                } else {
+                    Toast.makeText(EditNameActivity.this, "Server error", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-
+                Toast.makeText(EditNameActivity.this, getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
             }
         });
     }

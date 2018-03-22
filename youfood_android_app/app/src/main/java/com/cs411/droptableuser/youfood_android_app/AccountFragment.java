@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,8 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     Button deleteAccount;
     @BindView(R.id.button_account_logout)
     Button logout;
+    @BindView(R.id.textview_account_password)
+    TextView textViewPassword;
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
@@ -63,6 +66,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         } else {
             textViewAccountType.setText(R.string.user);
         }
+        textViewPassword.setText(UtilsCache.getPassword());
 
         editAccount.setOnClickListener(this);
         deleteAccount.setOnClickListener(this);
@@ -89,7 +93,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             case R.id.button_account_edit_account:
                 //TODO implement this one
                 intent = new Intent(getActivity(), EditNameActivity.class);
-                intent.putExtra("username", UtilsCache.getName());
                 startActivityForResult(intent, EDIT_NAME_REQUEST);
                 break;
         }
@@ -105,14 +108,14 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_NAME_REQUEST && resultCode == 204) {
-            String userName = data.getExtras().getString("username");
-
-            textViewUserName.setText(userName);
+            textViewUserName.setText(UtilsCache.getName());
+            textViewPassword.setText(UtilsCache.getPassword());
         }
     }
 
     private void deleteAccount() {
         Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
+        Log.e("AccountFragment", call.request().url().toString());
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {

@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void verifyUser() {
         final String email = editTextUsername.getText().toString();
-        String password = editTextPassword.getText().toString();
+        final String password = editTextPassword.getText().toString();
         Call<VerifyLoginResponse> call
                 = UserEndpoints.userEndpoints.verifyLogin(new VerifyLoginRequest(email, password));
 
@@ -84,6 +84,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     UtilsCache.storeEmail(loginResponse.getEmail());
                     UtilsCache.storeIsOwner(loginResponse.isOwner());
                     UtilsCache.storeHasLoggedIn(true);
+                    UtilsCache.storePassword(password);
 
                     // Move on to next activity
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
