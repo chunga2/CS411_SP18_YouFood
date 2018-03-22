@@ -10,7 +10,21 @@ public class VerifyLoginResponse {
     @SerializedName("is_owner")
     private boolean isOwner;
 
+    @SerializedName("email")
+    private String email;
+
+    @SerializedName("name")
+    private String name;
+
     public boolean isOwner() {
         return isOwner;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
     }
 }

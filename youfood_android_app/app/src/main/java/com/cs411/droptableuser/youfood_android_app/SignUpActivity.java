@@ -28,7 +28,7 @@ import retrofit2.Response;
 public class SignUpActivity extends AppCompatActivity {
     public static final String TAG = "SignUpActivity";
 
-    private boolean isOwner;
+    private static boolean isOwner;
 
     @BindView(R.id.edittext_signup_username)
     EditText editTextUserName;
@@ -50,9 +50,9 @@ public class SignUpActivity extends AppCompatActivity {
         buttonSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = editTextEmail.getText().toString();
+                final String email = editTextEmail.getText().toString();
                 String password = editTextPassword.getText().toString();
-                String userName = editTextUserName.getText().toString();
+                final String userName = editTextUserName.getText().toString();
                 Call<Void> call
                         = UserEndpoints.userEndpoints.createUser(
                                 new POSTUserRequest(email, userName, password, isOwner));
@@ -60,8 +60,11 @@ public class SignUpActivity extends AppCompatActivity {
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                        if(response.code() == 201) {
-                            Log.d(TAG, Boolean.toString(isOwner));
+                        if(response.code() == ResponseCodes.HTTP_CREATED) {
+                            UtilsCache.storeName(userName);
+                            UtilsCache.storeEmail(email);
+                            UtilsCache.storeIsOwner(isOwner);
+
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                         } else {
