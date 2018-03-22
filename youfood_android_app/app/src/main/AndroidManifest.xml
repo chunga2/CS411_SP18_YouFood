@@ -29,6 +29,9 @@
             android:name="com.cs411.droptableuser.youfood_android_app.RestaurantDetailActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".SignUpActivity" />
+        <activity
+            android:name=".EditNameActivity"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"

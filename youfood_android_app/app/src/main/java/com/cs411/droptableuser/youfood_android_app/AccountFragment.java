@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +23,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AccountFragment extends Fragment implements View.OnClickListener {
+    private static final int EDIT_NAME_REQUEST = 2;
+
     Unbinder unbinder;
 
     @BindView(R.id.textview_account_username)
@@ -47,6 +48,9 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     @BindView(R.id.button_account_logout)
     Button logout;
 
+    @BindView(R.id.button_account_edit_username)
+    Button buttonEditUsername;
+
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
 
@@ -68,6 +72,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             accountType.setText("User");
         }
 
+        buttonEditUsername.setOnClickListener(this);
         editAccount.setOnClickListener(this);
         deleteAccount.setOnClickListener(this);
         logout.setOnClickListener(this);
@@ -115,8 +120,20 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             case R.id.button_account_edit_account:
                 //TODO implement this one
                 break;
+            case R.id.button_account_edit_username:
+                intent = new Intent(getActivity(), EditNameActivity.class);
+                intent.putExtra("username", UtilsCache.getName());
+                startActivityForResult(intent, EDIT_NAME_REQUEST);
+                break;
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EDIT_NAME_REQUEST && resultCode == 204) {
+            String userName = data.getExtras().getString("username");
 
+            name.setText(userName);
+        }
+    }
 }
