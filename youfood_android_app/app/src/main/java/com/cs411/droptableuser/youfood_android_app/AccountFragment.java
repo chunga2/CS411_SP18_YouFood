@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,16 +41,13 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     RecyclerView userReviewsList;
 
     @BindView(R.id.button_account_edit_account)
-    Button editAccount;
+    ImageView editAccount;
 
     @BindView(R.id.button_account_delete_account)
     Button deleteAccount;
 
     @BindView(R.id.button_account_logout)
     Button logout;
-
-    @BindView(R.id.button_account_edit_username)
-    Button buttonEditUsername;
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
@@ -72,7 +70,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             accountType.setText("User");
         }
 
-        buttonEditUsername.setOnClickListener(this);
         editAccount.setOnClickListener(this);
         deleteAccount.setOnClickListener(this);
         logout.setOnClickListener(this);
@@ -119,8 +116,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
 
             case R.id.button_account_edit_account:
                 //TODO implement this one
-                break;
-            case R.id.button_account_edit_username:
                 intent = new Intent(getActivity(), EditNameActivity.class);
                 intent.putExtra("username", UtilsCache.getName());
                 startActivityForResult(intent, EDIT_NAME_REQUEST);
