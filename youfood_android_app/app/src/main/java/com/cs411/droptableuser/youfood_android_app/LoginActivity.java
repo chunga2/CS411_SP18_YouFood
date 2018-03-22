@@ -24,8 +24,6 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     @BindView(R.id.textview_login_signup)
     TextView textViewSignUp;
-    @BindView(R.id.button_login_guest)
-    Button buttonContinueAsGuest;
     @BindView(R.id.button_login_signin)
     Button buttonSignIn;
     @BindView(R.id.edittext_login_username)
@@ -43,7 +41,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
 
         textViewSignUp.setOnClickListener(this);
-        buttonContinueAsGuest.setOnClickListener(this);
         buttonSignIn.setOnClickListener(this);
 
     }
@@ -57,10 +54,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.button_login_signin:
                 verifyUser();
-                break;
-            case R.id.button_login_guest:
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
                 break;
         }
     }
