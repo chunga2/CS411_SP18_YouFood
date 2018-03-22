@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
         setActionBar();
 
-        // TODO: After implementing Login option, disabled budget and account tabs if a user is not signed in.
         bottomNavigationView.setOnNavigationItemSelectedListener
                 (new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
