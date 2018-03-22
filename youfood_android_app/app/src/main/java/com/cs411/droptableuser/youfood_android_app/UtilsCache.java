@@ -12,6 +12,7 @@ public class UtilsCache {
     private static final String NAME_KEY = "Name";
     private static final String EMAIL_KEY = "Email";
     private static final String IS_OWNER_KEY = "IsOwner";
+    private static final String HAS_LOGGED_IN_KEY = "HasLoggedIn";
 
     static Context context;
     static SharedPreferences prefs;
@@ -39,6 +40,12 @@ public class UtilsCache {
         prefsEditor.apply();
     }
 
+    static void storeHasLoggedIn(boolean hasLoggedIn) {
+        SharedPreferences.Editor prefsEditor = prefs.edit();
+        prefsEditor.putBoolean(HAS_LOGGED_IN_KEY, hasLoggedIn);
+        prefsEditor.apply();
+    }
+
     static String getName() {
         return prefs.getString(NAME_KEY, "");
     }
@@ -49,5 +56,9 @@ public class UtilsCache {
 
     static boolean getIsOwner() {
         return prefs.getBoolean(IS_OWNER_KEY, false);
+    }
+
+    static boolean getHasLoggedIn() {
+        return prefs.getBoolean(HAS_LOGGED_IN_KEY, false);
     }
 }

@@ -89,7 +89,7 @@ public class EditNameActivity extends AppCompatActivity {
         if (id == R.id.menu_item_send) {
             String userName = editTextUserName.getText().toString();
             if (userName.length() == 0) {
-                textInputLayoutUserName.setError("Please enter your name.");
+                textInputLayoutUserName.setError("Please enter your textViewUserName.");
             } else {
                 updateUserName(userName);
             }
@@ -99,11 +99,11 @@ public class EditNameActivity extends AppCompatActivity {
     }
 
     /**
-     * Update the user's name.
+     * Update the user's textViewUserName.
      *
-     * After updating the name successfully, this method calls finish() to close the current activity.
+     * After updating the textViewUserName successfully, this method calls finish() to close the current activity.
      *
-     * @param userName The new user name.
+     * @param userName The new user textViewUserName.
      */
     private void updateUserName(final String userName) {
         Call<Void> call

@@ -1,6 +1,7 @@
 package com.cs411.droptableuser.youfood_android_app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,23 +30,17 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     Unbinder unbinder;
 
     @BindView(R.id.textview_account_username)
-    TextView name;
-
+    TextView textViewUserName;
     @BindView(R.id.textview_account_email)
-    TextView email;
-
+    TextView textViewEmail;
     @BindView(R.id.textview_account_accvalue)
-    TextView accountType;
-
+    TextView textViewAccountType;
     @BindView(R.id.recycler_view_account_myreviews)
     RecyclerView userReviewsList;
-
     @BindView(R.id.button_account_edit_account)
     ImageView editAccount;
-
     @BindView(R.id.button_account_delete_account)
     Button deleteAccount;
-
     @BindView(R.id.button_account_logout)
     Button logout;
 
@@ -61,13 +56,12 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         View rootView = inflater.inflate(R.layout.fragment_account, container, false);
         unbinder = ButterKnife.bind(this, rootView);
 
-        name.setText(UtilsCache.getName());
-        email.setText(UtilsCache.getEmail());
-
-        if(UtilsCache.getIsOwner() == true) {
-            accountType.setText("Owner");
+        textViewUserName.setText(UtilsCache.getName());
+        textViewEmail.setText(UtilsCache.getEmail());
+        if(UtilsCache.getIsOwner()) {
+            textViewAccountType.setText(R.string.owner);
         } else {
-            accountType.setText("User");
+            textViewAccountType.setText(R.string.user);
         }
 
         editAccount.setOnClickListener(this);
@@ -78,42 +72,20 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unbinder.unbind();
-    }
-
-    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_account_delete_account:
-                Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                            Toast.makeText(AccountFragment.this.getContext(), "Deleted Account!", Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(AccountFragment.this.getContext(), "Failed To Delete Account!", Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(AccountFragment.this.getContext(), getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
-                    }
-                });
+                deleteAccount();
                 break;
-
             case R.id.button_account_logout:
+                SharedPreferences.Editor editor = UtilsCache.prefs.edit();
+                editor.clear();
+                editor.apply();
+
                 Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 break;
-
             case R.id.button_account_edit_account:
                 //TODO implement this one
                 intent = new Intent(getActivity(), EditNameActivity.class);
@@ -124,11 +96,57 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_NAME_REQUEST && resultCode == 204) {
             String userName = data.getExtras().getString("username");
 
-            name.setText(userName);
+            textViewUserName.setText(userName);
         }
+    }
+
+    private void deleteAccount() {
+        Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
+                    SharedPreferences.Editor editor = UtilsCache.prefs.edit();
+                    editor.clear();
+                    editor.apply();
+
+                    Toast.makeText(
+                            AccountFragment.this.getContext(),
+                            "Deleted Account!",
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(
+                            AccountFragment.this.getContext(),
+                            "Failed To Delete Account!",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                Toast.makeText(
+                        AccountFragment.this.getContext(),
+                        getString(R.string.network_failed_message),
+                        Toast.LENGTH_LONG
+                ).show();
+            }
+        });
     }
 }
