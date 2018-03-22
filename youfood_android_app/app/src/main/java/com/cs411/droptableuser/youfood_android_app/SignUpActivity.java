@@ -64,6 +64,8 @@ public class SignUpActivity extends AppCompatActivity {
                             UtilsCache.storeName(userName);
                             UtilsCache.storeEmail(email);
                             UtilsCache.storeIsOwner(isOwner);
+                            UtilsCache.storeHasLoggedIn(true);
+
 
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
@@ -71,7 +73,7 @@ public class SignUpActivity extends AppCompatActivity {
                             Log.d(TAG, String.valueOf(response.code()));
                             Toast.makeText(
                                     SignUpActivity.this,
-                                    "Your email or password were incorrect.",
+                                    "Your textViewEmail or password were incorrect.",
                                     Toast.LENGTH_LONG).show();
                         }
                     }
