@@ -9,12 +9,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.cs411.droptableuser.youfood_android_app.endpoints.RestaurantEndpoints;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RestaurantsFragment extends Fragment {
     Unbinder unbinder;
@@ -35,7 +42,24 @@ public class RestaurantsFragment extends Fragment {
         unbinder = ButterKnife.bind(this, rootView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
-        recyclerView.setAdapter(new RestaurantsRecyclerViewAdpater(new ArrayList<Restaurants>()));
+
+        final RestaurantsRecyclerViewAdpater adapter = new RestaurantsRecyclerViewAdpater(new ArrayList<GETRestaurantResponse>());
+        recyclerView.setAdapter(adapter);
+
+        Call<ArrayList<GETRestaurantResponse>> call = RestaurantEndpoints.restaurantEndpoints.getRestaurants(null, null, "San Francisco", null);
+        call.enqueue(new Callback<ArrayList<GETRestaurantResponse>>() {
+            @Override
+            public void onResponse(Call<ArrayList<GETRestaurantResponse>> call, Response<ArrayList<GETRestaurantResponse>> response) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    adapter.setData(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<GETRestaurantResponse>> call, Throwable t) {
+                Toast.makeText(RestaurantsFragment.this.getContext(), getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
+            }
+        });
 
         return rootView;
     }

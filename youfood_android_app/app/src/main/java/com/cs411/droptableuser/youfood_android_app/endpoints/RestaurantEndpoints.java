@@ -21,7 +21,7 @@ public interface RestaurantEndpoints {
     @GET("/restaurants")
     Call<ArrayList<GETRestaurantResponse>> getRestaurants(@Query("priceeq") String priceEquals,
                                                           @Query("pricelt") String priceLessThan,
-                                                          @Query("city") String address,
+                                                          @Query("city") String city,
                                                           @Query("name") String name);
 
     @PUT("/restaurants")
