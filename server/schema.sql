@@ -3,6 +3,7 @@ CREATE TABLE "User"(
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
+    id SERIAL UNIQUE,
     is_owner boolean NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "Restaurant"(
@@ -11,7 +12,8 @@ CREATE TABLE "Restaurant"(
     pricerange int,
     phone text NOT NULL,
     image_url text NOT NULL,
-    owner_email citext REFERENCES "User"(email), 
+    owner_email citext REFERENCES "User"(email),
+    id SERIAL UNIQUE,
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Budget"(
