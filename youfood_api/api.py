@@ -1014,10 +1014,52 @@ class ReviewAPI(MethodView):
                     return jsonify({'error': 'No record to delete'}), 400
                 return Response(status=204)
 
+def get_restaurant_statistics():
+    """
+    GET /get_restaurant_statistics?name=<name>&address=<address>
+
+    Response: 
+    {
+        'review_average': <float>,
+        'review_count': <int>,
+        'transaction_count': <int>
+    }
+    """
+    name = request.args.get("name")
+    address = request.args.get("address")
+    if name is None or address is None:
+        return jsonify({"error": "Missing Query Arg"}), 400
+
+    with conn as c:
+            with c.cursor() as cur:
+                cur.execute(""" 
+                    SELECT "ReviewGroup".averagerating, "ReviewGroup".numratings, "TransactionGroup".numtransactions
+                    FROM 
+                    (
+                        SELECT AVG(rating) AS averagerating, COUNT(*) AS numratings 
+                        FROM "Review" 
+                        WHERE restaurant_name = %s AND restaurant_address = %s 
+                    ) AS "ReviewGroup",
+                    (
+                        SELECT COUNT(*) AS numtransactions
+                        FROM "Transaction"
+                        WHERE restaurant_name = %s AND restaurant_address = %s
+                    ) AS "TransactionGroup";""", (name, address, name, address))
+
+                row = cur.fetchone()
+                statistics = {
+                    'review_average': float(row[0]),
+                    'review_count': row[1],
+                    'transaction_count': row[2]
+                }
+
+                return jsonify(statistics), 200
+
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
 app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST'])
+app.add_url_rule('/restaurant_statistics', 'restaurant_statistics', get_restaurant_statistics, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
