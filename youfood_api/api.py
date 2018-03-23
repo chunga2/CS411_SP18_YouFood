@@ -791,6 +791,7 @@ class RecommendationAPI(MethodView):
                     SELECT date, useremail, restaurant_name, restaurant_address
                     FROM "Recommendation"
                     WHERE useremail = %s
+                    ORDER BY date desc;
                     """, (useremail,))
                 rv = cur.fetchall()
                 json_objects = self.convert_to_json(rv)
