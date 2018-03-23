@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'data.json'
+FILENAME = 'san_francisco.json'
 
 #Load the json
 data = json.load(open(FILENAME))
@@ -19,30 +19,22 @@ counter = 0
 for business in businesses:
     # Format special things for display
     print("Adding #" + str(counter) + " " + business['name'])
-    my_price = business.get('price', None)
-    if my_price:
-        my_price = len(my_price)
+    
     in_address = ", ".join(business['location']['display_address'])
-    # insert restaurant
+    # Update restaurant
     cur.execute('''
-    INSERT INTO \"Restaurant\" (address, pricerange, name, phone, image_url, lat, lon) 
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    UPDATE \"Restaurant\"
+    SET lat=%s
+    SET lon=%s
+    WHERE name=%s AND address=%s
     ''',
-                (in_address, my_price, business['name'], business['display_phone'], business['image_url'], business['coordinates']['latitude'], business['coordinates']['longitude']))
-    # insert categories
-    for category in business['categories']:
-        cur.execute('''
-        INSERT INTO \"RestaurantCategories\" (category, restaurant_name, restaurant_address)  
-        VALUES (%s, %s, %s)
-        ''',
-                    (category['title'], business['name'], in_address))
+    (business['coordinates']['latitude'], business['coordinates']['longitude'], business['name'], in_address))
+   
     conn.commit()
     counter += 1
 
 print("Finished! Check Database. Did this many: ", counter)
 conn.commit()
-
-# Note that I use display_phone instead of the normal phone
 
 """
 SAMPLE ENTRY
@@ -73,7 +65,3 @@ SAMPLE ENTRY
     'url': 'https://www.yelp.com/biz/yummy-yummy-san-francisco?adjust_creative=09CWf82V7c_xrYOTHH6wKw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=09CWf82V7c_xrYOTHH6wKw'}
 
 """
-
-
-
-
