@@ -318,7 +318,8 @@ class RestaurantAPI(MethodView):
             subqueries = {
                 "name": "name = %s",
                 "city": "address LIKE %s",
-                "pricelt": "pricerange < %s",
+                "pricegte": "pricerange >= %s"
+                "pricelte": "pricerange <= %s",
                 "priceeq": "pricerange = %s",
             }
             selections = []
