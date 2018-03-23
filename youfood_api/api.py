@@ -313,7 +313,6 @@ class RestaurantAPI(MethodView):
         Accepts params as GET arguments, which are documented in build_where.
         :return: JSON response, formatted by format_restaurant.
         """
-
         def build_where(query_params):
             subqueries = {
                 "name": "name = %s",
@@ -336,7 +335,7 @@ class RestaurantAPI(MethodView):
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
-            return "", ""
+            return "", []
 
         where_clause, where_params = build_where(request.args)
         with conn as c:
@@ -399,34 +398,87 @@ class RestaurantCategoriesAPI(MethodView):
         GET /restaurant_categories?category=<category>
         :return: JSON response, formatted by format_restaurant.
         """
+        def build_where(query_params):
+            subqueries = {
+                "name": "name = %s",
+                "city": "address LIKE %s",
+                "pricegte": "pricerange >= %s",
+                "pricelte": "pricerange <= %s",
+                "priceeq": "pricerange = %s",
+            }
+            selections = []
+            params = []
+            for k, v in query_params.items():
+                if k in subqueries:
+                    if k == "city":
+                        value = "%%%s,%%" % str(v)
+                        selections += [subqueries[k]]
+                        params += [value]
+                    else:
+                        selections += [subqueries[k]]
+                        params += [v]
+            if selections:
+                where_clause = "WHERE " + " AND ".join(selections)
+                return where_clause, params
+            return "", []
+        # This endpoint should never be called without category passed in as an arg
         category = request.args.get("category")
         if category == None:
             return jsonify({'error': 'No category specified'}), 400
 
+        where_params = [category]
+        where_clause, params = build_where(request.args)
+        where_params += params
+        print(where_clause)
+        print(where_params)
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                    "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
-                    FROM "Restaurant",
-                        (
-                            (SELECT * FROM "RestaurantCategories")
-                            EXCEPT
-                            (SELECT * 
-                             FROM "RestaurantCategories" AS "OuterTable"
-                             WHERE NOT EXISTS
-                                (
-                                SELECT * FROM "RestaurantCategories"
-                                WHERE "RestaurantCategories".category = %s AND 
-                                "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
-                                "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
-                                )
-                            ) 
-                        ) AS "SpecificRestaurants"
-                    WHERE "Restaurant".name = "SpecificRestaurants".restaurant_name 
-                    AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", (category,))
+                if len(params) == 0:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
+                        FROM "Restaurant",
+                            (
+                                (SELECT * FROM "RestaurantCategories")
+                                EXCEPT
+                                (SELECT * 
+                                 FROM "RestaurantCategories" AS "OuterTable"
+                                 WHERE NOT EXISTS
+                                    (
+                                    SELECT * FROM "RestaurantCategories"
+                                    WHERE "RestaurantCategories".category = %s AND 
+                                    "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
+                                    "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
+                                    )
+                                ) 
+                            ) AS "SpecificRestaurants"
+                        WHERE "Restaurant".name = "SpecificRestaurants".restaurant_name 
+                        AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", where_params)
+                else:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
+                        FROM "Restaurant",
+                            (
+                                (SELECT * FROM "RestaurantCategories")
+                                EXCEPT
+                                (SELECT * 
+                                 FROM "RestaurantCategories" AS "OuterTable"
+                                 WHERE NOT EXISTS
+                                    (
+                                    SELECT * FROM "RestaurantCategories"
+                                    WHERE "RestaurantCategories".category = %s AND 
+                                    "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
+                                    "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
+                                    )
+                                ) 
+                            ) AS "SpecificRestaurants"
+                        {where_clause} AND "Restaurant".name = "SpecificRestaurants".restaurant_name 
+                        AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""".format(where_clause=where_clause), where_params)
+
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
+                jsonobjects.append({'length': len(jsonobjects)})
                 return jsonify(jsonobjects), 200
 
 
