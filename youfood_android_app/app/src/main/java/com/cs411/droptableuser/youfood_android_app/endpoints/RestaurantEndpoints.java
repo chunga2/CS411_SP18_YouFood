@@ -20,7 +20,8 @@ import retrofit2.http.Query;
 public interface RestaurantEndpoints {
     @GET("/restaurants")
     Call<ArrayList<GETRestaurantResponse>> getRestaurants(@Query("priceeq") String priceEquals,
-                                                          @Query("pricelt") String priceLessThan,
+                                                          @Query("pricelte") String priceLte,
+                                                          @Query("pricegte") String priceGte,
                                                           @Query("city") String city,
                                                           @Query("name") String name);
 

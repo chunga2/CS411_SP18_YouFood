@@ -58,6 +58,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_account, container, false);
         unbinder = ButterKnife.bind(this, rootView);
+        setHasOptionsMenu(false);
 
         textViewUserName.setText(UtilsCache.getName());
         textViewEmail.setText(UtilsCache.getEmail());
