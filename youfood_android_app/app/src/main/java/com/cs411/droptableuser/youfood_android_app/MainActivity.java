@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
                         Fragment selectedFragment = null;
                         switch (item.getItemId()) {
                             case R.id.menu_restaurants:
-                                selectedFragment = RestaurantsFragment.newInstance("The House");
+                                selectedFragment = RestaurantsFragment.newInstance();
                                 getSupportActionBar().setTitle("Restaurants");
                                 break;
                             case R.id.menu_budget_temp:
@@ -69,11 +69,12 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
     }
 
     @Override
-    public void onRestaurantSelected(String restaurant) {
-        bottomNavigationView.setSelectedItemId(R.id.menu_restaurants);
+    public void onRestaurantSelected(String restaurant, String address) {
+        MenuItem item = bottomNavigationView.getMenu().findItem(R.id.menu_restaurants);
+        item.setChecked(true);
         getSupportActionBar().setTitle("Restaurants");
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance(restaurant));
+        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance(restaurant, address));
         transaction.commit();
     }
 }

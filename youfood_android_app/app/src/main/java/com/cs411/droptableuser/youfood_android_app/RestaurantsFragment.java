@@ -39,7 +39,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RestaurantsFragment extends Fragment {
-    private static final String RESTAURANT_SEARCH_KEY = "Restaurant";
+    private static final String RESTAURANT_NAME_SEARCH_KEY = "RestaurantName";
+    private static final String RESTAURANT_ADDRESS_SEARCH_KEY = "RestaurantAddress";
+
     Unbinder unbinder;
     RestaurantsRecyclerViewAdpater adapter;
 
@@ -56,6 +58,11 @@ public class RestaurantsFragment extends Fragment {
     CheckBox nameCheckBox;
     @BindView(R.id.edittext_restaurants_name)
     EditText nameEditText;
+
+    @BindView(R.id.checkbox_restaurants_address)
+    CheckBox addressCheckBox;
+    @BindView(R.id.edittext_restaurants_address)
+    EditText addressEditText;
 
     @BindView(R.id.checkbox_restaurants_city)
     CheckBox cityCheckBox;
@@ -85,11 +92,12 @@ public class RestaurantsFragment extends Fragment {
         return fragment;
     }
 
-    public static RestaurantsFragment newInstance(String restaurantName) {
+    public static RestaurantsFragment newInstance(String restaurantName, String restaurantAddress) {
         RestaurantsFragment fragment = new RestaurantsFragment();
 
         Bundle args = new Bundle();
-        args.putString(RESTAURANT_SEARCH_KEY, restaurantName);
+        args.putString(RESTAURANT_NAME_SEARCH_KEY, restaurantName);
+        args.putString(RESTAURANT_ADDRESS_SEARCH_KEY, restaurantAddress);
         fragment.setArguments(args);
 
         return fragment;
@@ -104,10 +112,14 @@ public class RestaurantsFragment extends Fragment {
 
         // Fragment was created with specific restaurant to display, so let's set the filters to that
         Bundle args = getArguments();
-        if((args != null) && (args.containsKey(RESTAURANT_SEARCH_KEY))) {
+        if((args != null) && (args.containsKey(RESTAURANT_NAME_SEARCH_KEY)) && (args.containsKey(RESTAURANT_ADDRESS_SEARCH_KEY))) {
             nameCheckBox.setChecked(true);
-            String restaurant = args.getString(RESTAURANT_SEARCH_KEY);
+            String restaurant = args.getString(RESTAURANT_NAME_SEARCH_KEY);
             nameEditText.setText(restaurant);
+
+            addressCheckBox.setChecked(true);
+            String address = args.getString(RESTAURANT_ADDRESS_SEARCH_KEY);
+            addressEditText.setText(address);
         }
 
         progressBar.setVisibility(View.VISIBLE);
@@ -133,7 +145,8 @@ public class RestaurantsFragment extends Fragment {
         });
 
         // When first created, nothing in filters should be checked, so the request will be all Null query arguments, so
-        // we will get all the results back
+        // we will get all the results back. Unless this was created by clicking on the restaurant name of a Recommendation,
+        // then we will filter on name and address to return the exact restaurant.
         loadRestaurants();
 
         return rootView;
@@ -173,11 +186,16 @@ public class RestaurantsFragment extends Fragment {
             category = categoryEditText.getText().toString();
         }
 
+        String address = null;
+        if(addressCheckBox.isChecked()) {
+            address = addressEditText.getText().toString();
+        }
+
         Call<ArrayList<GETRestaurantResponse>> call;
         if(category == null) {
-            call = RestaurantEndpoints.restaurantEndpoints.getRestaurants(priceEquals, priceLte, priceGte, city, name);
+            call = RestaurantEndpoints.restaurantEndpoints.getRestaurants(priceEquals, priceLte, priceGte, city, name, address);
         } else {
-            call = RestaurantCategoriesEndpoints.restaurantCategoriesEndpoints.getRestaurantsByCategory(category, priceEquals, priceLte, priceGte, city, name);
+            call = RestaurantCategoriesEndpoints.restaurantCategoriesEndpoints.getRestaurantsByCategory(category, priceEquals, priceLte, priceGte, city, name, address);
         }
 
         call.enqueue(new Callback<ArrayList<GETRestaurantResponse>>() {

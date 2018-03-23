@@ -170,7 +170,9 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
                 builder.show();
             } else if (view.getId() == R.id.text_recommendation_name) {
                 if(listener != null) {
-                    listener.onRestaurantSelected(this.restaurantName.getText().toString());
+                    String name = this.restaurantName.getText().toString();
+                    String address = this.restaurantAddress.getText().toString();
+                    listener.onRestaurantSelected(name, address);
                 }
             }
         }

@@ -57,7 +57,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     RestaurantSelectedListener listener;
 
     public interface RestaurantSelectedListener {
-        public void onRestaurantSelected(String restaurant);
+        public void onRestaurantSelected(String restaurant, String address);
     }
 
     public static AccountFragment newInstance() {
