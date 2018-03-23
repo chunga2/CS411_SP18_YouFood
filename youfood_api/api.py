@@ -340,14 +340,24 @@ class RestaurantAPI(MethodView):
         where_clause, where_params = build_where(request.args)
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                    "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
-                    FROM "Restaurant", "RestaurantCategories"
-                    {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
-                    AND "Restaurant".address = "RestaurantCategories".restaurant_address 
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
+                if len(where_params) > 0:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                        FROM "Restaurant", "RestaurantCategories"
+                        {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                        AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
+                else:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                        FROM "Restaurant", "RestaurantCategories" 
+                        WHERE "Restaurant".name = "RestaurantCategories".restaurant_name 
+                        AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""")
+
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
+                jsonobjects.append({'length': len(jsonobjects)})
                 return jsonify(jsonobjects), 200
 
     def put(self):
