@@ -319,9 +319,10 @@ class RestaurantAPI(MethodView):
             subqueries = {
                 "name": "name = %s",
                 "city": "address LIKE %s",
+                "address": "address = %s",
                 "pricegte": "pricerange >= %s",
                 "pricelte": "pricerange <= %s",
-                "priceeq": "pricerange = %s",
+                "priceeq": "pricerange = %s"
             }
             selections = []
             params = []
@@ -406,9 +407,10 @@ class RestaurantCategoriesAPI(MethodView):
             subqueries = {
                 "name": "name = %s",
                 "city": "address LIKE %s",
+                "address": "address = %s",
                 "pricegte": "pricerange >= %s",
                 "pricelte": "pricerange <= %s",
-                "priceeq": "pricerange = %s",
+                "priceeq": "pricerange = %s"
             }
             selections = []
             params = []
