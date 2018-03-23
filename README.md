@@ -3,7 +3,7 @@
 
 ### Description
 
-Have you and your friends ever struggled to think of where to eat? We plan to create a restaurant review Android App localized to New York City and focusing on the college student demographic. Users will be able to view reviews of local restaurants by fellow students and create an account to write reviews. 
+Have you and your friends ever struggled to think of where to eat? We plan to create a restaurant review Android App localized to the San Francisco Bay Area and focusing on the college student demographic. Users will be able to view reviews of local restaurants by fellow students and create an account to write reviews. 
 
 Our review system, will allow users to give a rating out of 10 as well as write a text review highlighting various aspects of their experience.
 
