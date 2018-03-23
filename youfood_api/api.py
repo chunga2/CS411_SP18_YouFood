@@ -332,7 +332,7 @@ class RestaurantAPI(MethodView):
                         params += [value]
                     else:
                         selections += [subqueries[k]]
-                        params += [str(v)]
+                        params += [v]
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
