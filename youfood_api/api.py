@@ -859,8 +859,9 @@ class ReviewAPI(MethodView):
     def convert_to_json(self, rows):
         json_objects = []
         for row in rows:
-            useremail, restaurant_name, restaurant_address, description, rating, date = row
+            name, useremail, restaurant_name, restaurant_address, description, rating, date = row
             json_obj = {
+                'name': name,
                 'useremail': useremail,
                 'restaurant_name': restaurant_name,
                 'restaurant_address': restaurant_address,
@@ -890,9 +891,10 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
-                        WHERE useremail=%s;""", (useremail,))
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
+                        WHERE useremail=%s
+                        AND "Review".useremail = "User".email;""", (useremail,))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
@@ -905,10 +907,11 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
                         WHERE restaurant_name=%s
-                        AND restaurant_address=%s;""", (restaurant_name, restaurant_address))
+                        AND restaurant_address=%s
+                        AND "Review".useremail = "User".email;""", (restaurant_name, restaurant_address))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
