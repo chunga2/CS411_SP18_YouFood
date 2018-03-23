@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'san_francisco.json'
+FILENAME = 'san_jose.json'
 
 #Load the json
 data = json.load(open(FILENAME))
@@ -24,8 +24,8 @@ for business in businesses:
     # Update restaurant
     cur.execute('''
     UPDATE \"Restaurant\"
-    SET lat=%s
-    SET lon=%s
+    SET lat=%s,
+    lon=%s
     WHERE name=%s AND address=%s
     ''',
     (business['coordinates']['latitude'], business['coordinates']['longitude'], business['name'], in_address))

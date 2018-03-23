@@ -11,8 +11,8 @@ CREATE TABLE "Restaurant"(
     pricerange int,
     phone text NOT NULL,
     image_url text NOT NULL,
-    lat float NOT NULL,
-    lon float NOT NULL,
+    lat float,
+    lon float,
     owner_email citext REFERENCES "User"(email) ON DELETE SET NULL, 
     PRIMARY KEY (address, name)
 );
