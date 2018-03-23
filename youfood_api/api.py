@@ -358,6 +358,7 @@ class RestaurantAPI(MethodView):
 
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
+                jsonobjects.append({'length': len(jsonobjects)})
                 return jsonify(jsonobjects), 200
 
     def put(self):
