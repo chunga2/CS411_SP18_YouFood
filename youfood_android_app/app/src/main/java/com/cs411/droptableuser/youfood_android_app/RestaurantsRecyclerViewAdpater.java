@@ -50,7 +50,7 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
         GETRestaurantResponse restaurantObj = this.restaurants.get(position);
         holder.restaurantObj = restaurantObj;
         Glide.with(holder.itemView.getContext())
-                .load(restaurantObj.getImageURL())
+                .load(restaurantObj.getImageUrl())
                 .apply(new RequestOptions().override(110, 110).fitCenter())
                 .into(holder.imageViewRestaurant);
         holder.textViewRestaurantName.setText(restaurantObj.getName());

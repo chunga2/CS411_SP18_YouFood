@@ -30,6 +30,12 @@ public class GETRestaurantResponse implements Parcelable {
     @SerializedName("pricerange")
     private String priceRange;
 
+    @SerializedName("latitude")
+    private float latitude;
+
+    @SerializedName("longitude")
+    private float longitude;
+
     public String getAddress() {
         return address;
     }
@@ -38,7 +44,7 @@ public class GETRestaurantResponse implements Parcelable {
         return categories;
     }
 
-    public String getImageURL() {
+    public String getImageUrl() {
         return imageUrl;
     }
 
@@ -54,6 +60,15 @@ public class GETRestaurantResponse implements Parcelable {
         return priceRange;
     }
 
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
@@ -67,6 +82,8 @@ public class GETRestaurantResponse implements Parcelable {
         dest.writeString(this.name);
         dest.writeString(this.phone);
         dest.writeString(this.priceRange);
+        dest.writeFloat(this.latitude);
+        dest.writeFloat(this.longitude);
     }
 
     public GETRestaurantResponse() {
@@ -79,6 +96,8 @@ public class GETRestaurantResponse implements Parcelable {
         this.name = in.readString();
         this.phone = in.readString();
         this.priceRange = in.readString();
+        this.latitude = in.readFloat();
+        this.longitude = in.readFloat();
     }
 
     public static final Parcelable.Creator<GETRestaurantResponse> CREATOR = new Parcelable.Creator<GETRestaurantResponse>() {
