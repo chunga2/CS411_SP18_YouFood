@@ -3,14 +3,14 @@ SQL to find all transactions in a week
 //Get all transactions from a [replaceme] week
 SELECT *
 FROM "Transaction"
-WHERE date < ([replaceme]::date - (concat((extract(isodow FROM [replaceme]::date)),' days'))::interval+'7 days'::interval) AND
-date > ([replaceme]::date - (concat((extract(isodow FROM [replaceme]::date)),' days'))::interval);
+WHERE date < ([replaceme]::date - (concat((MOD(extract(isodow FROM [replaceme])::int, 7)),' days'))::interval+'7 days'::interval) AND
+date > ([replaceme]::date - (concat((MOD(extract(isodow FROM [replaceme])::int, 7)),' days'))::interval);
 
 //tester Finds all in week of March 3, 2018
 SELECT *
 FROM "Transaction"
-WHERE date < ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38')::date)),' days'))::interval+'7 days'::interval) AND
-date > ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38')::date)),' days'))::interval);
+WHERE date < ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((MOD(extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38'))::int, 7)),' days'))::interval+'7 days'::interval) AND
+date > ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((MOD(extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38'))::int, 7)),' days'))::interval);
 
 
 
@@ -25,3 +25,5 @@ SELECT [replaceme] -
        (SELECT concat(
        	       (SELECT extract(isodow FROM [replaceme])),' days'))::interval AS sunnyday;
 
+//Modulus on the day
+SELECT MOD(extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38'))::int, 7)
