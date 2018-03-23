@@ -37,11 +37,15 @@ import retrofit2.Response;
 public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<RecommendationsRecyclerViewAdapter.ViewHolder> {
     ArrayList<GETRecommendationResponse> recommendations;
     Context context;
+    AccountFragment.RestaurantSelectedListener listener;
 
-    public RecommendationsRecyclerViewAdapter(ArrayList<GETRecommendationResponse> recommendations, Context context) {
+    public RecommendationsRecyclerViewAdapter(ArrayList<GETRecommendationResponse> recommendations, Context context,
+                                              AccountFragment.RestaurantSelectedListener listener) {
         this.recommendations = recommendations;
         this.context = context;
+        this.listener = listener;
     }
+
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -123,45 +127,52 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
             ButterKnife.bind(this, itemView);
 
             this.deleteButton.setOnClickListener(this);
+            this.restaurantName.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Delete Recommendation");
-            builder.setMessage("Are you sure you want to delete this recommendation?");
-            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Call<Void> call = RecommendationEndpoints.recommendationEndpoints.deleteRecommendation(UtilsCache.getEmail(),
-                            recommendationObj.getRestaurantAddress(), recommendationObj.getRestaurantName(), recommendationObj.getDate());
-                    call.enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                                recommendations.remove(index);
-                                RecommendationsRecyclerViewAdapter.this.notifyItemRemoved(index);
-                                Toast.makeText(context, "Succesfully deleted", Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(context, "Could not delete", Toast.LENGTH_LONG).show();
+            if (view.getId() == R.id.image_recommendation_delete) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Delete Recommendation");
+                builder.setMessage("Are you sure you want to delete this recommendation?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Call<Void> call = RecommendationEndpoints.recommendationEndpoints.deleteRecommendation(UtilsCache.getEmail(),
+                                recommendationObj.getRestaurantAddress(), recommendationObj.getRestaurantName(), recommendationObj.getDate());
+                        call.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                if (response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
+                                    recommendations.remove(index);
+                                    RecommendationsRecyclerViewAdapter.this.notifyItemRemoved(index);
+                                    Toast.makeText(context, "Succesfully deleted", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(context, "Could not delete", Toast.LENGTH_LONG).show();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(context, R.string.network_failed_message, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    dialogInterface.dismiss();
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Toast.makeText(context, R.string.network_failed_message, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        dialogInterface.dismiss();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                builder.show();
+            } else if (view.getId() == R.id.text_recommendation_name) {
+                if(listener != null) {
+                    listener.onRestaurantSelected(this.restaurantName.getText().toString());
                 }
-            });
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            });
-            builder.show();
+            }
         }
     }
 }

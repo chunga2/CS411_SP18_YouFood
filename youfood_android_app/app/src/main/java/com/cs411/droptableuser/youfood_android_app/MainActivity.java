@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AccountFragment.RestaurantSelectedListener {
     @BindView(R.id.bottom_naviagation)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.toolbar_main)
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                         Fragment selectedFragment = null;
                         switch (item.getItemId()) {
                             case R.id.menu_restaurants:
-                                selectedFragment = RestaurantsFragment.newInstance();
+                                selectedFragment = RestaurantsFragment.newInstance("The House");
                                 getSupportActionBar().setTitle("Restaurants");
                                 break;
                             case R.id.menu_budget_temp:
@@ -66,5 +66,14 @@ public class MainActivity extends AppCompatActivity {
     private void setActionBar() {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
+    }
+
+    @Override
+    public void onRestaurantSelected(String restaurant) {
+        bottomNavigationView.setSelectedItemId(R.id.menu_restaurants);
+        getSupportActionBar().setTitle("Restaurants");
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance(restaurant));
+        transaction.commit();
     }
 }

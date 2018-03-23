@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,6 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RestaurantsFragment extends Fragment {
+    private static final String RESTAURANT_SEARCH_KEY = "Restaurant";
     Unbinder unbinder;
     RestaurantsRecyclerViewAdpater adapter;
 
@@ -83,12 +85,30 @@ public class RestaurantsFragment extends Fragment {
         return fragment;
     }
 
+    public static RestaurantsFragment newInstance(String restaurantName) {
+        RestaurantsFragment fragment = new RestaurantsFragment();
+
+        Bundle args = new Bundle();
+        args.putString(RESTAURANT_SEARCH_KEY, restaurantName);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_restaurants, container, false);
         unbinder = ButterKnife.bind(this, rootView);
         setHasOptionsMenu(true);
+
+        // Fragment was created with specific restaurant to display, so let's set the filters to that
+        Bundle args = getArguments();
+        if((args != null) && (args.containsKey(RESTAURANT_SEARCH_KEY))) {
+            nameCheckBox.setChecked(true);
+            String restaurant = args.getString(RESTAURANT_SEARCH_KEY);
+            nameEditText.setText(restaurant);
+        }
 
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
