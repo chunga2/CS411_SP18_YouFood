@@ -63,11 +63,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return false;
-    }
-
     private void setActionBar() {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);

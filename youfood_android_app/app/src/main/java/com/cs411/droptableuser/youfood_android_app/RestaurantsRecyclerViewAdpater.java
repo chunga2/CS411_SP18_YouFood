@@ -48,11 +48,11 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
     public void onBindViewHolder(ViewHolder holder, int position) {
         // TODO: Resize the image with caching.
         GETRestaurantResponse restaurantObj = this.restaurants.get(position);
+        holder.restaurantObj = restaurantObj;
         Glide.with(holder.itemView.getContext())
                 .load(restaurantObj.getImageURL())
                 .apply(new RequestOptions().override(110, 110).fitCenter())
                 .into(holder.imageViewRestaurant);
-        holder.ratingBarRestaurant.setRating(3);
         holder.textViewRestaurantName.setText(restaurantObj.getName());
 
         String[] categories = restaurantObj.getCategories();
@@ -96,8 +96,7 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
         TextView textViewRestaurantLocation;
         @BindView(R.id.text_restaurant_price_range)
         TextView textViewRestaurantPriceRange;
-        @BindView(R.id.rating_bar_restaurant)
-        RatingBar ratingBarRestaurant;
+        GETRestaurantResponse restaurantObj;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -110,8 +109,9 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
         public void onClick(View view) {
             final Context context = view.getContext();
             Intent detailedIntent = new Intent(context, RestaurantDetailActivity.class);
-
-            // TODO: Add data to the intent when we have real data set.
+            detailedIntent.putExtra(RestaurantDetailActivity.RESTAURANT_KEY, restaurantObj);
+            detailedIntent.putExtra(RestaurantDetailActivity.CATEGORIES_KEY, textViewRestaurantCuisine.getText().toString());
+            detailedIntent.putExtra(RestaurantDetailActivity.PRICE_RANGE_KEY, textViewRestaurantPriceRange.getText().toString());
             context.startActivity(detailedIntent);
         }
     }

@@ -30,21 +30,6 @@
         app:layout_constraintEnd_toStartOf="@+id/text_restaurant_price_range"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RatingBar
-        android:id="@+id/rating_bar_restaurant"
-        style="@android:style/Widget.DeviceDefault.RatingBar.Small"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:numStars="5"
-        android:rating="0"
-        android:stepSize="0.5"
-        android:layout_marginTop="5dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/image_restaurant"
-        app:layout_constraintTop_toBottomOf="@+id/text_restaurant_name" />
-
     <TextView
         android:id="@+id/text_restaurant_cuisine"
         android:layout_width="0dp"
@@ -56,7 +41,7 @@
         tools:text="sldfjdfkdsfjsslfjslfdjfsdlkfsdjfslkfjsfksdfjsdflksdfjsdlfsdfjsd"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/image_restaurant"
-        app:layout_constraintTop_toBottomOf="@+id/rating_bar_restaurant" />
+        app:layout_constraintTop_toBottomOf="@+id/text_restaurant_name" />
 
     <TextView
         android:id="@+id/text_restaurant_location"
