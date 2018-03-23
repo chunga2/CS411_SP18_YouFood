@@ -13,6 +13,9 @@ public class GETReviewResponse {
     @SerializedName("description")
     private String description;
 
+    @SerializedName("name")
+    private String name;
+
     @SerializedName("rating")
     private int rating;
 
