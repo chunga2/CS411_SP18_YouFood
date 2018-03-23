@@ -42,7 +42,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     @BindView(R.id.textview_account_accvalue)
     TextView textViewAccountType;
     @BindView(R.id.button_account_edit_account)
-    ImageView editAccount;
+    Button editAccount;
     @BindView(R.id.button_account_delete_account)
     Button deleteAccount;
     @BindView(R.id.button_account_logout)
