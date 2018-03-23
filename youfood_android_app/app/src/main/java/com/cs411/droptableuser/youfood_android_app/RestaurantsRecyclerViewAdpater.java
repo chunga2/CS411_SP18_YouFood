@@ -11,6 +11,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
 
 import java.util.List;
 
@@ -22,11 +24,16 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
     private static final int TEMP_NUM_ITEMS = 10;
     private static final String ZOMATO_LOGO_URL =
             "https://static2.tripoto.com/media/filter/nt/img/19307/UserPhoto/logo_unit_2_red.png";
-    // Class Restaurants is not defined yet.
-    private final List<Restaurants> restaurants;
 
-    public RestaurantsRecyclerViewAdpater(List<Restaurants> restaurants) {
+    private List<GETRestaurantResponse> restaurants;
+
+    public RestaurantsRecyclerViewAdpater(List<GETRestaurantResponse> restaurants) {
         this.restaurants = restaurants;
+    }
+
+    public void setData(List<GETRestaurantResponse> restaurants) {
+        this.restaurants = restaurants;
+        this.notifyDataSetChanged();
     }
 
     @Override
@@ -40,21 +47,42 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // TODO: Resize the image with caching.
+        GETRestaurantResponse restaurantObj = this.restaurants.get(position);
+        holder.restaurantObj = restaurantObj;
         Glide.with(holder.itemView.getContext())
-                .load(ZOMATO_LOGO_URL)
+                .load(restaurantObj.getImageUrl())
+                .apply(new RequestOptions().override(110, 110).fitCenter())
                 .into(holder.imageViewRestaurant);
-        holder.ratingBarRestaurant.setRating(5);
-        holder.textViewRestaurantName.setText(R.string.temp_restaurant_name);
-        holder.textViewRestaurantCuisine.setText(R.string.temp_restaurant_cuisines);
-        holder.textViewRestaurantLocation.setText(R.string.temp_restaurant_location);
-        holder.textViewRestaurantPriceRange.setText(R.string.temp_restaurant_price_range);
+        holder.textViewRestaurantName.setText(restaurantObj.getName());
+
+        String[] categories = restaurantObj.getCategories();
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < (categories.length - 1); i++) {
+            builder.append(categories[i]);
+            builder.append(", ");
+        }
+        builder.append(categories[categories.length-1]);
+        holder.textViewRestaurantCuisine.setText(builder.toString());
+
+        holder.textViewRestaurantLocation.setText(restaurantObj.getAddress());
+
+        builder = new StringBuilder();
+        if(restaurantObj.getPriceRange() != null) {
+            int priceRange = Integer.parseInt(restaurantObj.getPriceRange());
+            for (int i = 0; i < priceRange; i++) {
+                builder.append("$");
+            }
+
+            holder.textViewRestaurantPriceRange.setText(builder.toString());
+        } else {
+            holder.textViewRestaurantPriceRange.setText("None");
+        }
     }
 
     // TODO: Change the total number of items after implementing data set.
     @Override
     public int getItemCount() {
-        return TEMP_NUM_ITEMS;
-        // return restaurants.size();
+        return restaurants.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -68,8 +96,7 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
         TextView textViewRestaurantLocation;
         @BindView(R.id.text_restaurant_price_range)
         TextView textViewRestaurantPriceRange;
-        @BindView(R.id.rating_bar_restaurant)
-        RatingBar ratingBarRestaurant;
+        GETRestaurantResponse restaurantObj;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -82,9 +109,9 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
         public void onClick(View view) {
             final Context context = view.getContext();
             Intent detailedIntent = new Intent(context, RestaurantDetailActivity.class);
-
-            // TODO: Add data to the intent when we have real data set.
-
+            detailedIntent.putExtra(RestaurantDetailActivity.RESTAURANT_KEY, restaurantObj);
+            detailedIntent.putExtra(RestaurantDetailActivity.CATEGORIES_KEY, textViewRestaurantCuisine.getText().toString());
+            detailedIntent.putExtra(RestaurantDetailActivity.PRICE_RANGE_KEY, textViewRestaurantPriceRange.getText().toString());
             context.startActivity(detailedIntent);
         }
     }

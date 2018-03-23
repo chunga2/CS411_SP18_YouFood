@@ -1,3 +1,5 @@
+yelp_data_loading/__pycache__
+youfood_api/__pycache__/
 .mypy_cache/*
 server/__pycache__/credentials.cpython-36.pyc
 youfood_api/api.pyc

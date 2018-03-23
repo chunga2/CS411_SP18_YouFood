@@ -1,0 +1,27 @@
+SQL to find all transactions in a week
+
+//Get all transactions from a [replaceme] week
+SELECT *
+FROM "Transaction"
+WHERE date < ([replaceme]::date - (concat((extract(isodow FROM [replaceme]::date)),' days'))::interval+'7 days'::interval) AND
+date > ([replaceme]::date - (concat((extract(isodow FROM [replaceme]::date)),' days'))::interval);
+
+//tester Finds all in week of March 3, 2018
+SELECT *
+FROM "Transaction"
+WHERE date < ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38')::date)),' days'))::interval+'7 days'::interval) AND
+date > ((TIMESTAMP '2018-03-20 15:36:38')::date - (concat((extract(isodow FROM (TIMESTAMP '2018-03-20 15:36:38')::date)),' days'))::interval);
+
+
+
+//get the day of the week of a thing
+SELECT extract(isodow FROM [replaceme]);
+
+//get a different date
+SELECT [replaceme] - '5 days'::interval;
+
+//get First Sunday Before Current
+SELECT [replaceme] -
+       (SELECT concat(
+       	       (SELECT extract(isodow FROM [replaceme])),' days'))::interval AS sunnyday;
+

@@ -42,7 +42,8 @@
                     android:layout_marginStart="16dp"
                     android:fontFamily="@font/roboto"
                     android:textColor="@color/black"
-                    android:textSize="24sp" />
+                    android:textSize="24sp"
+                    tools:text="The House" />
 
                 <TextView
                     android:id="@+id/text_detail_location"
@@ -51,7 +52,8 @@
                     android:layout_alignStart="@+id/text_detail_restaurant_name"
                     android:layout_below="@+id/text_detail_restaurant_name"
                     android:fontFamily="@font/roboto"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    tools:text="1230 Grant Ave, San Francisco, CA 94133" />
 
                 <TextView
                     android:id="@+id/text_detail_price_range"
@@ -61,7 +63,8 @@
                     android:layout_alignBottom="@+id/text_detail_restaurant_name"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="16dp"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    tools:text="$$$" />
 
                 <RatingBar
                     android:id="@+id/rating_bar_detail_aggregate_rating"
@@ -95,7 +98,8 @@
                     android:fontFamily="@font/roboto"
                     android:maxWidth="170dp"
                     android:textColor="@color/black"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    tools:text="Asian Fusion, Indian, Pakistani, Meditterraena" />
 
                 <TextView
                     android:id="@+id/text_detail_average_cost_title"
@@ -116,7 +120,8 @@
                     android:layout_below="@+id/text_detail_average_cost_title"
                     android:fontFamily="@font/roboto"
                     android:textColor="@color/black"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    tools:text="This restaurant will cost you between $31-$60 per person ljlkjlljl jlkjlj" />
 
                 <TextView
                     android:id="@+id/text_detail_rating_title"
@@ -135,8 +140,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/rating_bar_detail_aggregate_rating"
-                    android:layout_toStartOf="@+id/text_detail_price_range"
-                    android:fontFamily="@font/roboto" />
+                    android:layout_marginEnd="8dp"
+                    android:layout_toEndOf="@+id/rating_bar_detail_aggregate_rating"
+                    android:fontFamily="@font/roboto"
+                    tools:text="(5)" />
 
             </RelativeLayout>
 
@@ -196,6 +203,13 @@
                     android:fontFamily="@font/roboto"
                     android:text="@string/restaurant_detail_write_your_review" />
             </RelativeLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/restaurant_detail_reviews_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </android.support.v7.widget.RecyclerView>
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

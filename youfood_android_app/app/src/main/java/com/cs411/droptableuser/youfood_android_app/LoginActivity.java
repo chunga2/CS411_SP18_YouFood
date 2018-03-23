@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,16 +37,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check whether the user is logged in or not.
+        // If the user is logged in, start MainActivity.
+        UtilsCache.initialize(getApplicationContext());
+        if (UtilsCache.getHasLoggedIn()) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        // This is always the first activity, so initialize the shared prefs cache
-        UtilsCache.initialize(this.getApplicationContext());
 
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
 
         textViewSignUp.setOnClickListener(this);
         buttonSignIn.setOnClickListener(this);
-
     }
 
     @Override
@@ -63,7 +70,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void verifyUser() {
         final String email = editTextUsername.getText().toString();
-        String password = editTextPassword.getText().toString();
+        final String password = editTextPassword.getText().toString();
         Call<VerifyLoginResponse> call
                 = UserEndpoints.userEndpoints.verifyLogin(new VerifyLoginRequest(email, password));
 
@@ -76,6 +83,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     UtilsCache.storeName(loginResponse.getName());
                     UtilsCache.storeEmail(loginResponse.getEmail());
                     UtilsCache.storeIsOwner(loginResponse.isOwner());
+                    UtilsCache.storeHasLoggedIn(true);
+                    UtilsCache.storePassword(password);
 
                     // Move on to next activity
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -83,7 +92,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 } else {
                     Toast.makeText(
                             LoginActivity.this,
-                            "Your email or password were incorrect.",
+                            "Your textViewEmail or password were incorrect.",
                             Toast.LENGTH_LONG).show();
                 }
             }

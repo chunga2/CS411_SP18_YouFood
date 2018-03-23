@@ -2,6 +2,7 @@ package com.cs411.droptableuser.youfood_android_app.endpoints;
 
 import com.cs411.droptableuser.youfood_android_app.requests.PUTRestaurantRequest;
 import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantStatisticsResponse;
 
 import java.util.ArrayList;
 
@@ -20,9 +21,12 @@ import retrofit2.http.Query;
 public interface RestaurantEndpoints {
     @GET("/restaurants")
     Call<ArrayList<GETRestaurantResponse>> getRestaurants(@Query("priceeq") String priceEquals,
-                                                          @Query("pricelt") String priceLessThan,
-                                                          @Query("address") String address,
+                                                          @Query("pricelte") String priceLte,
+                                                          @Query("pricegte") String priceGte,
+                                                          @Query("city") String city,
                                                           @Query("name") String name);
+    @GET("/restaurant_statistics")
+    Call<GETRestaurantStatisticsResponse> getRestaurantStatistics(@Query("name") String name, @Query("address") String address);
 
     @PUT("/restaurants")
     Call<Void> updateRestaurantOwner(@Body PUTRestaurantRequest putRestaurantRequest);

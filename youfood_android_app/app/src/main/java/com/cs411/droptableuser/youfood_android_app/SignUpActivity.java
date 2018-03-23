@@ -51,7 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final String email = editTextEmail.getText().toString();
-                String password = editTextPassword.getText().toString();
+                final String password = editTextPassword.getText().toString();
                 final String userName = editTextUserName.getText().toString();
                 Call<Void> call
                         = UserEndpoints.userEndpoints.createUser(
@@ -64,6 +64,8 @@ public class SignUpActivity extends AppCompatActivity {
                             UtilsCache.storeName(userName);
                             UtilsCache.storeEmail(email);
                             UtilsCache.storeIsOwner(isOwner);
+                            UtilsCache.storeHasLoggedIn(true);
+                            UtilsCache.storePassword(password);
 
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
@@ -71,7 +73,7 @@ public class SignUpActivity extends AppCompatActivity {
                             Log.d(TAG, String.valueOf(response.code()));
                             Toast.makeText(
                                     SignUpActivity.this,
-                                    "Your email or password were incorrect.",
+                                    "An account with that email already exists!",
                                     Toast.LENGTH_LONG).show();
                         }
                     }

@@ -124,14 +124,16 @@ def format_restaurants(restaurant_tuples):
     i = 0
     while i < len(restaurant_tuples):
         rest_tuple = restaurant_tuples[i]
-        address, name, pricerange, phone, image_url, category = rest_tuple
+        address, name, pricerange, phone, image_url, category, lat, lon = rest_tuple
         json_obj = {
             "address": address,
             "name": name,
             "pricerange": pricerange,
             "phone": phone,
             "image_url": image_url,
-            "categories": [category]
+            "categories": [category],
+            "latitude": lat,
+            "longitude": lon
         }
 
         while (i + 1) < len(restaurant_tuples) and address == restaurant_tuples[i + 1][0] and name == \
@@ -357,33 +359,50 @@ class RestaurantAPI(MethodView):
         Accepts params as GET arguments, which are documented in build_where.
         :return: JSON response, formatted by format_restaurant.
         """
-
         def build_where(query_params):
             subqueries = {
                 "name": "name = %s",
-                "address": "address = %s",
-                "pricelt": "pricerange < %s",
+                "city": "address LIKE %s",
+                "pricegte": "pricerange >= %s",
+                "pricelte": "pricerange <= %s",
                 "priceeq": "pricerange = %s",
             }
             selections = []
             params = []
             for k, v in query_params.items():
                 if k in subqueries:
-                    selections += [subqueries[k]]
-                    params += [str(v)]
+                    if k == "city":
+                        value = "%%%s,%%" % str(v)
+                        selections += [subqueries[k]]
+                        params += [value]
+                    else:
+                        selections += [subqueries[k]]
+                        params += [v]
             if selections:
                 where_clause = "WHERE " + " AND ".join(selections) + " AND"
                 return where_clause, params
-            return "WHERE ", ""
+            return "", []
 
         where_clause, where_params = build_where(request.args)
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("""SELECT address, name, pricerange, phone, image_url, category
-                    FROM "Restaurant", "RestaurantCategories"
-                    {where_clause} name = restaurant_name 
-                    AND address = restaurant_address 
-                    ORDER BY name ASC, address ASC""".format(where_clause=where_clause), where_params)
+                if len(where_params) > 0:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category, 
+                        "Restaurant".lat, "Restaurant".lon  
+                        FROM "Restaurant", "RestaurantCategories"
+                        {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
+                        AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
+                else:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category, 
+                        "Restaurant".lat, "Restaurant".lon  
+                        FROM "Restaurant", "RestaurantCategories" 
+                        WHERE "Restaurant".name = "RestaurantCategories".restaurant_name 
+                        AND "Restaurant".address = "RestaurantCategories".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""")
+
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects), 200
@@ -425,32 +444,86 @@ class RestaurantCategoriesAPI(MethodView):
         GET /restaurant_categories?category=<category>
         :return: JSON response, formatted by format_restaurant.
         """
+        def build_where(query_params):
+            subqueries = {
+                "name": "name = %s",
+                "city": "address LIKE %s",
+                "pricegte": "pricerange >= %s",
+                "pricelte": "pricerange <= %s",
+                "priceeq": "pricerange = %s",
+            }
+            selections = []
+            params = []
+            for k, v in query_params.items():
+                if k in subqueries:
+                    if k == "city":
+                        value = "%%%s,%%" % str(v)
+                        selections += [subqueries[k]]
+                        params += [value]
+                    else:
+                        selections += [subqueries[k]]
+                        params += [v]
+            if selections:
+                where_clause = "WHERE " + " AND ".join(selections)
+                return where_clause, params
+            return "", []
+        # This endpoint should never be called without category passed in as an arg
         category = request.args.get("category")
         if category == None:
             return jsonify({'error': 'No category specified'}), 400
 
+        where_params = [category]
+        where_clause, params = build_where(request.args)
+        where_params += params
+        print(where_clause)
+        print(where_params)
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                    "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
-                    FROM "Restaurant",
-                        (
-                            (SELECT * FROM "RestaurantCategories")
-                            EXCEPT
-                            (SELECT * 
-                             FROM "RestaurantCategories" AS "OuterTable"
-                             WHERE NOT EXISTS
-                                (
-                                SELECT * FROM "RestaurantCategories"
-                                WHERE "RestaurantCategories".category = %s AND 
-                                "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
-                                "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
-                                )
-                            ) 
-                        ) AS "SpecificRestaurants"
-                    WHERE "Restaurant".name = "SpecificRestaurants".restaurant_name 
-                    AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
-                    ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", (category,))
+                if len(params) == 0:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category, 
+                        "Restaurant".lat, "Restaurant".lon 
+                        FROM "Restaurant",
+                            (
+                                (SELECT * FROM "RestaurantCategories")
+                                EXCEPT
+                                (SELECT * 
+                                 FROM "RestaurantCategories" AS "OuterTable"
+                                 WHERE NOT EXISTS
+                                    (
+                                    SELECT * FROM "RestaurantCategories"
+                                    WHERE "RestaurantCategories".category = %s AND 
+                                    "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
+                                    "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
+                                    )
+                                ) 
+                            ) AS "SpecificRestaurants"
+                        WHERE "Restaurant".name = "SpecificRestaurants".restaurant_name 
+                        AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", where_params)
+                else:
+                    cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category, 
+                        "Restaurant".lat, "Restaurant".lon 
+                        FROM "Restaurant",
+                            (
+                                (SELECT * FROM "RestaurantCategories")
+                                EXCEPT
+                                (SELECT * 
+                                 FROM "RestaurantCategories" AS "OuterTable"
+                                 WHERE NOT EXISTS
+                                    (
+                                    SELECT * FROM "RestaurantCategories"
+                                    WHERE "RestaurantCategories".category = %s AND 
+                                    "RestaurantCategories".restaurant_name = "OuterTable".restaurant_name AND 
+                                    "RestaurantCategories".restaurant_address = "OuterTable".restaurant_address
+                                    )
+                                ) 
+                            ) AS "SpecificRestaurants"
+                        {where_clause} AND "Restaurant".name = "SpecificRestaurants".restaurant_name 
+                        AND "Restaurant".address = "SpecificRestaurants".restaurant_address 
+                        ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""".format(where_clause=where_clause), where_params)
+
                 rv = cur.fetchall()
                 jsonobjects = format_restaurants(rv)
                 return jsonify(jsonobjects), 200
@@ -758,6 +831,7 @@ class RecommendationAPI(MethodView):
                     SELECT date, useremail, restaurant_name, restaurant_address
                     FROM "Recommendation"
                     WHERE useremail = %s
+                    ORDER BY date desc;
                     """, (useremail,))
                 rv = cur.fetchall()
                 json_objects = self.convert_to_json(rv)
@@ -824,8 +898,9 @@ class ReviewAPI(MethodView):
     def convert_to_json(self, rows):
         json_objects = []
         for row in rows:
-            useremail, restaurant_name, restaurant_address, description, rating, date = row
+            name, useremail, restaurant_name, restaurant_address, description, rating, date = row
             json_obj = {
+                'name': name,
                 'useremail': useremail,
                 'restaurant_name': restaurant_name,
                 'restaurant_address': restaurant_address,
@@ -855,9 +930,10 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
-                        WHERE useremail=%s;""", (useremail,))
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
+                        WHERE useremail=%s
+                        AND "Review".useremail = "User".email;""", (useremail,))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
@@ -870,10 +946,11 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
                         WHERE restaurant_name=%s
-                        AND restaurant_address=%s;""", (restaurant_name, restaurant_address))
+                        AND restaurant_address=%s
+                        AND "Review".useremail = "User".email;""", (restaurant_name, restaurant_address))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
@@ -990,8 +1067,52 @@ class ReviewAPI(MethodView):
                     return jsonify({'error': 'No record to delete'}), 400
                 return Response(status=204)
 
+def get_restaurant_statistics():
+    """
+    GET /get_restaurant_statistics?name=<name>&address=<address>
 
+    Response: 
+    {
+        'review_average': <float>,
+        'review_count': <int>,
+        'transaction_count': <int>
+    }
+    """
+    name = request.args.get("name")
+    address = request.args.get("address")
+    if name is None or address is None:
+        return jsonify({"error": "Missing Query Arg"}), 400
+
+    with conn as c:
+            with c.cursor() as cur:
+                cur.execute(""" 
+                    SELECT "ReviewGroup".averagerating, "ReviewGroup".numratings, "TransactionGroup".numtransactions
+                    FROM 
+                    (
+                        SELECT AVG(rating) AS averagerating, COUNT(*) AS numratings 
+                        FROM "Review" 
+                        WHERE restaurant_name = %s AND restaurant_address = %s 
+                    ) AS "ReviewGroup",
+                    (
+                        SELECT COUNT(*) AS numtransactions
+                        FROM "Transaction"
+                        WHERE restaurant_name = %s AND restaurant_address = %s
+                    ) AS "TransactionGroup";""", (name, address, name, address))
+
+                row = cur.fetchone()
+                statistics = {
+                    'review_average': float(row[0]),
+                    'review_count': row[1],
+                    'transaction_count': row[2]
+                }
+
+                return jsonify(statistics), 200
+
+
+
+app.add_url_rule('/', 'home', home, methods=['GET'])
 app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST'])
+app.add_url_rule('/restaurant_statistics', 'restaurant_statistics', get_restaurant_statistics, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])

@@ -12,6 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cs411.droptableuser.youfood_android_app.endpoints.RestaurantEndpoints;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantStatisticsResponse;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,9 +27,16 @@ import java.net.URLEncoder;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RestaurantDetailActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener {
+    public static final String RESTAURANT_KEY = "Restaurant";
+    public static final String CATEGORIES_KEY = "Categories";
+    public static final String PRICE_RANGE_KEY = "PriceRange";
+
     @BindView(R.id.rating_bar_detail_aggregate_rating)
     RatingBar ratingBarAggregateRating;
     @BindView(R.id.text_detail_restaurant_name)
@@ -44,38 +54,80 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
     @BindView(R.id.relative_layout_detail_clickable_review)
     RelativeLayout relativeLayoutWriteReview;
 
+    GETRestaurantResponse restaurantObj;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_detail);
         ButterKnife.bind(this);
 
-        textViewName.setText(R.string.temp_restaurant_name);
-        textViewCuisines.setText(R.string.temp_restaurant_cuisines);
-        textViewLocation.setText(R.string.temp_restaurant_location);
-        textViewNumVotes.setText(R.string.temp_restaurant_num_votes);
-        textViewPriceRange.setText(R.string.temp_restaurant_price_range);
-        textViewAverageCost.setText(R.string.temp_restaurant_average_cost);
-        ratingBarAggregateRating.setRating(5);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.google_map);
-        mapFragment.getMapAsync(this);
+        Intent intent = getIntent();
+        if(intent.hasExtra(RESTAURANT_KEY) && intent.hasExtra(CATEGORIES_KEY) && intent.hasExtra(PRICE_RANGE_KEY)) {
+            restaurantObj = (GETRestaurantResponse) intent.getParcelableExtra("Restaurant");
+            String cuisines = (String) intent.getStringExtra(CATEGORIES_KEY);
+            String priceRange = (String) intent.getStringExtra(PRICE_RANGE_KEY);
 
-        /*
-        relativeLayoutWriteReview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            // Begin network call to set statistics
+            setStatistics(restaurantObj.getName(), restaurantObj.getAddress());
 
+            textViewName.setText(restaurantObj.getName());
+            textViewCuisines.setText(cuisines);
+            textViewLocation.setText(restaurantObj.getAddress());
+            textViewPriceRange.setText(priceRange);
+
+            String intPriceRange = restaurantObj.getPriceRange();
+            if(intPriceRange != null) {
+                switch(Integer.parseInt(intPriceRange)){
+                    case 1:
+                        textViewAverageCost.setText(R.string.one_dollar_sign_description);
+                        break;
+                    case 2:
+                        textViewAverageCost.setText(R.string.two_dollar_signs_description);
+                        break;
+                    case 3:
+                        textViewAverageCost.setText(R.string.three_dollar_signs_description);
+                        break;
+                    case 4:
+                        textViewAverageCost.setText(R.string.four_dollar_signs_description);
+                        break;
+                    default:
+                        textViewAverageCost.setText(R.string.one_dollar_sign_description);
+                }
             }
-        });*/
+
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.google_map);
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    private void setStatistics(String name, String address) {
+        Call<GETRestaurantStatisticsResponse> call = RestaurantEndpoints.restaurantEndpoints.getRestaurantStatistics(name, address);
+        call.enqueue(new Callback<GETRestaurantStatisticsResponse>() {
+            @Override
+            public void onResponse(Call<GETRestaurantStatisticsResponse> call, Response<GETRestaurantStatisticsResponse> response) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    textViewNumVotes.setText("(" + String.valueOf(response.body().getReviewCount()) + ")");
+                    ratingBarAggregateRating.setRating(response.body().getReviewAverage()/2);
+                } else {
+                    Toast.makeText(RestaurantDetailActivity.this, "Call failed!", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GETRestaurantStatisticsResponse> call, Throwable t) {
+                Toast.makeText(RestaurantDetailActivity.this, getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
         // Temporary Siebel center coordinate.
-        LatLng restaurantLatLng = new LatLng(40.113819, -88.225036);
+        LatLng restaurantLatLng = new LatLng(restaurantObj.getLatitude(), restaurantObj.getLongitude());
         map.addMarker(new MarkerOptions().position(restaurantLatLng)
-                .title(getString(R.string.temp_restaurant_name)));
+                .title(restaurantObj.getName()));
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(restaurantLatLng, 16);
         //map.moveCamera(CameraUpdateFactory.newLatLng(restaurantLatLng));
         map.animateCamera(cameraUpdate);
@@ -84,7 +136,7 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        final String location = getString(R.string.temp_restaurant_location);
+        final String location = restaurantObj.getAddress();
 
         try {
             final String encodedLocation = URLEncoder.encode(location, "UTF-8");

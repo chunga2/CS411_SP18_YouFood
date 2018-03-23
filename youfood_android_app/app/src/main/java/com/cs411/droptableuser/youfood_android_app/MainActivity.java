@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import butterknife.BindView;
@@ -28,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
         this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
         setActionBar();
 
-        // TODO: After implementing Login option, disabled budget and account tabs if a user is not signed in.
         bottomNavigationView.setOnNavigationItemSelectedListener
                 (new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override

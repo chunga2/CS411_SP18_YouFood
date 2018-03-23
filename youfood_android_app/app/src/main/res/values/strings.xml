@@ -9,7 +9,7 @@
     <string name="temp_restaurant_name">YouFood Restaurant</string>
     <string name="temp_restaurant_cuisines">Italian, Pizza</string>
     <string name="temp_restaurant_location">201 N Goodwin Ave, Urbana, IL 61801</string>
-    <string name="temp_restaurant_average_cost">$30 for two people (approx.)</string>
+    <string name="temp_restaurant_average_cost">$30 per person (approx.)</string>
     <string name="temp_restaurant_price_range">$$$$$</string>
     <string name="temp_restaurant_num_votes">1334 Votes</string>
     <string name="google_maps_key">AIzaSyArjeAfpmmBG9EvwjISIP4J6hF2aKXWFgc</string>
@@ -25,4 +25,10 @@
     <string name="user">User</string>
     <string name="owner">Owner</string>
     <string name="network_failed_message">Network Request Failed. Check Network Connection And Try Again!</string>
+
+    <string name="one_dollar_sign_description">$10 or less per person</string>
+    <string name="two_dollar_signs_description">$11-$30 per person</string>
+    <string name="three_dollar_signs_description">$31-$60 per person</string>
+    <string name="four_dollar_signs_description">$61 or more per person</string>
+
 </resources>
