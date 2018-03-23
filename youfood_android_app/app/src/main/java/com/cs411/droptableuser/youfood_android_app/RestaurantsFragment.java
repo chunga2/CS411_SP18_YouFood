@@ -24,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cs411.droptableuser.youfood_android_app.endpoints.RestaurantCategoriesEndpoints;
 import com.cs411.droptableuser.youfood_android_app.endpoints.RestaurantEndpoints;
 import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
 
@@ -121,6 +122,7 @@ public class RestaurantsFragment extends Fragment {
     public void loadRestaurants() {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
+        resultNumber.setText("");
 
         // Fill with all restaurants in San Francisco Bay Area initially
         String priceEquals = null;
@@ -151,11 +153,17 @@ public class RestaurantsFragment extends Fragment {
             category = categoryEditText.getText().toString();
         }
 
-        Call<ArrayList<GETRestaurantResponse>> call = RestaurantEndpoints.restaurantEndpoints.getRestaurants(priceEquals, priceLte, priceGte, city, name);
+        Call<ArrayList<GETRestaurantResponse>> call;
+        if(category == null) {
+            call = RestaurantEndpoints.restaurantEndpoints.getRestaurants(priceEquals, priceLte, priceGte, city, name);
+        } else {
+            call = RestaurantCategoriesEndpoints.restaurantCategoriesEndpoints.getRestaurantsByCategory(category, priceEquals, priceLte, priceGte, city, name);
+        }
+
         call.enqueue(new Callback<ArrayList<GETRestaurantResponse>>() {
             @Override
             public void onResponse(Call<ArrayList<GETRestaurantResponse>> call, Response<ArrayList<GETRestaurantResponse>> response) {
-                if(response.code() == ResponseCodes.HTTP_OK) {
+                if (response.code() == ResponseCodes.HTTP_OK) {
                     adapter.setData(response.body());
                 } else {
                     Toast.makeText(RestaurantsFragment.this.getContext(), "Failed to load restaurants", Toast.LENGTH_LONG).show();

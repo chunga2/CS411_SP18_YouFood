@@ -75,7 +75,7 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
 
             holder.textViewRestaurantPriceRange.setText(builder.toString());
         } else {
-            holder.textViewRestaurantCuisine.setText("None");
+            holder.textViewRestaurantPriceRange.setText("None");
         }
     }
 

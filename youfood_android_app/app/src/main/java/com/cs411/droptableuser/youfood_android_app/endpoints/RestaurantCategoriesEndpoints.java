@@ -17,7 +17,12 @@ import retrofit2.http.Query;
 public interface RestaurantCategoriesEndpoints {
 
     @GET("/restaurant_categories")
-    Call<ArrayList<GETRestaurantResponse>> getRestaurantsByCategory(@Query("category") String category);
+    Call<ArrayList<GETRestaurantResponse>> getRestaurantsByCategory(@Query("category") String category,
+                                                                    @Query("priceeq") String priceEquals,
+                                                                    @Query("pricelte") String priceLte,
+                                                                    @Query("pricegte") String priceGte,
+                                                                    @Query("city") String city,
+                                                                    @Query("name") String name);
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("http://youfood.ddns.net")
