@@ -188,7 +188,7 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
     @Override
     public void onMapReady(GoogleMap map) {
         // Temporary Siebel center coordinate.
-        LatLng restaurantLatLng = new LatLng(37.79847, -122.4070514);
+        LatLng restaurantLatLng = new LatLng(restaurantObj.getLatitude(), restaurantObj.getLongitude());
         map.addMarker(new MarkerOptions().position(restaurantLatLng)
                 .title(restaurantObj.getName()));
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(restaurantLatLng, 16);

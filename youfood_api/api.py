@@ -73,14 +73,16 @@ def format_restaurants(restaurant_tuples):
     i = 0
     while i < len(restaurant_tuples):
         rest_tuple = restaurant_tuples[i]
-        address, name, pricerange, phone, image_url, category = rest_tuple
+        address, name, pricerange, phone, image_url, category, lat, lon = rest_tuple
         json_obj = {
             "address": address,
             "name": name,
             "pricerange": pricerange,
             "phone": phone,
             "image_url": image_url,
-            "categories": [category]
+            "categories": [category],
+            "latitude": lat,
+            "longitude": lon
         }
 
         while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
@@ -342,14 +344,16 @@ class RestaurantAPI(MethodView):
             with c.cursor() as cur:
                 if len(where_params) > 0:
                     cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category, 
+                        "Restaurant".lat, "Restaurant".lon  
                         FROM "Restaurant", "RestaurantCategories"
                         {where_clause} AND "Restaurant".name = "RestaurantCategories".restaurant_name 
                         AND "Restaurant".address = "RestaurantCategories".restaurant_address 
                         ORDER BY "Restaurant".name ASC, "Restaurant".address ASC""".format(where_clause=where_clause), where_params)
                 else:
                     cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category
+                        "Restaurant".phone, "Restaurant".image_url, "RestaurantCategories".category, 
+                        "Restaurant".lat, "Restaurant".lon  
                         FROM "Restaurant", "RestaurantCategories" 
                         WHERE "Restaurant".name = "RestaurantCategories".restaurant_name 
                         AND "Restaurant".address = "RestaurantCategories".restaurant_address 
@@ -435,7 +439,8 @@ class RestaurantCategoriesAPI(MethodView):
             with c.cursor() as cur:
                 if len(params) == 0:
                     cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category, 
+                        "Restaurant".lat, "Restaurant".lon 
                         FROM "Restaurant",
                             (
                                 (SELECT * FROM "RestaurantCategories")
@@ -456,7 +461,8 @@ class RestaurantCategoriesAPI(MethodView):
                         ORDER BY "Restaurant".name ASC, "Restaurant".address ASC;""", where_params)
                 else:
                     cur.execute("""SELECT "Restaurant".address, "Restaurant".name, "Restaurant".pricerange, 
-                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category
+                        "Restaurant".phone, "Restaurant".image_url, "SpecificRestaurants".category, 
+                        "Restaurant".lat, "Restaurant".lon 
                         FROM "Restaurant",
                             (
                                 (SELECT * FROM "RestaurantCategories")
@@ -785,6 +791,7 @@ class RecommendationAPI(MethodView):
                     SELECT date, useremail, restaurant_name, restaurant_address
                     FROM "Recommendation"
                     WHERE useremail = %s
+                    ORDER BY date desc;
                     """, (useremail,))
                 rv = cur.fetchall()
                 json_objects = self.convert_to_json(rv)
@@ -852,8 +859,9 @@ class ReviewAPI(MethodView):
     def convert_to_json(self, rows):
         json_objects = []
         for row in rows:
-            useremail, restaurant_name, restaurant_address, description, rating, date = row
+            name, useremail, restaurant_name, restaurant_address, description, rating, date = row
             json_obj = {
+                'name': name,
                 'useremail': useremail,
                 'restaurant_name': restaurant_name,
                 'restaurant_address': restaurant_address,
@@ -883,9 +891,10 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
-                        WHERE useremail=%s;""", (useremail,))
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
+                        WHERE useremail=%s
+                        AND "Review".useremail = "User".email;""", (useremail,))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
@@ -898,10 +907,11 @@ class ReviewAPI(MethodView):
             with conn as c:
                 with c.cursor() as cur:
                     cur.execute("""
-                        SELECT useremail, restaurant_name, restaurant_address, description, rating, date
-                        FROM "Review"
+                        SELECT "User".name, useremail, restaurant_name, restaurant_address, description, rating, date
+                        FROM "Review", "User"
                         WHERE restaurant_name=%s
-                        AND restaurant_address=%s;""", (restaurant_name, restaurant_address))
+                        AND restaurant_address=%s
+                        AND "Review".useremail = "User".email;""", (restaurant_name, restaurant_address))
                     rows = cur.fetchall()
                     json_objects = self.convert_to_json(rows)
                     return jsonify(json_objects), 200
