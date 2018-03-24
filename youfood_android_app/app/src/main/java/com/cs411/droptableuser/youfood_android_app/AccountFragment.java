@@ -1,11 +1,13 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +18,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cs411.droptableuser.youfood_android_app.endpoints.RecommendationEndpoints;
 import com.cs411.droptableuser.youfood_android_app.endpoints.UserEndpoints;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRecommendationResponse;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,21 +42,37 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     TextView textViewEmail;
     @BindView(R.id.textview_account_accvalue)
     TextView textViewAccountType;
-    @BindView(R.id.recycler_view_account_myreviews)
-    RecyclerView userReviewsList;
     @BindView(R.id.button_account_edit_account)
-    ImageView editAccount;
+    Button editAccount;
     @BindView(R.id.button_account_delete_account)
     Button deleteAccount;
     @BindView(R.id.button_account_logout)
     Button logout;
     @BindView(R.id.textview_account_password)
     TextView textViewPassword;
+    @BindView(R.id.recycler_view_account_myrecommendations)
+    RecyclerView myRecommendationsRV;
+
+    RecommendationsRecyclerViewAdapter adapter;
+    RestaurantSelectedListener listener;
+
+    public interface RestaurantSelectedListener {
+        public void onRestaurantSelected(String restaurant, String address);
+    }
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
 
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        if(context instanceof  MainActivity) {
+            MainActivity activity = (MainActivity) context;
+            listener = (RestaurantSelectedListener) activity;
+        }
+        super.onAttach(context);
     }
 
     @Nullable
@@ -72,6 +94,26 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         editAccount.setOnClickListener(this);
         deleteAccount.setOnClickListener(this);
         logout.setOnClickListener(this);
+
+        myRecommendationsRV.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
+        Call<ArrayList<GETRecommendationResponse>> call = RecommendationEndpoints.recommendationEndpoints.getRecommendationsForUser(UtilsCache.getEmail());
+        call.enqueue(new Callback<ArrayList<GETRecommendationResponse>>() {
+            @Override
+            public void onResponse(Call<ArrayList<GETRecommendationResponse>> call, Response<ArrayList<GETRecommendationResponse>> response) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    adapter = new RecommendationsRecyclerViewAdapter(response.body(), AccountFragment.this.getContext(), listener);
+                    myRecommendationsRV.setAdapter(adapter);
+                } else {
+                    Log.e("AccountFrag", String.valueOf(response.code()));
+                    Toast.makeText(AccountFragment.this.getContext(), "Failed To Load Recommendations!", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<GETRecommendationResponse>> call, Throwable t) {
+                Toast.makeText(AccountFragment.this.getContext(), R.string.network_failed_message, Toast.LENGTH_LONG).show();
+            }
+        });
 
         return rootView;
     }

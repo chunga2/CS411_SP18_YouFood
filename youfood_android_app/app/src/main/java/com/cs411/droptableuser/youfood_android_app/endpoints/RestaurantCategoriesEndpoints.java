@@ -22,7 +22,8 @@ public interface RestaurantCategoriesEndpoints {
                                                                     @Query("pricelte") String priceLte,
                                                                     @Query("pricegte") String priceGte,
                                                                     @Query("city") String city,
-                                                                    @Query("name") String name);
+                                                                    @Query("name") String name,
+                                                                    @Query("address") String address);
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("http://youfood.ddns.net")

@@ -58,7 +58,6 @@ public class GETReviewResponse implements Parcelable {
     public String getName() {
         return name;
     }
-<<<<<<< HEAD
 
     @Override
     public int describeContents() {
@@ -100,6 +99,4 @@ public class GETReviewResponse implements Parcelable {
             return new GETReviewResponse[size];
         }
     };
-=======
->>>>>>> origin/master
 }

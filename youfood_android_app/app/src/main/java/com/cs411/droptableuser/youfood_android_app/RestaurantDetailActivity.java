@@ -140,7 +140,8 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
                     textViewNumVotes.setText("(" + String.valueOf(response.body().getReviewCount()) + ")");
                     ratingBarAggregateRating.setRating(response.body().getReviewAverage()/2);
                 } else {
-                    Toast.makeText(RestaurantDetailActivity.this, "Call failed!", Toast.LENGTH_LONG).show();
+                    textViewNumVotes.setText("(0)");
+                    ratingBarAggregateRating.setRating(0);
                 }
             }
 
