@@ -35,7 +35,7 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
     public static final String REVIEW_KEY = "Review";
     public static final String TOOLBAR_TITLE = "Edit Review";
 
-    private int numStars;
+    private float numStars;
 
     @BindView(R.id.toolbar_edit_review)
     Toolbar toolbar;
@@ -70,11 +70,11 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        ratingBar.setRating(review.getRating());
+        ratingBar.setRating(review.getRating()/2.0f);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                numStars = (int) v;
+                numStars = v;
             }
         });
 
@@ -130,6 +130,7 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void updateReview() {
+        final int rating = (int) (numStars * 2);
         Call<Void> call
                 = ReviewEndpoints.reviewEndpoints.updateReview(new PUTReviewRequest(
                         review.getDate(),
@@ -137,8 +138,7 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
                         review.getRestaurantName(),
                         review.getRestaurantAddress(),
                         editTextReview.getText().toString(),
-                        numStars
-
+                        rating
         ));
 
         call.enqueue(new Callback<Void>() {
@@ -148,7 +148,7 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
                     Intent intent = new Intent();
                     intent.putExtra(ReviewActivity.DESCRIPTION_KEY,
                             editTextReview.getText().toString());
-                    intent.putExtra(ReviewActivity.RATING_KEY, numStars);
+                    intent.putExtra(ReviewActivity.RATING_KEY, rating);
 
                     setResult(response.code(), intent);
                     finish();

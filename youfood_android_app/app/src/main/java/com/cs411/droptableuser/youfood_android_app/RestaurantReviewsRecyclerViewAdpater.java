@@ -45,7 +45,7 @@ public class RestaurantReviewsRecyclerViewAdpater
         holder.textViewDate.setText(review.getDate());
         holder.textViewUserName.setText(review.getName());
         holder.textViewDescription.setText(review.getDescription());
-        holder.ratingBar.setRating(review.getRating());
+        holder.ratingBar.setRating(review.getRating()/2.0f);
 
         holder.userEmail = review.getEmail();
         holder.restaurantName = review.getRestaurantName();

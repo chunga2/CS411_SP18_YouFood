@@ -61,7 +61,7 @@ public class ReviewActivity extends AppCompatActivity {
         textViewDate.setText(review.getDate());
         textViewUserName.setText(review.getName());
         textViewDescription.setText(review.getDescription());
-        ratingBar.setRating(review.getRating());
+        ratingBar.setRating(review.getRating()/2.0f);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ReviewActivity extends AppCompatActivity {
             int numStars = data.getExtras().getInt(RATING_KEY);
             String description = data.getExtras().getString(DESCRIPTION_KEY);
 
-            ratingBar.setRating(numStars);
+            ratingBar.setRating(numStars/2.0f);
             textViewDescription.setText(description);
         }
     }

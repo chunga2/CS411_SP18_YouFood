@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,7 +37,7 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
     public static final String RESTAURANT_NAME_KEY = "RestaurantName";
     public static final String RESTAURANT_ADDRESS_KEY = "RestaurantAddress";
 
-    private int numStars;
+    private float numStars;
     private String restaurantName;
     private String restaurantAddress;
 
@@ -70,7 +71,7 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                numStars = (int) v;
+                numStars = v;
             }
         });
 
@@ -94,6 +95,7 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
 
     private void postReview() {
         String dateTimeNow = getCurrentDateTime();
+        int rating = (int) (numStars * 2);
 
         Call<Void> call
                 = ReviewEndpoints.reviewEndpoints.createReview(new POSTReviewRequest(
@@ -102,7 +104,7 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
                 restaurantName,
                 restaurantAddress,
                 editTextDescription.getText().toString(),
-                numStars
+                rating
         ));
 
         call.enqueue(new Callback<Void>() {
@@ -133,7 +135,8 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
     }
 
     private String getCurrentDateTime() {
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("PST"));
         Date date = new Date();
 
         return dateFormat.format(date);
