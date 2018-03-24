@@ -4,8 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+
 import android.view.View;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -13,8 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs411.droptableuser.youfood_android_app.endpoints.RestaurantEndpoints;
+import com.cs411.droptableuser.youfood_android_app.endpoints.ReviewEndpoints;
 import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantResponse;
 import com.cs411.droptableuser.youfood_android_app.responses.GETRestaurantStatisticsResponse;
+import com.cs411.droptableuser.youfood_android_app.responses.GETReviewResponse;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,10 +41,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RestaurantDetailActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnMapLongClickListener {
+        GoogleMap.OnMapLongClickListener, View.OnClickListener {
     public static final String RESTAURANT_KEY = "Restaurant";
     public static final String CATEGORIES_KEY = "Categories";
     public static final String PRICE_RANGE_KEY = "PriceRange";
+    public static final int POST_REVIEW_REQUEST = 44;
+
+    public RestaurantReviewsRecyclerViewAdpater adapter;
 
     @BindView(R.id.rating_bar_detail_aggregate_rating)
     RatingBar ratingBarAggregateRating;
@@ -53,6 +65,10 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
     TextView textViewLocation;
     @BindView(R.id.relative_layout_detail_clickable_review)
     RelativeLayout relativeLayoutWriteReview;
+    @BindView(R.id.recycler_view_restaurant_detail_reviews)
+    RecyclerView recyclerView;
+    @BindView(R.id.textview_detail_username)
+    TextView textViewUserName;
 
     GETRestaurantResponse restaurantObj;
 
@@ -75,6 +91,7 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
             textViewCuisines.setText(cuisines);
             textViewLocation.setText(restaurantObj.getAddress());
             textViewPriceRange.setText(priceRange);
+            textViewUserName.setText(UtilsCache.getName());
 
             String intPriceRange = restaurantObj.getPriceRange();
             if(intPriceRange != null) {
@@ -96,9 +113,21 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
                 }
             }
 
+            adapter = new RestaurantReviewsRecyclerViewAdpater(new ArrayList<GETReviewResponse>());
+            getReviews();
+
+            recyclerView.setHasFixedSize(true);
+            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(),
+                    DividerItemDecoration.VERTICAL));
+            recyclerView.setNestedScrollingEnabled(false);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(adapter);
+
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.google_map);
             mapFragment.getMapAsync(this);
+
+            relativeLayoutWriteReview.setOnClickListener(this);
         }
     }
 
@@ -118,6 +147,40 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
             @Override
             public void onFailure(Call<GETRestaurantStatisticsResponse> call, Throwable t) {
                 Toast.makeText(RestaurantDetailActivity.this, getString(R.string.network_failed_message), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void getReviews() {
+        Call<ArrayList<GETReviewResponse>> call
+                = ReviewEndpoints.reviewEndpoints.getReviews(
+                        "False",
+                        restaurantObj.getName(),
+                        restaurantObj.getAddress(),
+                        null);
+
+        call.enqueue(new Callback<ArrayList<GETReviewResponse>>() {
+            @Override
+            public void onResponse(@NonNull Call<ArrayList<GETReviewResponse>> call,
+                                   @NonNull Response<ArrayList<GETReviewResponse>> response) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    Log.d("RestaurantDetailActivity", String.valueOf(response.code()));
+                    adapter.setData(response.body());
+                } else {
+                    Log.d("RestaurantDetailActivity", String.valueOf(response.code()));
+                    Toast.makeText(
+                            RestaurantDetailActivity.this,
+                            "Can't load reviews successfully.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<GETReviewResponse>> call, Throwable t) {
+                Toast.makeText(
+                        RestaurantDetailActivity.this,
+                        getString(R.string.network_failed_message),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -151,6 +214,24 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
         } catch (Exception e) {
             Toast.makeText(this, "Sorry, we can't open the capable map application.",
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.relative_layout_detail_clickable_review) {
+            Intent intent = new Intent(this, PostReviewActivity.class);
+            intent.putExtra(PostReviewActivity.RESTAURANT_NAME_KEY, restaurantObj.getName());
+            intent.putExtra(PostReviewActivity.RESTAURANT_ADDRESS_KEY, restaurantObj.getAddress());
+            startActivityForResult(intent, POST_REVIEW_REQUEST);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == POST_REVIEW_REQUEST && resultCode == ResponseCodes.HTTP_CREATED) {
+            Log.d("RestDetailAct", "called");
+            getReviews();
         }
     }
 }
