@@ -114,7 +114,6 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
             }
 
             adapter = new RestaurantReviewsRecyclerViewAdpater(new ArrayList<GETReviewResponse>());
-            getReviews();
 
             recyclerView.setHasFixedSize(true);
             recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(),
@@ -129,6 +128,12 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
             relativeLayoutWriteReview.setOnClickListener(this);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getReviews();
     }
 
     private void setStatistics(String name, String address) {
