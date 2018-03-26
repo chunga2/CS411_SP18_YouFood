@@ -7,4 +7,10 @@
         android:icon="@drawable/ic_more_vert_white_24px"
         android:title="@string/edit_review"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_delete"
+        android:icon="@drawable/ic_more_vert_white_24px"
+        android:title="@string/delete_review"
+        app:showAsAction="never" />
 </menu>

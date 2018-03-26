@@ -43,8 +43,6 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
     EditText editTextReview;
     @BindView(R.id.ratingbar_edit_review)
     RatingBar ratingBar;
-    @BindView(R.id.button_edit_review_delete)
-    Button buttonDelete;
     @BindView(R.id.button_edit_review_update)
     Button buttonUpdate;
 
@@ -81,52 +79,16 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
         if (review != null) {
             editTextReview.setText(review.getDescription());
         }
-        buttonDelete.setOnClickListener(this);
         buttonUpdate.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button_edit_review_delete:
-                deleteReview();
-                break;
             case R.id.button_edit_review_update:
                 updateReview();
                 break;
         }
-    }
-
-    private void deleteReview() {
-        Call<Void> call
-                = ReviewEndpoints.reviewEndpoints.deleteReview(
-                UtilsCache.getEmail(),
-                review.getRestaurantAddress(),
-                review.getRestaurantName(),
-                review.getDate());
-
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(
-                            EditReviewActivity.this,
-                            "Can't delete the review.",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Toast.makeText(
-                        EditReviewActivity.this,
-                        getString(R.string.network_failed_message),
-                        Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     private void updateReview() {

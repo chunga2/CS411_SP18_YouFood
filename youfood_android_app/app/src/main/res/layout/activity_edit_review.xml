@@ -30,7 +30,7 @@
             android:id="@+id/edittext_edit_review"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/button_edit_review_delete"
+            android:layout_above="@+id/button_edit_review_update"
             android:layout_below="@+id/ratingbar_edit_review"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
@@ -45,23 +45,15 @@
             android:textSize="16sp" />
 
         <Button
-            android:id="@+id/button_edit_review_delete"
-            android:layout_width="180dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignStart="@+id/edittext_edit_review"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="@font/roboto_medium"
-            android:text="@string/delete" />
-
-        <Button
             android:id="@+id/button_edit_review_update"
             style="@style/Widget.AppCompat.Button"
-            android:layout_width="180dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/button_edit_review_delete"
-            android:layout_alignBottom="@+id/button_edit_review_delete"
-            android:layout_alignEnd="@+id/edittext_edit_review"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto_medium"
             android:text="@string/update" />
 

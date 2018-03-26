@@ -71,9 +71,8 @@
                     style="@style/Widget.AppCompat.RatingBar.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_detail_rating_title"
-                    android:layout_marginEnd="73dp"
-                    android:layout_toStartOf="@+id/text_detail_price_range"
+                    android:layout_alignEnd="@+id/text_detail_location"
+                    android:layout_alignTop="@+id/text_detail_cuisines"
                     android:numStars="5"
                     android:rating="0"
                     android:stepSize="0.5" />
@@ -127,8 +126,7 @@
                     android:id="@+id/text_detail_rating_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/text_detail_cuisines_title"
-                    android:layout_alignBottom="@+id/text_detail_cuisines_title"
+                    android:layout_above="@+id/rating_bar_detail_aggregate_rating"
                     android:layout_alignStart="@+id/rating_bar_detail_aggregate_rating"
                     android:fontFamily="@font/roboto"
                     android:text="@string/rating_title"
@@ -140,8 +138,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/rating_bar_detail_aggregate_rating"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toEndOf="@+id/rating_bar_detail_aggregate_rating"
+                    android:layout_marginStart="20dp"
+                    android:layout_toEndOf="@+id/text_detail_rating_title"
                     android:fontFamily="@font/roboto"
                     tools:text="(5)" />
 

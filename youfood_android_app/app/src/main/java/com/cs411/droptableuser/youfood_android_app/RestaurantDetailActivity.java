@@ -230,9 +230,6 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == POST_REVIEW_REQUEST && resultCode == ResponseCodes.HTTP_CREATED) {
-            Log.d("RestDetailAct", "called");
-            getReviews();
-        }
+        getReviews();
     }
 }

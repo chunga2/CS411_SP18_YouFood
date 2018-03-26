@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +23,8 @@ import butterknife.ButterKnife;
 
 public class RestaurantReviewsRecyclerViewAdpater
         extends RecyclerView.Adapter<RestaurantReviewsRecyclerViewAdpater.ViewHolder> {
+    private static final int REVIEW_REQUEST = 4;
+
     private List<GETReviewResponse> reviews;
 
     public RestaurantReviewsRecyclerViewAdpater(List<GETReviewResponse> reviews) {
@@ -90,7 +93,7 @@ public class RestaurantReviewsRecyclerViewAdpater
 
             detailedIntent.putExtra(ReviewActivity.REVIEW_KEY, review);
 
-            context.startActivity(detailedIntent);
+            ((Activity) context).startActivityForResult(detailedIntent, REVIEW_REQUEST);
         }
     }
 }
