@@ -28,8 +28,6 @@ import retrofit2.Response;
 public class SignUpActivity extends AppCompatActivity {
     public static final String TAG = "SignUpActivity";
 
-    private static boolean isOwner;
-
     @BindView(R.id.edittext_signup_username)
     EditText editTextUserName;
     @BindView(R.id.edittext_signup_email)
@@ -55,7 +53,7 @@ public class SignUpActivity extends AppCompatActivity {
                 final String userName = editTextUserName.getText().toString();
                 Call<Void> call
                         = UserEndpoints.userEndpoints.createUser(
-                                new POSTUserRequest(email, userName, password, isOwner));
+                                new POSTUserRequest(email, userName, password, false));
 
                 call.enqueue(new Callback<Void>() {
                     @Override
@@ -63,7 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
                         if(response.code() == ResponseCodes.HTTP_CREATED) {
                             UtilsCache.storeName(userName);
                             UtilsCache.storeEmail(email);
-                            UtilsCache.storeIsOwner(isOwner);
+                            UtilsCache.storeIsOwner(false);
                             UtilsCache.storeHasLoggedIn(true);
                             UtilsCache.storePassword(password);
 
@@ -85,21 +83,5 @@ public class SignUpActivity extends AppCompatActivity {
                 });
             }
         });
-    }
-
-    public void onRadioButtonClicked(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-
-        switch(view.getId()) {
-            case R.id.radio_button_signup_user:
-                if (checked) {
-                    isOwner = false;
-                }
-                break;
-            case R.id.radio_button_signup_owner:
-                if (checked) {
-                    isOwner = true;
-                }
-        }
     }
 }
