@@ -33,15 +33,15 @@
     <TextView
         android:id="@+id/text_restaurant_cuisine"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="42dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:textColor="@color/black"
         android:layout_marginTop="5dp"
-        tools:text="sldfjdfkdsfjsslfjslfdjfsdlkfsdjfslkfjsfksdfjsdflksdfjsdlfsdfjsd"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/image_restaurant"
-        app:layout_constraintTop_toBottomOf="@+id/text_restaurant_name" />
+        app:layout_constraintTop_toBottomOf="@+id/text_restaurant_name"
+        tools:text="sldfjdfkdsfjsslfjslfdjfsdlkfsdjfslkfjsfksdfjsdflksdfjsdlfsdfjsd" />
 
     <TextView
         android:id="@+id/text_restaurant_location"

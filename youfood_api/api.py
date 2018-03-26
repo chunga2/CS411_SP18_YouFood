@@ -363,9 +363,10 @@ class RestaurantAPI(MethodView):
             subqueries = {
                 "name": "name = %s",
                 "city": "address LIKE %s",
+                "address": "address = %s",
                 "pricegte": "pricerange >= %s",
                 "pricelte": "pricerange <= %s",
-                "priceeq": "pricerange = %s",
+                "priceeq": "pricerange = %s"
             }
             selections = []
             params = []
@@ -448,9 +449,10 @@ class RestaurantCategoriesAPI(MethodView):
             subqueries = {
                 "name": "name = %s",
                 "city": "address LIKE %s",
+                "address": "address = %s",
                 "pricegte": "pricerange >= %s",
                 "pricelte": "pricerange <= %s",
-                "priceeq": "pricerange = %s",
+                "priceeq": "pricerange = %s"
             }
             selections = []
             params = []
@@ -1108,11 +1110,45 @@ def get_restaurant_statistics():
 
                 return jsonify(statistics), 200
 
+def get_weekly_transactions_for_user():
+    useremail = request.args.get("useremail")
+    dateSearch = request.args.get("date")
+    if useremail is None or dateSearch is None:
+        return jsonify({"error": "Missing Query Arg"}), 400
+
+    dateObj = datetime.strptime(dateSearch, "%d-%m-%Y %H:%M:%S")
+    with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""
+                SELECT date, useremail, amount, restaurant_name, restaurant_address
+                FROM "Transaction"
+                WHERE useremail=%s AND date < (%s::date - (concat((MOD(extract(isodow FROM %s)::int, 7)),' days'))::interval+'7 days'::interval) AND
+                date > (%s::date - (concat((MOD(extract(isodow FROM %s)::int, 7)),' days'))::interval);
+                """,
+                (useremail, dateObj,dateObj,dateObj,dateObj))
+
+                rows = cur.fetchall()
+                json_objects = []
+                for row in rows:
+                    date, email, amount, name, address = row
+                    jsonObj = {
+                        "date": date.strftime("%d-%m-%Y %H:%M:%S"),
+                        "useremail": email,
+                        "amount": amount,
+                        "restaurant_name": name,
+                        "restaurant_address": address
+                    }
+
+                    json_objects.append(jsonObj)
+                return jsonify(json_objects), 200
+
+
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
 app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST'])
 app.add_url_rule('/restaurant_statistics', 'restaurant_statistics', get_restaurant_statistics, methods=['GET'])
+app.add_url_rule('/transactions_weekly', 'transactions_weekly', get_weekly_transactions_for_user, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])

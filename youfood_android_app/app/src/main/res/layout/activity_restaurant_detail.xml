@@ -8,7 +8,7 @@
     tools:context="com.cs411.droptableuser.youfood_android_app.RestaurantDetailActivity"
     tools:layout_editor_absoluteY="81dp">
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -162,54 +162,50 @@
                 android:id="@+id/relative_layout_detail_clickable_review"
                 android:layout_width="match_parent"
                 android:layout_height="90dp"
+                android:layout_marginBottom="8dp"
                 android:background="@android:color/white"
                 android:clickable="true"
                 android:focusable="true">
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/image_detail_user"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:src="@drawable/usericon" />
 
                 <TextView
                     android:id="@+id/textview_detail_username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/image_detail_user"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_toEndOf="@+id/image_detail_user"
                     android:fontFamily="@font/roboto_medium"
-                    android:text="Drop Table User"
                     android:textColor="@color/black" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_alignParentStart="true"
-                    android:layout_below="@+id/image_detail_user"
-                    android:layout_marginTop="8dp"
-                    android:background="@color/black" />
+                    android:layout_below="@+id/textview_detail_username"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/black"
+                    android:id="@+id/view2" />
 
                 <TextView
                     android:id="@+id/text_detail_review_subheader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignStart="@+id/image_detail_user"
-                    android:layout_marginBottom="8dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/view2"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="@font/roboto"
                     android:text="@string/restaurant_detail_write_your_review" />
             </RelativeLayout>
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/restaurant_detail_reviews_list"
+                android:id="@+id/recycler_view_restaurant_detail_reviews"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp">
 
             </android.support.v7.widget.RecyclerView>
         </LinearLayout>
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 </RelativeLayout>

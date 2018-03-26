@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -53,11 +54,25 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     RecyclerView myRecommendationsRV;
 
     RecommendationsRecyclerViewAdapter adapter;
+    RestaurantSelectedListener listener;
+
+    public interface RestaurantSelectedListener {
+        public void onRestaurantSelected(String restaurant, String address);
+    }
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
 
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        if(context instanceof  MainActivity) {
+            MainActivity activity = (MainActivity) context;
+            listener = (RestaurantSelectedListener) activity;
+        }
+        super.onAttach(context);
     }
 
     @Nullable
@@ -86,7 +101,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onResponse(Call<ArrayList<GETRecommendationResponse>> call, Response<ArrayList<GETRecommendationResponse>> response) {
                 if(response.code() == ResponseCodes.HTTP_OK) {
-                    adapter = new RecommendationsRecyclerViewAdapter(response.body(), AccountFragment.this.getContext());
+                    adapter = new RecommendationsRecyclerViewAdapter(response.body(), AccountFragment.this.getContext(), listener);
                     myRecommendationsRV.setAdapter(adapter);
                 } else {
                     Log.e("AccountFrag", String.valueOf(response.code()));

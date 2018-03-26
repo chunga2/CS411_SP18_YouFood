@@ -27,6 +27,9 @@ public interface TransactionEndpoints {
                                                             @Query("user") String user,
                                                             @Query("amount") String amount);
 
+    @GET("/transactions_weekly")
+    Call<ArrayList<GETTransactionResponse>> getWeeklyTransactions(@Query("useremail") String email, @Query("date") String date);
+
     @POST("/transactions")
     Call<Void> createTransaction(@Body POSTTransactionRequest postTransactionRequest);
 

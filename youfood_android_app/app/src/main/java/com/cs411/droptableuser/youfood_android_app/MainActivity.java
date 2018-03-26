@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AccountFragment.RestaurantSelectedListener {
     @BindView(R.id.bottom_naviagation)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.toolbar_main)
@@ -66,5 +66,15 @@ public class MainActivity extends AppCompatActivity {
     private void setActionBar() {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
+    }
+
+    @Override
+    public void onRestaurantSelected(String restaurant, String address) {
+        MenuItem item = bottomNavigationView.getMenu().findItem(R.id.menu_restaurants);
+        item.setChecked(true);
+        getSupportActionBar().setTitle("Restaurants");
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance(restaurant, address));
+        transaction.commit();
     }
 }
