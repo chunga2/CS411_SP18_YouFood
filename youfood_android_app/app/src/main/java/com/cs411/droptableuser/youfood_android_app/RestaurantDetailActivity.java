@@ -84,9 +84,6 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
             String cuisines = (String) intent.getStringExtra(CATEGORIES_KEY);
             String priceRange = (String) intent.getStringExtra(PRICE_RANGE_KEY);
 
-            // Begin network call to set statistics
-            setStatistics(restaurantObj.getName(), restaurantObj.getAddress());
-
             textViewName.setText(restaurantObj.getName());
             textViewCuisines.setText(cuisines);
             textViewLocation.setText(restaurantObj.getAddress());
@@ -114,7 +111,6 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
             }
 
             adapter = new RestaurantReviewsRecyclerViewAdpater(new ArrayList<GETReviewResponse>());
-            getReviews();
 
             recyclerView.setHasFixedSize(true);
             recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(),
@@ -129,6 +125,13 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
             relativeLayoutWriteReview.setOnClickListener(this);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getReviews();
+        setStatistics(restaurantObj.getName(), restaurantObj.getAddress());
     }
 
     private void setStatistics(String name, String address) {

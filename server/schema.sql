@@ -2,8 +2,7 @@ CREATE TABLE "User"(
     email citext
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
-    hashedpass char(20) NOT NULL,
-    is_owner boolean NOT NULL DEFAULT FALSE
+    hashedpass char(20) NOT NULL
 );
 CREATE TABLE "Restaurant"(
     address text NOT NULL,
@@ -51,15 +50,6 @@ CREATE TABLE "Review"(
         CONSTRAINT onetoten CHECK (rating <= 10 AND rating >= 0) NOT NULL,
     date timestamp NOT NULL,
     PRIMARY KEY(useremail, restaurant_name, restaurant_address, date)
-);
-
-CREATE TABLE "Promotion"(
-    restaurant_name text,
-    restaurant_address text,
-    FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
-    date timestamp NOT NULL,
-    description text NOT NULL,
-    PRIMARY KEY (date, description, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "RestaurantCategories" (
