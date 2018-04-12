@@ -14,7 +14,7 @@ CREATE TABLE "Restaurant"(
     lat float,
     lon float,
     owner_email citext REFERENCES "User"(email) ON DELETE SET NULL, 
-    id SERIAL UNIQUE,
+    rID SERIAL UNIQUE,
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Budget"(
@@ -60,4 +60,13 @@ CREATE TABLE "RestaurantCategories" (
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     category text NOT NULL,
     PRIMARY KEY (category, restaurant_name, restaurant_address)
+);
+
+CREATE TABLE "RestaurantEmbeddings"(
+  rId INTEGER REFERENCES "Restaurant"(rID) PRIMARY KEY,
+  c1 REAL,
+  c2 REAL,
+  c3 REAL,
+  c4 REAL,
+  c5 REAL
 );

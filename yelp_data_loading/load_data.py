@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 
 #Choose the file (Must be in same file)
-FILENAME = 'data.json'
+FILENAME = 'Urbana.json'
 
 #Load the json
 data = json.load(open(FILENAME))

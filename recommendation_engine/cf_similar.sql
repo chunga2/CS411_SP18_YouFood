@@ -16,4 +16,4 @@ FROM (
 WHERE useremail <> 'test0@illinois.net'
 GROUP BY restaurant_name, restaurant_address
 ORDER BY amt DESC
-LIMIT 10;
+LIMIT 10;ccccccicjifgeivkjbnvhijlutirkddunrrijvljiuhv
