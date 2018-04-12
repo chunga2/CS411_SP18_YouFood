@@ -3,19 +3,29 @@ package com.cs411.droptableuser.youfood_android_app;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.cs411.droptableuser.youfood_android_app.endpoints.ReviewEndpoints;
 import com.cs411.droptableuser.youfood_android_app.responses.GETReviewResponse;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by JunYoung on 2018. 3. 23..
@@ -57,8 +67,33 @@ public class ReviewActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setTitle(review.getRestaurantName());
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         textViewDate.setText(review.getDate());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        try {
+            Date date = simpleDateFormat.parse(review.getDate());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            String firstHalfDate = String.format("%d/%d/%d", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR));
+
+            String timeofDay;
+            int hourOfDay;
+            if(calendar.get(Calendar.HOUR_OF_DAY) > 12) {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY) - 12;
+                timeofDay = "PM";
+            } else {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+                timeofDay = "AM";
+            }
+
+            String secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
+            textViewDate.setText(firstHalfDate + " " + secondHalfDate);
+
+        } catch (ParseException e) {}
+
+
         textViewUserName.setText(review.getName());
         textViewDescription.setText(review.getDescription());
         ratingBar.setRating(review.getRating()/2.0f);
@@ -79,6 +114,8 @@ public class ReviewActivity extends AppCompatActivity {
             Intent intent = new Intent(this, EditReviewActivity.class);
             intent.putExtra(EditReviewActivity.REVIEW_KEY, review);
             startActivityForResult(intent, EDIT_REVIEW_REQUEST);
+        } else if (item.getItemId() == R.id.menu_item_delete) {
+            deleteReview();
         }
 
         return super.onOptionsItemSelected(item);
@@ -93,5 +130,43 @@ public class ReviewActivity extends AppCompatActivity {
             ratingBar.setRating(numStars/2.0f);
             textViewDescription.setText(description);
         }
+    }
+
+    private void deleteReview() {
+        Call<Void> call
+                = ReviewEndpoints.reviewEndpoints.deleteReview(
+                UtilsCache.getEmail(),
+                review.getRestaurantAddress(),
+                review.getRestaurantName(),
+                review.getDate());
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
+                    finish();
+                } else {
+                    Toast.makeText(
+                            ReviewActivity.this,
+                            "Can't delete the review.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                Toast.makeText(
+                        ReviewActivity.this,
+                        getString(R.string.network_failed_message),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+
+        return true;
     }
 }

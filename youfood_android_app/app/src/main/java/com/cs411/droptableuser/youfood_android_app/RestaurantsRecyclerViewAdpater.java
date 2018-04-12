@@ -46,12 +46,11 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        // TODO: Resize the image with caching.
         GETRestaurantResponse restaurantObj = this.restaurants.get(position);
         holder.restaurantObj = restaurantObj;
         Glide.with(holder.itemView.getContext())
                 .load(restaurantObj.getImageUrl())
-                .apply(new RequestOptions().override(110, 110).fitCenter())
+                .apply(new RequestOptions().override(110, 110).centerCrop())
                 .into(holder.imageViewRestaurant);
         holder.textViewRestaurantName.setText(restaurantObj.getName());
 

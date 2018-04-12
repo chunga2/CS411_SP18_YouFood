@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.cs411.droptableuser.youfood_android_app.endpoints.ReviewEndpoints;
 import com.cs411.droptableuser.youfood_android_app.requests.POSTReviewRequest;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;

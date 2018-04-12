@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +12,10 @@ import android.widget.TextView;
 
 import com.cs411.droptableuser.youfood_android_app.responses.GETReviewResponse;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -22,6 +27,8 @@ import butterknife.ButterKnife;
 
 public class RestaurantReviewsRecyclerViewAdpater
         extends RecyclerView.Adapter<RestaurantReviewsRecyclerViewAdpater.ViewHolder> {
+    private static final int REVIEW_REQUEST = 4;
+
     private List<GETReviewResponse> reviews;
 
     public RestaurantReviewsRecyclerViewAdpater(List<GETReviewResponse> reviews) {
@@ -42,10 +49,33 @@ public class RestaurantReviewsRecyclerViewAdpater
 
         holder.review = review;
 
-        holder.textViewDate.setText(review.getDate());
         holder.textViewUserName.setText(review.getName());
         holder.textViewDescription.setText(review.getDescription());
         holder.ratingBar.setRating(review.getRating()/2.0f);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        try {
+            Date date = simpleDateFormat.parse(review.getDate());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            String firstHalfDate = String.format("%d/%d/%d", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR));
+
+            String timeofDay;
+            int hourOfDay;
+            if(calendar.get(Calendar.HOUR_OF_DAY) > 12) {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY) - 12;
+                timeofDay = "PM";
+            } else {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+                timeofDay = "AM";
+            }
+
+            String secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
+            holder.textViewDate.setText(firstHalfDate + " " + secondHalfDate);
+
+        } catch (ParseException e) {}
+
 
         holder.userEmail = review.getEmail();
         holder.restaurantName = review.getRestaurantName();
@@ -90,7 +120,7 @@ public class RestaurantReviewsRecyclerViewAdpater
 
             detailedIntent.putExtra(ReviewActivity.REVIEW_KEY, review);
 
-            context.startActivity(detailedIntent);
+            ((Activity) context).startActivityForResult(detailedIntent, REVIEW_REQUEST);
         }
     }
 }

@@ -31,6 +31,7 @@
     <string name="three_dollar_signs_description">$31-$60 per person</string>
     <string name="four_dollar_signs_description">$61 or more per person</string>
     <string name="edit_review">Edit Review</string>
+    <string name="delete_review">Delete Review</string>
     <string name="close">close</string>
     <string name="delete">Delete</string>
     <string name="update">Update</string>
