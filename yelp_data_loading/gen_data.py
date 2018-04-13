@@ -124,7 +124,7 @@ def query_api(term, location):
 
     ret = {}
     ret['businesses'] = begin
-    with open('berkeley.json', 'w') as fp:
+    with open(f'{location}.json', 'w') as fp:
         json.dump(ret, fp)
         
     return begin
