@@ -3,7 +3,7 @@ CREATE TABLE "User"(
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
     hashedpass char(20) NOT NULL,
-    id SERIAL UNIQUE,
+    uID SERIAL UNIQUE
 );
 CREATE TABLE "Restaurant"(
     address text NOT NULL,
@@ -13,7 +13,6 @@ CREATE TABLE "Restaurant"(
     image_url text NOT NULL,
     lat float,
     lon float,
-    owner_email citext REFERENCES "User"(email) ON DELETE SET NULL, 
     rID SERIAL UNIQUE,
     PRIMARY KEY (address, name)
 );
@@ -63,7 +62,7 @@ CREATE TABLE "RestaurantCategories" (
 );
 
 CREATE TABLE "RestaurantEmbeddings"(
-  rId INTEGER REFERENCES "Restaurant"(rID) PRIMARY KEY,
+  rID INTEGER REFERENCES "Restaurant"(rID) PRIMARY KEY,
   c1 REAL,
   c2 REAL,
   c3 REAL,
