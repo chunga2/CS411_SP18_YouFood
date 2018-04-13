@@ -361,7 +361,7 @@ class RestaurantAPI(MethodView):
         """
         def build_where(query_params):
             subqueries = {
-                "name": "name ILIKE %%%s%%",
+                "name": "name ILIKE %s%",
                 "city": "address LIKE %s",
                 "address": "address = %s",
                 "pricegte": "pricerange >= %s",
@@ -376,11 +376,15 @@ class RestaurantAPI(MethodView):
                         value = "%%%s,%%" % str(v)
                         selections += [subqueries[k]]
                         params += [value]
+                    elif k == 'name':
+                        value = f'%{v}%'
+                        selections += [subqueries[k]]
+                        params += [value]
                     else:
                         selections += [subqueries[k]]
                         params += [v]
             if selections:
-                where_clause = "WHERE " + " AND ".join(selections) + " AND"
+                where_clause = "WHERE " + " AND ".join(selections)
                 return where_clause, params
             return "", []
 
