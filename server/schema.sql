@@ -2,7 +2,8 @@ CREATE TABLE "User"(
     email citext
         CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$') PRIMARY KEY,
     name text NOT NULL,
-    hashedpass char(20) NOT NULL
+    hashedpass char(20) NOT NULL,
+    uID SERIAL UNIQUE
 );
 CREATE TABLE "Restaurant"(
     address text NOT NULL,
@@ -12,7 +13,7 @@ CREATE TABLE "Restaurant"(
     image_url text NOT NULL,
     lat float,
     lon float,
-    owner_email citext REFERENCES "User"(email) ON DELETE SET NULL, 
+    rID SERIAL UNIQUE,
     PRIMARY KEY (address, name)
 );
 CREATE TABLE "Budget"(
@@ -58,4 +59,13 @@ CREATE TABLE "RestaurantCategories" (
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
     category text NOT NULL,
     PRIMARY KEY (category, restaurant_name, restaurant_address)
+);
+
+CREATE TABLE "RestaurantEmbeddings"(
+  rID INTEGER REFERENCES "Restaurant"(rID) PRIMARY KEY,
+  c1 REAL,
+  c2 REAL,
+  c3 REAL,
+  c4 REAL,
+  c5 REAL
 );

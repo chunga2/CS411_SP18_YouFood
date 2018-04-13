@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union, List
 
 import psycopg2
 from flask import Flask, jsonify, request, Response
@@ -13,8 +13,59 @@ app = Flask(__name__)
 conn = psycopg2.connect(dbname="youfood", user="youfood", password="wizard11", host="localhost")
 
 
+@app.route("/")
 def home():
     return "<h1 style='color:blue'>Hello There!</h1>"
+
+
+class InvalidUsageException(Exception):
+    def __init__(self, error_message, status_code=None):
+        """
+        Create an InvalidUsageException.
+        If this is raised within an app context, Flask will return an error dict to the user with code 400.
+        :param error_message:
+        :param status_code:
+        """
+        Exception.__init__(self)
+        self.status_code = 400
+        self.message = error_message
+        if status_code is not None:
+            self.status_code = status_code
+
+    def to_dict(self):
+        return {
+            'error': self.message
+        }
+
+
+@app.errorhandler(InvalidUsageException)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+
+# TODO: Migrate all functions to use this to validate their arguments, because this will ensure consistency
+def make_arg_list(args: List[str], data: Dict[str, str]) -> Union[List[str], Tuple[str, int]]:
+    """
+    Accept a list of arguments to match, as well as a dictionary to unpack into them.
+    :param args: The arguments to match.
+    :return: A list of parameters matching the arguments (in order) or a string holding the first missing argument.
+    """
+    vals = []
+    for k in args:
+        if k in data:
+            vals += autocast(data[k])
+        else:
+            raise InvalidUsageException(f"Missing argument {k}")
+    return vals
+
+
+def autocast(string: str) -> Union[str, datetime]:
+    try:
+        return datetime.strptime(string, "%d-%m-%Y %H:%M:%S")
+    except:
+        return string
 
 
 def flatten(iterable):
@@ -85,14 +136,16 @@ def format_restaurants(restaurant_tuples):
             "longitude": lon
         }
 
-        while (i+1) < len(restaurant_tuples) and address == restaurant_tuples[i+1][0] and name == restaurant_tuples[i+1][1]:
-            json_obj["categories"].append(restaurant_tuples[i+1][5])
+        while (i + 1) < len(restaurant_tuples) and address == restaurant_tuples[i + 1][0] and name == \
+                restaurant_tuples[i + 1][1]:
+            json_obj["categories"].append(restaurant_tuples[i + 1][5])
             i = i + 1
 
         json_objects.append(json_obj)
         i = i + 1
 
     return json_objects
+
 
 class UserAPI(MethodView):
 
@@ -102,22 +155,19 @@ class UserAPI(MethodView):
         Gets user info for a given specified email address that is a URL query parameter
         """
 
-        email = request.args.get("email")
-        if email == None:
-            return jsonify({'error': 'No email address specified'}), 400
-
-        cur = conn.cursor()
+        args = ['email']
+        params = make_arg_list(args, request.args)
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("SELECT email, name, is_owner FROM \"User\" WHERE email=%s;", (email,))
+                cur.execute("SELECT email, name, is_owner FROM \"User\" WHERE email=%s;", params)
                 row = cur.fetchone()
                 # Executes if no user with that email address was found
                 if row == None:
                     return jsonify({'error': 'No user with that email exists'}), 400
 
                 data = {
-                    'email' : row[0],
-                    'name' : row[1],
+                    'email': row[0],
+                    'name': row[1],
                     'is_owner': row[2]
                 }
 
@@ -135,21 +185,15 @@ class UserAPI(MethodView):
             "is_owner": <is_owner>
         }
         """
-        json_data = request.get_json()
-        email = json_data.get("email")
-        name = json_data.get("name")
-        password = json_data.get("password")
-        is_owner = json_data.get("is_owner")
-
-        if email == None or name == None or password == None or is_owner == None:
-            return Response(status=400)
+        args = ['email', 'name', 'password', 'is_owner']
+        params = make_arg_list(args, request.get_json())
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", (email, name, password, is_owner))
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", params)
                 return Response(status=201)
 
-    def put(self):
+    def put(self): #TODO: Rewrite so that this can use make_arg_list
         """
         PUT: /users
 
@@ -170,12 +214,12 @@ class UserAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                if(name != None):
+                if (name != None):
                     cur.execute("UPDATE \"User\" SET name = %s WHERE email = %s;", (name, email))
                     if cur.rowcount == 0:
                         return jsonify({'error': 'No user with that email exists'}), 400
 
-                if(password != None):
+                if (password != None):
                     cur.execute("UPDATE \"User\" SET hashedpass = %s WHERE email = %s;", (password, email))
                     if cur.rowcount == 0:
                         return jsonify({'error': 'No user with that email exists'}), 400
@@ -189,17 +233,17 @@ class UserAPI(MethodView):
         entered can correspond to at most 1 user
         """
 
-        email = request.args.get("email")
-        if email == None:
-            return jsonify({'error': 'No email address specified'}), 400
+        args = ['email']
+        params = make_arg_list(args, request.args)
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("DELETE FROM \"User\" WHERE email=%s;", (email,))
+                cur.execute("DELETE FROM \"User\" WHERE email=%s;", params)
                 if cur.rowcount == 0:
                     return jsonify({'error': 'No user with that email exists'}), 400
 
                 return Response(status=204)
+
 
 class PromotionAPI(MethodView):
 
@@ -235,7 +279,7 @@ class PromotionAPI(MethodView):
                         'restaurant_address': address,
                         'date': date.strftime("%d-%m-%Y %H:%M:%S"),
                         'description': description
-                    } 
+                    }
                     json_objects.append(json_obj)
 
                 return jsonify(json_objects), 200
@@ -262,7 +306,7 @@ class PromotionAPI(MethodView):
             return Response(status=400)
 
         with conn as c:
-            with c.cursor() as cur: 
+            with c.cursor() as cur:
                 cur.execute("INSERT INTO \"Promotion\" "
                             "(restaurant_name, restaurant_address, date, description) "
                             "VALUES (%s, %s, %s, %s);",
@@ -317,7 +361,7 @@ class RestaurantAPI(MethodView):
         """
         def build_where(query_params):
             subqueries = {
-                "name": "name = %s",
+                "name": "name ILIKE %s",
                 "city": "address LIKE %s",
                 "address": "address = %s",
                 "pricegte": "pricerange >= %s",
@@ -330,6 +374,10 @@ class RestaurantAPI(MethodView):
                 if k in subqueries:
                     if k == "city":
                         value = "%%%s,%%" % str(v)
+                        selections += [subqueries[k]]
+                        params += [value]
+                    elif k == 'name':
+                        value = f'%{v}%'
                         selections += [subqueries[k]]
                         params += [value]
                     else:
@@ -373,17 +421,15 @@ class RestaurantAPI(MethodView):
             'owner_email': <email>
         }
         """
-        json_data = request.get_json()
-        restaurant_name = json_data.get("restaurant_name")
-        restaurant_address = json_data.get("restaurant_address")
-        owner_email = json_data.get("owner_email")
+        args = ['owner_email', 'restaurant_name', 'restaurant_address']
+        params = make_arg_list(args, request.get_json())
 
         with conn as c:
             with c.cursor() as cur:
                 cur.execute("""
                     SELECT is_owner
                     FROM "User"
-                    WHERE email=%s;""", (owner_email,))
+                    WHERE email=%s;""", (params[0],))
 
                 row = cur.fetchone()
                 if row is None or row[0] == False:
@@ -392,9 +438,9 @@ class RestaurantAPI(MethodView):
                 cur.execute("""
                     UPDATE "Restaurant"
                     SET owner_email = %s
-                    WHERE name = %s AND address = %s;""", (owner_email, restaurant_name, restaurant_address))
+                    WHERE name = %s 
+                    AND address = %s;""", params)
                 return Response(status=204)
-
 
 
 class RestaurantCategoriesAPI(MethodView):
@@ -605,8 +651,8 @@ class TransactionAPI(MethodView):
                     UPDATE "Transaction"
                     SET amount=%s
                     WHERE useremail=%s
-                    AND date = %s""", 
-                    (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                    AND date = %s""",
+                            (amount, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
 
     def delete(self):
@@ -625,7 +671,6 @@ class TransactionAPI(MethodView):
                     WHERE useremail=%s 
                     AND date=%s""", (useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
-
 
 
 def format_budget(transaction_tuple: Tuple) -> Dict[str, str]:
@@ -740,8 +785,8 @@ class BudgetAPI(MethodView):
                     UPDATE "Budget"
                     SET total=%s
                     WHERE useremail=%s 
-                    AND date = %s""", 
-                    (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
+                    AND date = %s""",
+                            (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
 
     def delete(self):
@@ -762,14 +807,13 @@ class BudgetAPI(MethodView):
                 return Response(status=204)
 
 
-
 class RecommendationAPI(MethodView):
     def convert_to_json(self, rows):
         json_objects = []
         for row in rows:
             date, useremail, restaurant_name, restaurant_address = row
             json_obj = {
-                'date': date.strftime("%d-%m-%Y %H:%M:%S"), 
+                'date': date.strftime("%d-%m-%Y %H:%M:%S"),
                 'useremail': useremail,
                 'restaurant_name': restaurant_name,
                 'restaurant_address': restaurant_address
@@ -827,7 +871,6 @@ class RecommendationAPI(MethodView):
                     "Recommendation" (date, useremail, restaurant_name, restaurant_address)
                     VALUES (%s, %s, %s, %s);""", (formatted_date_obj, useremail, restaurant_name, restaurant_address))
                 return Response(status=201)
-
 
     def delete(self):
         """
@@ -948,7 +991,8 @@ class ReviewAPI(MethodView):
                 cur.execute("""
                     INSERT INTO
                     "Review" (date, useremail, restaurant_name, restaurant_address, description, rating)
-                    VALUES (%s, %s, %s, %s, %s, %s);""", (formatted_date_obj, useremail, restaurant_name, restaurant_address, description, rating))
+                    VALUES (%s, %s, %s, %s, %s, %s);""",
+                            (formatted_date_obj, useremail, restaurant_name, restaurant_address, description, rating))
                 return Response(status=201)
 
     def put(self):
@@ -972,19 +1016,21 @@ class ReviewAPI(MethodView):
         description = json_data.get("description")
         rating = json_data.get("rating")
 
-        if date == None or useremail == None or restaurant_name == None or restaurant_address == None or (description == None and rating == None):
+        if date == None or useremail == None or restaurant_name == None or restaurant_address == None or (
+                description == None and rating == None):
             return "Missing request arg", 400
 
         with conn as c:
             with c.cursor() as cur:
                 formatted_date_obj = datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
-                
+
                 if description != None:
                     cur.execute("""
                         UPDATE "Review"
                         SET description = %s
                         WHERE date = %s AND useremail = %s AND restaurant_name = %s
-                        AND restaurant_address = %s;""", (description, formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                        AND restaurant_address = %s;""",
+                                (description, formatted_date_obj, useremail, restaurant_name, restaurant_address))
                     if cur.rowcount == 0:
                         return "Record Not Found", 400
 
@@ -993,7 +1039,8 @@ class ReviewAPI(MethodView):
                         UPDATE "Review"
                         SET rating = %s
                         WHERE date = %s AND useremail = %s AND restaurant_name = %s
-                        AND restaurant_address = %s;""", (rating, formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                        AND restaurant_address = %s;""",
+                                (rating, formatted_date_obj, useremail, restaurant_name, restaurant_address))
                     if cur.rowcount == 0:
                         return "Record Not Found", 400
 
