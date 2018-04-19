@@ -50,7 +50,7 @@ def make_recommendations(useremail):
         WHERE name NOT IN 
             (SELECT restaurant_name AS name FROM "Transaction" WHERE useremail = %s)
         ORDER BY distance ASC 
-        LIMIT 30 
+        LIMIT 10 
         ON CONFLICT DO NOTHING;
     DELETE FROM "Recommendation" AS r WHERE EXISTS
         (SELECT 1 FROM "Recommendation" AS r2 WHERE r.restaurant_name = r2.restaurant_name AND r.useremail = r2.useremail AND r.ctid < r2.ctid);
