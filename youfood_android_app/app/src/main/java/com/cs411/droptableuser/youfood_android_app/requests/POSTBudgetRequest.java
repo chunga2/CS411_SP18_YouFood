@@ -13,12 +13,12 @@ public class POSTBudgetRequest {
     @SerializedName("useremail")
     private String userEmail;
 
-    @SerializedName("amount")
-    private double amount;
+    @SerializedName("total")
+    private double total;
 
-    public POSTBudgetRequest(String date, String userEmail, double amount) {
+    public POSTBudgetRequest(String date, String userEmail, double total) {
         this.date = date;
         this.userEmail = userEmail;
-        this.amount = amount;
+        this.total = total;
     }
 }

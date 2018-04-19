@@ -33,7 +33,20 @@
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/roboto"
                 android:text="@string/balance"
+                android:textSize="24sp"
                 android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/text_balance_date_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_balance_header"
+                android:layout_marginTop="10dp"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/roboto"
+                tools:text="03/19/2018 - 03/25/2018"
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
 
             <TextView
                 android:id="@+id/textview_balance"
@@ -41,21 +54,19 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="false"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="32dp"
+                android:layout_below="@+id/text_balance_date_range"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/roboto"
                 android:maxLength="17"
-                android:text="$1000.00"
+                tools:text="$1000.00"
                 android:textColor="@color/green_A700"
-                android:textSize="30sp"
-                tools:text="$10000000.00" />
+                android:textSize="26sp" />
 
             <ImageView
                 android:id="@+id/imageview_edit_balance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_alignBottom="@+id/textview_balance"
-                android:layout_marginBottom="7dp"
                 android:layout_marginStart="8dp"
                 android:layout_toEndOf="@+id/textview_balance"
                 app:srcCompat="@drawable/ic_edit_black_24dp" />

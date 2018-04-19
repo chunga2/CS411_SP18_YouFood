@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by JunYoung on 2018. 4. 13..
@@ -35,6 +36,7 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
 
     public ExpensesPieChartViewHolder(View itemView) {
         super(itemView);
+        ButterKnife.bind(this, itemView);
     }
 
     public void bind(ArrayList<GETTransactionResponse> weeklyTransactions) {

@@ -59,6 +59,10 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
             case R.layout.card_expenses_chart:
                 ExpensesPieChartViewHolder expensesHolder = (ExpensesPieChartViewHolder)holder;
                 expensesHolder.bind(weeklyTransactions);
+                break;
+            case R.layout.card_balance:
+                BalanceViewHolder balanceHolder = (BalanceViewHolder) holder;
+                balanceHolder.bind();
         }
     }
 
