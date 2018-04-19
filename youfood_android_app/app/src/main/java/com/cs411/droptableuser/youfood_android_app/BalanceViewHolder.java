@@ -93,7 +93,8 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         }
 
                         textViewTotalSpent.setText(String.format("$%.2f", totalSpent));
-                        if((budget != null) && (totalSpent > Double.parseDouble(budget.getTotal().substring(1))))  {
+                        if((budget != null) && (totalSpent > Double.parseDouble(budget.getTotal()
+                                .substring(1).replace(",", ""))))  {
                             textViewTotalSpent.setTextColor(Color.parseColor("#E1374F"));
                         } else {
                             textViewTotalSpent.setTextColor(Color.parseColor("#00C853"));
