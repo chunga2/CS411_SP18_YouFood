@@ -881,7 +881,7 @@ class RecommendationAPI(MethodView):
         restaurant_name = request.args.get("restaurant_name")
         restaurant_address = request.args.get("restaurant_address")
 
-        if useremail == None or restaurant_name == None or restaurant_address == None or date == None:
+        if useremail == None or restaurant_name == None or restaurant_address == None:
             return "Missing request arg", 400
 
         with conn as c:
