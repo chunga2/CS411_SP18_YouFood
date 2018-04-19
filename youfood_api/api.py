@@ -785,7 +785,7 @@ class BudgetAPI(MethodView):
                     UPDATE "Budget"
                     SET total=%s
                     WHERE useremail=%s 
-                    AND date = %s""",
+                    AND date = %s;""",
                             (total, useremail, datetime.strptime(date, "%d-%m-%Y %H:%M:%S")))
                 return Response(status=204)
 
