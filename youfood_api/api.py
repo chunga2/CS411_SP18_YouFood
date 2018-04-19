@@ -234,8 +234,6 @@ class UserAPI(MethodView):
         Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
         entered can correspond to at most 1 user
         """
-
-        json_data = request.get_json()
         email = request.args.get("email")
         if not email:
             raise InvalidUsageException("Missing email!")
