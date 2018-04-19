@@ -11,7 +11,10 @@ def sql(query, opt=[]):
     with connection as conn:
         with conn.cursor() as cur:
             cur.execute(query, opt)
-            return pd.DataFrame(cur.fetchall())
+            try:
+                return pd.DataFrame(cur.fetchall())
+            except:
+                pass
 def get_mean_vector(email):
     rids = sql(f"""
                 SELECT "RelevantRID".rID, power, c1, c2 ,c3, c4, c5
@@ -37,7 +40,7 @@ def get_mean_vector(email):
 def make_recommendations(useremail):
     mean_vec = get_mean_vector(useremail).tolist()
     return sql("""
-    DELETE FROM "Recommendation" WHERE useremail=%s;
+    DELETE FROM "Recommendation" WHERE useremail = %s;
     INSERT INTO "Recommendation"(restaurant_name, restaurant_address, date, useremail)
         SELECT name AS restaurant_name, address AS restaurant_address, current_timestamp AS date, %s AS useremail FROM
           ((SELECT 
@@ -50,9 +53,8 @@ def make_recommendations(useremail):
         LIMIT 30 
         ON CONFLICT DO NOTHING;
     DELETE FROM "Recommendation" AS r WHERE EXISTS
-        (SELECT 1 FROM "Recommendation" AS r2 WHERE r.restaurant_name = r2.restaurant_name AND r.ctid < r2.ctid);
-    SELECT * FROM "Recommendation";
+        (SELECT 1 FROM "Recommendation" AS r2 WHERE r.restaurant_name = r2.restaurant_name AND r.useremail = r2.useremail AND r.ctid < r2.ctid);
     """, [useremail]*2 + mean_vec + [useremail])
 users = sql("SELECT email FROM \"User\";")
 for _, user in tqdm(users.itertuples(), total=len(users)):
-    make_recommendations(user)[:10]
+    make_recommendations(user)
