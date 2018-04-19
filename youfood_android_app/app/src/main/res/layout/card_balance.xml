@@ -45,7 +45,7 @@
                 android:layout_centerHorizontal="true"
                 android:fontFamily="@font/roboto"
                 tools:text="03/19/2018 - 03/25/2018"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textColor="@color/black"/>
 
             <TextView
