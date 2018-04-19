@@ -184,12 +184,17 @@ class UserAPI(MethodView):
             "password" : <password>,
         }
         """
-        args = ['email', 'name', 'password']
-        params = make_arg_list(args, request.get_json())
+        json_data = request.get_json()
+        email = json_data.get("email")
+        name = json_data.get("name")
+        password = json_data.get("password")
+
+        if email == None or (name == None and password == None):
+            return jsonify({'error': 'Missing email or both name and password'}), 400
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", params)
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", [email, name, password])
                 return Response(status=201)
 
     def put(self): #TODO: Rewrite so that this can use make_arg_list
