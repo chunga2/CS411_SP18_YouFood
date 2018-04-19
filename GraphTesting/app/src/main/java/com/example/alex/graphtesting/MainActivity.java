@@ -3,15 +3,21 @@ package com.example.alex.graphtesting;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,15 +43,28 @@ public class MainActivity extends AppCompatActivity {
         list_res[6] =
                 new GETTransactionResponse("1.00", "17-3-2018 12:12:12", "address", "name", "useremail");
 
-        // What if the format changes, like 03 vs 3 for march?
+        //Converters and Array to load total per day
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Calendar c = Calendar.getInstance();
         Double monies[] = new Double[7];
         for (int i =0; i < monies.length; i++) {
             monies[i] = 0.0;
         }
-        //loop thorough and update all datapoints
 
+        //gets the first sunday in the week
+        Calendar sunday=Calendar.getInstance();
+        try {
+            sunday.setTime(sdf.parse(list_res[0].getDate()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        sunday.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
+        sunday.set(Calendar.HOUR_OF_DAY,0);
+        sunday.set(Calendar.MINUTE,0);
+        sunday.set(Calendar.SECOND,0);
+        Date sunday_date = sunday.getTime();
+
+        //loop thorough and update all datapoints
         for(int i =0; i < list_res.length; i++) {
             String date_string = list_res[i].getDate();
             try {
@@ -58,78 +77,49 @@ public class MainActivity extends AppCompatActivity {
             Double amo = Double.parseDouble(amount);
             monies[dayOfWeek - 1] += amo;
         }
+        //monies = array of amount of cash per day with sunday as 0 and satruday as 6
+        //sunday is a calendar object of the first sunday of this week
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
-        BarGraphSeries<DataPoint> sunday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(1,monies[0])
+        LineGraphSeries<DataPoint> sim_series = new LineGraphSeries<>(new DataPoint[] {
+                new DataPoint(sunday.getTime().getTime() + 0*24*60*60*1000 + -6*60*60*1000, monies[0]),
+                new DataPoint(sunday.getTime().getTime() + 1*24*60*60*1000 + -6*60*60*1000, monies[1]),
+                new DataPoint(sunday.getTime().getTime() + 2*24*60*60*1000 + -6*60*60*1000, monies[2]),
+                new DataPoint(sunday.getTime().getTime() + 3*24*60*60*1000 + -6*60*60*1000, monies[3]),
+                new DataPoint(sunday.getTime().getTime() + 4*24*60*60*1000 + -6*60*60*1000, monies[4]),
+                new DataPoint(sunday.getTime().getTime() + 5*24*60*60*1000 + -6*60*60*1000, monies[5]),
+                new DataPoint(sunday.getTime().getTime() + 6*24*60*60*1000 + -6*60*60*1000, monies[6]),
         });
-        sunday.setColor(Color.RED);
-        sunday.setTitle("Sunday");
-        sunday.setSpacing(0);
-        sunday.setDrawValuesOnTop(true);
-        graph.addSeries(sunday);
 
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScrollable(true);
+        graph.getViewport().setScalableY(true);
+        graph.getViewport().setScrollableY(true);
 
-        BarGraphSeries<DataPoint> monday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(2,monies[1])
-        });
-        monday.setColor(Color.YELLOW);
-        monday.setTitle("Monday");
-        monday.setSpacing(0);
-        monday.setDrawValuesOnTop(true);
-        graph.addSeries(monday);
-
-        BarGraphSeries<DataPoint> tuesday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(3,monies[2])
-        });
-        tuesday.setColor(Color.GREEN);
-        tuesday.setTitle("Tuesday");
-        tuesday.setSpacing(0);
-        tuesday.setDrawValuesOnTop(true);
-        graph.addSeries(tuesday);
-
-        BarGraphSeries<DataPoint> wednesday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(4,monies[3])
-        });
-        wednesday.setColor(Color.BLUE);
-        wednesday.setTitle("Wednesday");
-        wednesday.setSpacing(0);
-        wednesday.setDrawValuesOnTop(true);
-        graph.addSeries(wednesday);
-
-        BarGraphSeries<DataPoint> thursday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(5,monies[4])
-        });
-        thursday.setColor(Color.CYAN);
-        thursday.setTitle("Thursday");
-        thursday.setSpacing(0);
-        thursday.setDrawValuesOnTop(true);
-        graph.addSeries(thursday);
-
-        BarGraphSeries<DataPoint> friday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(6,monies[5])
-        });
-        friday.setColor(Color.BLACK);
-        friday.setTitle("Friday");
-        friday.setSpacing(0);
-        friday.setDrawValuesOnTop(true);
-        graph.addSeries(friday);
-
-        BarGraphSeries<DataPoint> saturday = new BarGraphSeries<>(new DataPoint[] {
-                new DataPoint(7,monies[6])
-        });
-        saturday.setColor(Color.GRAY);
-        saturday.setTitle("Saturday");
-        saturday.setSpacing(0);
-        saturday.setDrawValuesOnTop(true);
-        graph.addSeries(saturday);
+        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
+        graph.getGridLabelRenderer().setNumHorizontalLabels(7);
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Date");
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Dollars");
 
         graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(8);
+        graph.getViewport().setMinX(sunday.getTime().getTime());
+        graph.getViewport().setMaxX(sunday.getTime().getTime() + 6*24*60*60*1000);
 
-        graph.getLegendRenderer().setVisible(true);
-        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+        Double monies_max = monies[0];
+        for (int i = 1; i < monies.length; i++) {
+            if (monies[i] > monies_max) {
+                monies_max = monies[i];
+            }
+        }
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(monies_max * 1.2);
+
+
+//        graph.getLegendRenderer().setVisible(true);
+//        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+
+        graph.addSeries(sim_series);
     }
 
 }

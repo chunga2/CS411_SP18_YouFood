@@ -16,6 +16,11 @@ import android.widget.Toast;
 import com.cs411.droptableuser.youfood_android_app.endpoints.ReviewEndpoints;
 import com.cs411.droptableuser.youfood_android_app.responses.GETReviewResponse;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
@@ -65,6 +70,30 @@ public class ReviewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         textViewDate.setText(review.getDate());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        try {
+            Date date = simpleDateFormat.parse(review.getDate());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            String firstHalfDate = String.format("%d/%d/%d", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR));
+
+            String timeofDay;
+            int hourOfDay;
+            if(calendar.get(Calendar.HOUR_OF_DAY) > 12) {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY) - 12;
+                timeofDay = "PM";
+            } else {
+                hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+                timeofDay = "AM";
+            }
+
+            String secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
+            textViewDate.setText(firstHalfDate + " " + secondHalfDate);
+
+        } catch (ParseException e) {}
+
+
         textViewUserName.setText(review.getName());
         textViewDescription.setText(review.getDescription());
         ratingBar.setRating(review.getRating()/2.0f);
