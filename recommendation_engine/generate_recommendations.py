@@ -3,7 +3,7 @@ import numpy as np
 la = np.linalg
 
 import psycopg2
-
+from tqdm import tqdm
 
 
 connection = psycopg2.connect(dbname="youfood", user="youfood", password="wizard11", host="localhost")
@@ -36,13 +36,23 @@ def get_mean_vector(email):
     return mean_vec
 def make_recommendations(useremail):
     mean_vec = get_mean_vector(useremail).tolist()
-    return sql("""INSERT INTO "Recommendation"(restaurant_name, restaurant_address, date, useremail)
-    SELECT name AS restaurant_name, address AS restaurant_address, current_timestamp AS date, %s AS useremail FROM
-      ((SELECT rID,
-              ((%s-c1)^2 + (%s-c2)^2 + (%s-c3)^2 + (%s-c4)^2 + (%s-c5)^2) AS distance
-        FROM "RestaurantEmbeddings") AS "EngagedRID" JOIN "Restaurant" ON "Restaurant".rID = "EngagedRID".rID)
-      WHERE name NOT IN (SELECT restaurant_name AS name FROM "Transaction" WHERE useremail = %s)
-    ORDER BY distance ASC;  SELECT * FROM "Recommendation";
-    """, [useremail] + mean_vec + [useremail])
-for _, user in sql("SELECT email FROM \"User\";").itertuples():
+    return sql("""
+    DELETE FROM "Recommendation" WHERE useremail=%s;
+    INSERT INTO "Recommendation"(restaurant_name, restaurant_address, date, useremail)
+        SELECT name AS restaurant_name, address AS restaurant_address, current_timestamp AS date, %s AS useremail FROM
+          ((SELECT 
+                rID,
+                ((%s-c1)^2 + (%s-c2)^2 + (%s-c3)^2 + (%s-c4)^2 + (%s-c5)^2) AS distance
+            FROM "RestaurantEmbeddings") AS "EngagedRID" JOIN "Restaurant" ON "Restaurant".rID = "EngagedRID".rID)
+        WHERE name NOT IN 
+            (SELECT restaurant_name AS name FROM "Transaction" WHERE useremail = %s)
+        ORDER BY distance ASC 
+        LIMIT 30 
+        ON CONFLICT DO NOTHING;
+    DELETE FROM "Recommendation" AS r WHERE EXISTS
+        (SELECT 1 FROM "Recommendation" AS r2 WHERE r.restaurant_name = r2.restaurant_name AND r.ctid < r2.ctid);
+    SELECT * FROM "Recommendation";
+    """, [useremail]*2 + mean_vec + [useremail])
+users = sql("SELECT email FROM \"User\";")
+for _, user in tqdm(users.itertuples(), total=len(users)):
     make_recommendations(user)[:10]
