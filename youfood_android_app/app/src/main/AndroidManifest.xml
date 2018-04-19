@@ -39,6 +39,7 @@
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".PostReviewActivity"
             android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".AddTransactionActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

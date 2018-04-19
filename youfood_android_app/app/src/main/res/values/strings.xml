@@ -35,5 +35,12 @@
     <string name="close">close</string>
     <string name="delete">Delete</string>
     <string name="update">Update</string>
+    <string name="balance">Balance</string>
+
+    <string name="division_sign">\u00F7</string>
+    <string name="multiplication_sign">*</string>
+    <string name="subtraction_sign">-</string>
+    <string name="addition_sign">+</string>
+    <string name="equal_sign">=</string>
 
 </resources>

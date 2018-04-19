@@ -33,6 +33,7 @@ import retrofit2.Response;
  */
 
 public class PostReviewActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG = "PostReviewActivity";
     public static final String RESTAURANT_NAME_KEY = "RestaurantName";
     public static final String RESTAURANT_ADDRESS_KEY = "RestaurantAddress";
 
@@ -94,6 +95,7 @@ public class PostReviewActivity extends AppCompatActivity implements View.OnClic
 
     private void postReview() {
         String dateTimeNow = getCurrentDateTime();
+        Log.d(TAG, dateTimeNow + " " + UtilsCache.getEmail() + " " + restaurantName + " " + restaurantAddress + " ");
         int rating = (int) (numStars * 2);
 
         Call<Void> call
