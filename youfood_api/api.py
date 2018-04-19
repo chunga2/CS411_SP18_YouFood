@@ -691,8 +691,8 @@ class BudgetAPI(MethodView):
 
         def build_where(query_params):
             subqueries = {
-                "start": "date > %s",
-                "end": "date < %s",
+                "start": "date >= %s",
+                "end": "date <= %s",
                 "user": "useremail = %s",
                 "total": "total = %s",
             }
