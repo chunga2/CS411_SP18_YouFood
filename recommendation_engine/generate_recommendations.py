@@ -41,8 +41,8 @@ def make_recommendations(useremail):
     mean_vec = get_mean_vector(useremail).tolist()
     return sql("""
     DELETE FROM "Recommendation" WHERE useremail = %s;
-    INSERT INTO "Recommendation"(restaurant_name, restaurant_address, date, useremail)
-        SELECT name AS restaurant_name, address AS restaurant_address, current_timestamp AS date, %s AS useremail FROM
+    INSERT INTO "Recommendation"(restaurant_name, restaurant_address, date, useremail, distance)
+        SELECT name AS restaurant_name, address AS restaurant_address, current_timestamp AS date, %s AS useremail, distance FROM
           ((SELECT 
                 rID,
                 ((%s-c1)^2 + (%s-c2)^2 + (%s-c3)^2 + (%s-c4)^2 + (%s-c5)^2) AS distance
