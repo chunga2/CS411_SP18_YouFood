@@ -184,12 +184,15 @@ class UserAPI(MethodView):
             "password" : <password>,
         }
         """
-        args = ['email', 'name', 'password']
-        params = make_arg_list(args, request.get_json())
+        json_data = request.get_json()
+        email = json_data.get("email")
+        name = json_data.get("name")
+        password = json_data.get("password")
+        is_owner = json_data.get("is_owner")
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("INSERT INTO \"User\" (email, name, hashedpass) VALUES (%s, %s, %s);", params)
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", (email, name, password, is_owner))
                 return Response(status=201)
 
     def put(self): #TODO: Rewrite so that this can use make_arg_list
