@@ -46,7 +46,6 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWeeklyTransactions();
     }
 
     @Nullable
@@ -59,8 +58,14 @@ public class BudgetFragment extends Fragment {
         adapter = new BudgetCardViewAdapter(weeklyTransactions);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
+        getWeeklyTransactions();
 
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     /*

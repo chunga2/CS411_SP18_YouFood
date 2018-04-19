@@ -89,6 +89,12 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        MenuItem item = bottomNavigationView.getMenu().findItem(R.id.menu_budget_temp);
+        item.setChecked(true);
+        getSupportActionBar().setTitle("Budget");
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, BudgetFragment.newInstance());
+        transaction.commit();
     }
 
     @Override
