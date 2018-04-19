@@ -235,12 +235,14 @@ class UserAPI(MethodView):
         entered can correspond to at most 1 user
         """
 
-        args = ['email']
-        params = make_arg_list(args, request.args)
+        json_data = request.get_json()
+        email = json_data.get("email")
+        if not email:
+            raise InvalidUsageException("Missing email!")
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("DELETE FROM \"User\" WHERE email=%s;", params)
+                cur.execute("DELETE FROM \"User\" WHERE email=%s;", [email])
                 if cur.rowcount == 0:
                     return jsonify({'error': 'No user with that email exists'}), 400
 
