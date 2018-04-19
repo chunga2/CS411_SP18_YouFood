@@ -236,7 +236,7 @@ class UserAPI(MethodView):
         """
 
         json_data = request.get_json()
-        email = json_data.get("email")
+        email = request.args.get("email")
         if not email:
             raise InvalidUsageException("Missing email!")
 
