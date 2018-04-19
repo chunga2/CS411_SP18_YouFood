@@ -62,7 +62,7 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
                 break;
             case R.layout.card_balance:
                 BalanceViewHolder balanceHolder = (BalanceViewHolder) holder;
-                balanceHolder.bind();
+                balanceHolder.bind(weeklyTransactions);
         }
     }
 

@@ -3,6 +3,7 @@ package com.cs411.droptableuser.youfood_android_app;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,9 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
     @BindView(R.id.textview_balance)
     TextView textViewBalance;
 
+    @BindView(R.id.text_total_spent)
+    TextView textViewTotalSpent;
+
     @BindView(R.id.text_balance_date_range)
     TextView textViewDateRange;
 
@@ -43,6 +47,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
     ImageView imageViewEditBalance;
 
     private GETBudgetResponse budget;
+    private ArrayList<GETTransactionResponse> transactionsList;
 
     public BalanceViewHolder(View itemView) {
         super(itemView);
@@ -51,7 +56,8 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
         budget = null;
     }
 
-    void bind() {
+    void bind(ArrayList<GETTransactionResponse> transactions) {
+        transactionsList = transactions;
         String currentDate = DateTime.getCurrentDateTime();
         String firstDayMonth = DateTime.getFirstDayMonthOfWeek(currentDate);
         String lastDayMonth = DateTime.getLastDayMonthOfWeek(currentDate);
@@ -76,8 +82,22 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                     } else {
                         ArrayList<GETBudgetResponse> body = response.body();
                         budget = body.get(0);
-                        String total = String.valueOf(budget.getTotal());
+                        String total = budget.getTotal();
                         textViewBalance.setText(total);
+                    }
+
+                    if(transactionsList.size() > 0) {
+                        double totalSpent = 0.0;
+                        for(GETTransactionResponse transaction : transactionsList) {
+                            totalSpent += Double.parseDouble(transaction.getAmount().substring(1));
+                        }
+
+                        textViewTotalSpent.setText(String.format("$%.2f", totalSpent));
+                        if((budget != null) && (totalSpent > Double.parseDouble(budget.getTotal().substring(1))))  {
+                            textViewTotalSpent.setTextColor(Color.parseColor("#E1374F"));
+                        } else {
+                            textViewTotalSpent.setTextColor(Color.parseColor("#00C853"));
+                        }
                     }
                 }
             }
@@ -121,7 +141,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if(response.code() == ResponseCodes.HTTP_CREATED) {
                                 // Bind will allow us to HTTP GET request for the budgets again and set the budget variable to the newly created one
-                                bind();
+                                bind(transactionsList);
                                 Toast.makeText(itemView.getContext(), "Budget Created!", Toast.LENGTH_LONG).show();
                             } else {
                                 Log.e("CreateBudget", String.valueOf(response.code()));
@@ -151,7 +171,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                                bind();
+                                bind(transactionsList);
                                 Toast.makeText(itemView.getContext(), "Budget Updated!", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(itemView.getContext(), "Budget Failed To Be Updated", Toast.LENGTH_LONG).show();
