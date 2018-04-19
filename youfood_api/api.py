@@ -877,7 +877,6 @@ class RecommendationAPI(MethodView):
         DELETE /recommendations?usermail=<usermail>&restaurant_name=<name>&restaurant_address=Maddress>&date=<date>
         Response is 400 if missing arg, 500 if error, 204 NO CONTENT
         """
-        date = request.args.get("date")
         useremail = request.args.get("useremail")
         restaurant_name = request.args.get("restaurant_name")
         restaurant_address = request.args.get("restaurant_address")
@@ -887,14 +886,12 @@ class RecommendationAPI(MethodView):
 
         with conn as c:
             with c.cursor() as cur:
-                formatted_date_obj = datetime.strptime(date, "%d-%m-%Y %H:%M:%S")
                 cur.execute("""
                     DELETE FROM "Recommendation"
-                    WHERE date = %s
-                    AND useremail=%s
-                    AND restaurant_name=%s
-                    AND restaurant_address=%s
-                    """, (formatted_date_obj, useremail, restaurant_name, restaurant_address))
+                    WHERE useremail=%s 
+                    AND restaurant_name=%s 
+                    AND restaurant_address=%s;
+                    """, (useremail, restaurant_name, restaurant_address))
                 if cur.rowcount == 0:
                     return jsonify({'error': 'No record to delete'}), 400
                 return Response(status=204)
