@@ -140,13 +140,14 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Call<Void> call = RecommendationEndpoints.recommendationEndpoints.deleteRecommendation(UtilsCache.getEmail(),
-                                recommendationObj.getRestaurantAddress(), recommendationObj.getRestaurantName(), recommendationObj.getDate());
+                                recommendationObj.getRestaurantAddress(), recommendationObj.getRestaurantName());
                         call.enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
                                 if (response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
                                     recommendations.remove(index);
                                     RecommendationsRecyclerViewAdapter.this.notifyItemRemoved(index);
+                                    RecommendationsRecyclerViewAdapter.this.notifyItemRangeChanged(index, recommendations.size());
                                     Toast.makeText(context, "Succesfully deleted", Toast.LENGTH_LONG).show();
                                 } else {
                                     Toast.makeText(context, "Could not delete", Toast.LENGTH_LONG).show();

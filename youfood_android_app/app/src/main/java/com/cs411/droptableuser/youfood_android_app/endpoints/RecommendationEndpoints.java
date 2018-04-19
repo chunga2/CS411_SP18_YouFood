@@ -28,8 +28,7 @@ public interface RecommendationEndpoints {
     @DELETE("/recommendations")
     Call<Void> deleteRecommendation(@Query("useremail") String email,
                                     @Query("restaurant_address") String address,
-                                    @Query("restaurant_name") String name,
-                                    @Query("date") String date);
+                                    @Query("restaurant_name") String name);
 
 
     Retrofit retrofit = new Retrofit.Builder()
