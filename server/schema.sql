@@ -37,8 +37,9 @@ CREATE TABLE "Recommendation"(
     useremail citext REFERENCES "User"(email) ON DELETE CASCADE,
     restaurant_name text,
     restaurant_address text,
+    distance real,
     FOREIGN KEY (restaurant_name, restaurant_address) REFERENCES "Restaurant"(name, address),
-    PRIMARY KEY (useremail, restaurant_name, restaurant_address, date)
+    PRIMARY KEY (useremail, restaurant_name, restaurant_address)
 );
 
 CREATE TABLE "Review"(

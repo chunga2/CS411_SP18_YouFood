@@ -182,15 +182,17 @@ class UserAPI(MethodView):
             "email" : <email>
             "name" : <name>
             "password" : <password>,
-            "is_owner": <is_owner>
         }
         """
-        args = ['email', 'name', 'password', 'is_owner']
-        params = make_arg_list(args, request.get_json())
+        json_data = request.get_json()
+        email = json_data.get("email")
+        name = json_data.get("name")
+        password = json_data.get("password")
+        is_owner = json_data.get("is_owner")
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", params)
+                cur.execute("INSERT INTO \"User\" (email, name, hashedpass, is_owner) VALUES (%s, %s, %s, %s);", (email, name, password, is_owner))
                 return Response(status=201)
 
     def put(self): #TODO: Rewrite so that this can use make_arg_list
@@ -232,13 +234,13 @@ class UserAPI(MethodView):
         Deletes a user with a given email address. It is only 1 user because email is a primary key, so the email
         entered can correspond to at most 1 user
         """
-
-        args = ['email']
-        params = make_arg_list(args, request.args)
+        email = request.args.get("email")
+        if not email:
+            raise InvalidUsageException("Missing email!")
 
         with conn as c:
             with c.cursor() as cur:
-                cur.execute("DELETE FROM \"User\" WHERE email=%s;", params)
+                cur.execute("DELETE FROM \"User\" WHERE email=%s;", [email])
                 if cur.rowcount == 0:
                     return jsonify({'error': 'No user with that email exists'}), 400
 
