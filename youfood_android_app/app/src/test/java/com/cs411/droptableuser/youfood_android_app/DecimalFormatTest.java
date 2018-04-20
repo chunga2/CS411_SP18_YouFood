@@ -63,4 +63,10 @@ public class DecimalFormatTest {
 
         assertEquals(withDecimalPlaces, withoutDecimalPlaces, 0.001);
     }
+
+    @Test
+    public void conversion_another_case_isCorrect() throws Exception {
+        double totalSpent = 3455;
+        System.out.println(String.format("$%.2f", totalSpent));
+    }
 }

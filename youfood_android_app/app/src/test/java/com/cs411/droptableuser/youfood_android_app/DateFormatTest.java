@@ -16,22 +16,10 @@ import java.util.Date;
 public class DateFormatTest {
     @Test
     public void get_first_date_of_week_isCorrect() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        Calendar c = Calendar.getInstance();
-        Calendar sunday = Calendar.getInstance();
-        try {
-            sunday.setTime(dateFormat.parse("15-3-2018 12:12:12"));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        String firstDateOfWeek = DateTime.getFirstDateOfWeek("20-04-2018 17:28:38");
 
-        sunday.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-        sunday.set(Calendar.HOUR_OF_DAY,0);
-        sunday.set(Calendar.MINUTE,0);
-        sunday.set(Calendar.SECOND,0);
-        Date sunday_date = sunday.getTime();
-
-        System.out.println(dateFormat.format(sunday_date));
+        System.out.println(firstDateOfWeek);
+        assertEquals("15-04-2018 00:00:00", firstDateOfWeek);
     }
 
     @Test
@@ -39,5 +27,26 @@ public class DateFormatTest {
         String date = "15-3-2018 12:12:12";
 
         assertEquals("15", date.substring(0,2));
+    }
+
+    @Test
+    public void get_first_day_month_of_week_isCoreect() {
+        String firstDayMonthOfWeek = DateTime.getFirstDayMonthOfWeek("20-04-2018 17:28:38");
+
+        assertEquals("04/15/2018", firstDayMonthOfWeek);
+    }
+
+    @Test
+    public void get_last_day_month_of_week_isCoreect() {
+        String lastDayMonthOfWeek = DateTime.getLastDayMonthOfWeek("20-04-2018 17:28:38");
+
+        assertEquals("04/21/2018", lastDayMonthOfWeek);
+    }
+
+    @Test
+    public void get_last_date_of_week_isCoreect() {
+        String lastDatefWeek = DateTime.getLastDateOfWeek("20-04-2018 17:28:38");
+
+        assertEquals("21-04-2018 23:59:59", lastDatefWeek);
     }
 }
