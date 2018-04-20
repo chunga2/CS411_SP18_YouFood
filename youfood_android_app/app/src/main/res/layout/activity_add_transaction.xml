@@ -91,11 +91,18 @@
         android:layout_below="@id/relative_layout_display"
         android:text="Calendar" />
 
+    <View
+        android:id="@+id/divider_add_transaction"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/black"
+        android:layout_below="@+id/button_add_transaction_date_picker"/>
+
     <TableLayout
         android:id="@+id/tableLayout"
         android:layout_width="330dp"
         android:layout_height="match_parent"
-        android:layout_below="@+id/button_add_transaction_date_picker"
+        android:layout_below="@+id/divider_add_transaction"
         android:orientation="vertical"
         android:shrinkColumns="*"
         android:stretchColumns="*">

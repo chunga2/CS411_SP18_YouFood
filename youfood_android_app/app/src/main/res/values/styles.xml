@@ -24,4 +24,9 @@
         <item name="android:colorControlActivated">@color/black</item>
     </style>
 
+    <style name="DatePickerDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/colorPrimary</item>
+
+    </style>
+
 </resources>
