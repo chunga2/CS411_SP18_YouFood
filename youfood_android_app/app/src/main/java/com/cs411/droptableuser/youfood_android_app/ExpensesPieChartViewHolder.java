@@ -5,6 +5,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.cs411.droptableuser.youfood_android_app.responses.GETTransactionResponse;
 import com.github.mikephil.charting.charts.PieChart;
@@ -24,6 +25,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 /**
  * Created by JunYoung on 2018. 4. 13..
  */
@@ -33,6 +37,10 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
 
     @BindView(R.id.piechart_expenses)
     PieChart pieChartExpenses;
+    @BindView(R.id.textview_expenses_header)
+    TextView textViewExpensesHeader;
+    @BindView(R.id.textview_expenses_no_data)
+    TextView textViewExpensesNoData;
 
     public ExpensesPieChartViewHolder(View itemView) {
         super(itemView);
@@ -43,34 +51,27 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
         List<PieEntry> entries = new ArrayList<>();
 
         pieChartExpenses.getDescription().setEnabled(false);
-        pieChartExpenses.setExtraOffsets(0f, -30f, 0f, -60f);
+        pieChartExpenses.setExtraOffsets(0f, -130f, 0f, -180f);
 
         if (weeklyTransactions.size() != 0) {
             HashMap<String, Float> transactions = categorizeAmountByDate(weeklyTransactions);
             int firstDayOfWeek = Integer.valueOf(DateTime.getFirstDateOfWeek(
                     weeklyTransactions.get(0).getDate()).substring(0, 2));
             addEntryForPieData(transactions, firstDayOfWeek, entries);
+
+            pieChartExpenses.setVisibility(VISIBLE);
+            textViewExpensesHeader.setVisibility(GONE);
+            textViewExpensesNoData.setVisibility(GONE);
+
+            customizeLegend();
+            setPieChartAttributes(entries);
+        } else {
+            pieChartExpenses.setVisibility(GONE);
+            textViewExpensesHeader.setVisibility(VISIBLE);
+            textViewExpensesNoData.setVisibility(VISIBLE);
         }
 
-        PieDataSet set = new PieDataSet(entries, "");
-        set.setValueTextSize(23f);
-        List<Integer> pieColors = setPieChartColor();
-        set.setColors(pieColors);
-        List<Integer> valueTestColors = setValueTextColors();
-        set.setValueTextColors(valueTestColors);
-        set.setValueFormatter(new DollarSignFormatter());
 
-        PieData data = new PieData(set);
-
-        customizeLegend();
-        pieChartExpenses.setCenterText("Expenses Chart");
-        pieChartExpenses.setDrawEntryLabels(true);
-        pieChartExpenses.setDrawCenterText(true);
-        pieChartExpenses.setEntryLabelTextSize(12f);
-        pieChartExpenses.setEntryLabelColor(ContextCompat.getColor(itemView.getContext(), R.color.black));
-        pieChartExpenses.animateX(1500);
-        pieChartExpenses.setData(data);
-        pieChartExpenses.invalidate();
     }
 
     private void customizeLegend() {
@@ -85,6 +86,27 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         legend.setTypeface(ResourcesCompat.getFont(itemView.getContext(), R.font.roboto));
+    }
+
+    private void setPieChartAttributes(List<PieEntry> entries) {
+        PieDataSet set = new PieDataSet(entries, "");
+        set.setValueTextSize(23f);
+        List<Integer> pieColors = setPieChartColor();
+        set.setColors(pieColors);
+        List<Integer> valueTestColors = setValueTextColors();
+        set.setValueTextColors(valueTestColors);
+        set.setValueFormatter(new DollarSignFormatter());
+
+        PieData data = new PieData(set);
+
+        pieChartExpenses.setCenterText("Expenses Chart");
+        pieChartExpenses.setDrawEntryLabels(true);
+        pieChartExpenses.setDrawCenterText(true);
+        pieChartExpenses.setEntryLabelTextSize(12f);
+        pieChartExpenses.setEntryLabelColor(ContextCompat.getColor(itemView.getContext(), R.color.black));
+        pieChartExpenses.animateX(1500);
+        pieChartExpenses.setData(data);
+        pieChartExpenses.invalidate();
     }
 
     private List<Integer> setPieChartColor() {

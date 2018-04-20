@@ -28,9 +28,11 @@ import butterknife.ButterKnife;
 public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public static final String TAG = "BudgetCardViewAdapter";
 
+    private ArrayList<String> date;
     private ArrayList<GETTransactionResponse> weeklyTransactions;
 
-    public BudgetCardViewAdapter(ArrayList<GETTransactionResponse> weeklyTransactions) {
+    public BudgetCardViewAdapter(ArrayList<GETTransactionResponse> weeklyTransactions, ArrayList<String> date) {
+        this.date = date;
         this.weeklyTransactions = weeklyTransactions;
     }
 
@@ -62,7 +64,7 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
                 break;
             case R.layout.card_balance:
                 BalanceViewHolder balanceHolder = (BalanceViewHolder) holder;
-                balanceHolder.bind(weeklyTransactions);
+                balanceHolder.bind(weeklyTransactions, date.get(0));
         }
     }
 

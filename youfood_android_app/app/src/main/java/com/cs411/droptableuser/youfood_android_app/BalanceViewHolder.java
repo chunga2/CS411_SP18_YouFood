@@ -47,6 +47,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
     ImageView imageViewEditBalance;
 
     private GETBudgetResponse budget;
+    private String date;
     private ArrayList<GETTransactionResponse> transactionsList;
 
     public BalanceViewHolder(View itemView) {
@@ -56,22 +57,22 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
         budget = null;
     }
 
-    void bind(ArrayList<GETTransactionResponse> transactions) {
+    void bind(ArrayList<GETTransactionResponse> transactions, String date) {
+        this.date = date;
         transactionsList = transactions;
-        String currentDate = DateTime.getCurrentDateTime();
-        String firstDayMonth = DateTime.getFirstDayMonthOfWeek(currentDate);
-        String lastDayMonth = DateTime.getLastDayMonthOfWeek(currentDate);
+        String firstDayMonth = DateTime.getFirstDayMonthOfWeek(date);
+        String lastDayMonth = DateTime.getLastDayMonthOfWeek(date);
 
         StringBuilder builder = new StringBuilder(firstDayMonth);
         builder.append(" - ");
         builder.append(lastDayMonth);
         textViewDateRange.setText(builder.toString());
 
-        String firstDayFormatted = DateTime.getFirstDateOfWeek(currentDate);
-        String lastDayFormatted = DateTime.getLastDateOfWeek(currentDate);
+        String firstDayFormatted = DateTime.getFirstDateOfWeek(date);
+        String lastDayFormatted = DateTime.getLastDateOfWeek(date);
 
-        Call<ArrayList<GETBudgetResponse>> call = BudgetEndpoints.budgetEndpoints.getBudgets(firstDayFormatted,
-                lastDayFormatted, UtilsCache.getEmail(), null);
+        Call<ArrayList<GETBudgetResponse>> call = BudgetEndpoints.budgetEndpoints.getBudgets(
+                firstDayFormatted, lastDayFormatted, UtilsCache.getEmail(), null);
 
         call.enqueue(new Callback<ArrayList<GETBudgetResponse>>() {
             @Override
@@ -86,7 +87,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         textViewBalance.setText(total);
                     }
 
-                    if(transactionsList.size() > 0) {
+                    if(transactionsList.size() >= 0) {
                         double totalSpent = 0.0;
                         for(GETTransactionResponse transaction : transactionsList) {
                             totalSpent += Double.parseDouble(transaction.getAmount().substring(1));
@@ -142,7 +143,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if(response.code() == ResponseCodes.HTTP_CREATED) {
                                 // Bind will allow us to HTTP GET request for the budgets again and set the budget variable to the newly created one
-                                bind(transactionsList);
+                                bind(transactionsList, date);
                                 Toast.makeText(itemView.getContext(), "Budget Created!", Toast.LENGTH_LONG).show();
                             } else {
                                 Log.e("CreateBudget", String.valueOf(response.code()));
@@ -172,7 +173,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                                bind(transactionsList);
+                                bind(transactionsList, date);
                                 Toast.makeText(itemView.getContext(), "Budget Updated!", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(itemView.getContext(), "Budget Failed To Be Updated", Toast.LENGTH_LONG).show();

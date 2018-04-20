@@ -46,14 +46,22 @@ import retrofit2.Response;
  * Created by JunYoung on 2018. 4. 14..
  */
 
-public class AddTransactionActivity extends AppCompatActivity
-        implements TextWatcher, View.OnClickListener, DatePickerDialog.OnDateSetListener {
+public class AddTransactionActivity extends AppCompatActivity implements TextWatcher,
+        View.OnClickListener {
     private static final String TAG = "AddTransactionActivity";
     private static final String DEFAULT_VALUE = "0.00";
+    private static final String EQUAL_KEY = "Equal";
+    private static final String ADDITION_KEY = "Addition";
+    private static final String SUBTRACTION_KEY = "Subtraction";
+    private static final String DIVISION_KEY = "Division";
+    private static final String MULTIPLICATION_KEY = "Multiplication";
 
     private String date;
     private String restaurantName;
     private String restaurantAddress;
+    private int userSelectedYear = 0;
+    private int userSelectedMonth = 0;
+    private int userSelectedDayOfMonth = 0;
     private float secondNum = 0.0f;
     private float totalSumOfFoodCost = 0.0f;
     private boolean hasAdded = false;
@@ -61,6 +69,7 @@ public class AddTransactionActivity extends AppCompatActivity
     private boolean hasMultiplied = false;
     private boolean hasSubtracted = false;
     private boolean isDefaultValue = true;
+    private boolean isSecondFoodCost = false;
     private boolean isOperationClicked = false;
 
     AutoCompleteRestaurantAdapter adapter;
@@ -166,15 +175,14 @@ public class AddTransactionActivity extends AppCompatActivity
         buttonSubtraction.setOnClickListener(this);
         buttonMultiplication.setOnClickListener(this);
 
-        date = getCurrentDateTime();
+        date = DateTime.getCurrentDateTime();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_add_transaction_date_picker:
-                DialogFragment datePicker = new DatePickerFragment();
-                datePicker.show(getSupportFragmentManager(), "date picker");
+                createDatePicker();
                 break;
 
             case R.id.button_add_transaction_num_0:
@@ -229,9 +237,13 @@ public class AddTransactionActivity extends AppCompatActivity
                 String currentExpense = textViewFoodCost.getText().toString();
                 if (currentExpense.length() > 1 && !currentExpense.equals(DEFAULT_VALUE)) {
                     textViewFoodCost.setText(currentExpense.substring(0, currentExpense.length() - 1));
-                } else if (currentExpense.length() == 1) {
+                } else if (currentExpense.length() == 1 && totalSumOfFoodCost != 0) {
+                    textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
+                    totalSumOfFoodCost = 0.0f;
+                } else {
                     isDefaultValue = true;
                     textViewFoodCost.setText(DEFAULT_VALUE);
+                    totalSumOfFoodCost = 0.0f;
                 }
 
                 break;
@@ -239,33 +251,120 @@ public class AddTransactionActivity extends AppCompatActivity
             case R.id.button_add_transaction_addition:
                 float currentFoodCost = Float.valueOf(textViewFoodCost.getText().toString());
                 if (totalSumOfFoodCost == 0) {
-                    isOperationClicked = true;
                     totalSumOfFoodCost = currentFoodCost;
-                } else {
-                    isOperationClicked = true;
-                    totalSumOfFoodCost += currentFoodCost;
+                } else if (isSecondFoodCost) {
+                    performPreCalculation(currentFoodCost);
                     textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
                 }
+                controlOperations(ADDITION_KEY);
+
+                break;
+
+            case R.id.button_add_transaction_subtraction:
+                currentFoodCost = Float.valueOf(textViewFoodCost.getText().toString());
+                if (totalSumOfFoodCost == 0) {
+                    totalSumOfFoodCost = currentFoodCost;
+                } else if (isSecondFoodCost) {
+                    performPreCalculation(currentFoodCost);
+                    textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
+                }
+                controlOperations(SUBTRACTION_KEY);
 
                 break;
 
             case R.id.button_add_transaction_division:
                 currentFoodCost = Float.valueOf(textViewFoodCost.getText().toString());
                 if (totalSumOfFoodCost == 0) {
-                    isOperationClicked = true;
                     totalSumOfFoodCost = currentFoodCost;
-                } else {
-                    isOperationClicked = true;
-                    totalSumOfFoodCost /= currentFoodCost;
+                } else if (isSecondFoodCost) {
+                    performPreCalculation(currentFoodCost);
+                    textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
+                }
+                controlOperations(DIVISION_KEY);
+
+                break;
+
+            case R.id.button_add_transaction_multiplication:
+                currentFoodCost = Float.valueOf(textViewFoodCost.getText().toString());
+                if (totalSumOfFoodCost == 0) {
+                    totalSumOfFoodCost = currentFoodCost;
+                } else if (isSecondFoodCost) {
+                    performPreCalculation(currentFoodCost);
+                    textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
+                }
+                controlOperations(MULTIPLICATION_KEY);
+
+                break;
+
+            case R.id.button_add_transaction_equal:
+                currentFoodCost = Float.valueOf(textViewFoodCost.getText().toString());
+                if (isSecondFoodCost) {
+                    performPreCalculation(currentFoodCost);
                     textViewFoodCost.setText(String.valueOf(totalSumOfFoodCost));
                 }
 
+                controlOperations(EQUAL_KEY);
         }
+    }
+
+    private void controlOperations(String operation) {
+        if ("Addition".equals(operation)) {
+            hasAdded = true;
+            hasDivided = false;
+            hasSubtracted = false;
+            hasMultiplied = false;
+            isOperationClicked = true;
+        } else if ("Subtraction".equals(operation)) {
+            hasSubtracted = true;
+            hasAdded = false;
+            hasDivided = false;
+            hasMultiplied = false;
+            isOperationClicked = true;
+        } else if ("Multiplication".equals(operation)) {
+            hasMultiplied = true;
+            hasAdded = false;
+            hasDivided = false;
+            hasSubtracted = false;
+            isOperationClicked = true;
+        } else if ("Division".equals(operation)) {
+            hasDivided = true;
+            hasAdded = false;
+            hasMultiplied = false;
+            hasSubtracted = false;
+            isOperationClicked = true;
+        } else if ("Equal".equals(operation)) {
+            hasDivided = false;
+            hasAdded = false;
+            hasMultiplied = false;
+            hasSubtracted = false;
+            isOperationClicked = true;
+        }
+    }
+
+    private void performPreCalculation(float currentFoodCost) {
+        if (hasAdded) {
+            hasAdded = false;
+            totalSumOfFoodCost += currentFoodCost;
+        } else if (hasSubtracted) {
+            hasSubtracted = false;
+            totalSumOfFoodCost -= currentFoodCost;
+        } else if (hasDivided) {
+            hasDivided = false;
+            totalSumOfFoodCost /= currentFoodCost;
+        } else if (hasMultiplied) {
+            hasMultiplied = false;
+            totalSumOfFoodCost *= currentFoodCost;
+        }
+
+        isSecondFoodCost = false;
     }
 
     private void addNumber(String num) {
         String currentExpense = textViewFoodCost.getText().toString();
         if (isDefaultValue || isOperationClicked) {
+            if (isOperationClicked) {
+                isSecondFoodCost = true;
+            }
             isDefaultValue = false;
             isOperationClicked = false;
             textViewFoodCost.setText(num);
@@ -273,25 +372,6 @@ public class AddTransactionActivity extends AppCompatActivity
             String result = currentExpense + num;
             textViewFoodCost.setText(result);
         }
-    }
-
-    private boolean hasComputed() {
-        return hasAdded || hasDivided || hasMultiplied || hasSubtracted;
-
-    }
-
-    @Override
-    public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.YEAR, year);
-        c.set(Calendar.MONTH, month);
-        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
-        dateFormat.setTimeZone(TimeZone.getTimeZone("PST"));
-
-        date = dateFormat.format(c.getTime());
-        Log.d(TAG, date);
     }
 
     @Override
@@ -403,17 +483,49 @@ public class AddTransactionActivity extends AppCompatActivity
         });
     }
 
+    private void createDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        Bundle args = new Bundle();
+
+        if (userSelectedYear == 0) {
+            args.putInt("year", calendar.get(Calendar.YEAR));
+            args.putInt("month", calendar.get(Calendar.MONTH));
+            args.putInt("day", calendar.get(Calendar.DAY_OF_MONTH));
+        } else {
+            args.putInt("year", userSelectedYear);
+            args.putInt("month", userSelectedMonth);
+            args.putInt("day", userSelectedDayOfMonth);
+        }
+
+        DatePickerFragment date = new DatePickerFragment();
+
+        date.setArguments(args);
+        date.setCallBack(onDateSetListener);
+        date.show(getSupportFragmentManager(), "Date Picker");
+    }
+
+    DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
+            userSelectedYear = year;
+            userSelectedMonth = month;
+            userSelectedDayOfMonth = dayOfMonth;
+
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR, year);
+            c.set(Calendar.MONTH, month);
+            c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss",
+                    Locale.getDefault());
+
+            date = dateFormat.format(c.getTime());
+        }
+    };
+
     private Double formatDecimalPlaces(Double foodCost) {
         DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
         return Double.valueOf(decimalFormat.format(foodCost));
-    }
-
-    private String getCurrentDateTime() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
-        dateFormat.setTimeZone(TimeZone.getTimeZone("PST"));
-        Date date = new Date();
-
-        return dateFormat.format(date);
     }
 }
