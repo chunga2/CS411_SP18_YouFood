@@ -59,38 +59,32 @@ public class DateTime {
 
 
     public static String getFirstDayMonthOfWeek(String currentDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        Calendar sunday = Calendar.getInstance();
+        String firstDateOfWeek = getFirstDateOfWeek(currentDate);
+        SimpleDateFormat currentDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Calendar saturday = Calendar.getInstance();
         try {
-            sunday.setTime(dateFormat.parse(currentDate));
+            saturday.setTime(currentDateFormat.parse(firstDateOfWeek));
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        sunday.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-        sunday.set(Calendar.HOUR_OF_DAY,0);
-        sunday.set(Calendar.MINUTE,0);
-        sunday.set(Calendar.SECOND,0);
-        Date firstDayMonthOfWeek = sunday.getTime();
+        SimpleDateFormat formatForDisplaying = new SimpleDateFormat("MM/dd/yyyy");
 
-        return dateFormat.format(firstDayMonthOfWeek);
+        return formatForDisplaying.format(saturday.getTime());
     }
 
     public static String getLastDayMonthOfWeek(String currentDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        String lastDateOfWeek = getLastDateOfWeek(currentDate);
+        SimpleDateFormat currentDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Calendar saturday = Calendar.getInstance();
         try {
-            saturday.setTime(dateFormat.parse(currentDate));
+            saturday.setTime(currentDateFormat.parse(lastDateOfWeek));
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        saturday.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
-        saturday.set(Calendar.HOUR_OF_DAY,23);
-        saturday.set(Calendar.MINUTE,59);
-        saturday.set(Calendar.SECOND,59);
-        Date lastDayMonthOfWeek = saturday.getTime();
+        SimpleDateFormat formatForDisplaying = new SimpleDateFormat("MM/dd/yyyy");
 
-        return dateFormat.format(lastDayMonthOfWeek);
+        return formatForDisplaying.format(saturday.getTime());
     }
 }
