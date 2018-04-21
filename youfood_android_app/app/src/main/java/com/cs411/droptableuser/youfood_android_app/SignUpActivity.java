@@ -67,6 +67,8 @@ public class SignUpActivity extends AppCompatActivity {
 
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
+
+                            finish();
                         } else {
                             Log.d(TAG, String.valueOf(response.code()));
                             Toast.makeText(

@@ -39,11 +39,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
 
         // Check whether the user is logged in or not.
-        // If the user is logged in, start MainActivity.
+        //
+        // If the user is logged in, start MainActivity and remove LoginActivity from the stack.
         UtilsCache.initialize(getApplicationContext());
         if (UtilsCache.getHasLoggedIn()) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+
+            finish();
         }
 
         setContentView(R.layout.activity_login);
@@ -89,10 +92,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     // Move on to next activity
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
+
+                    finish();
                 } else {
                     Toast.makeText(
                             LoginActivity.this,
-                            "Your textViewEmail or password were incorrect.",
+                            "Your Email or password were incorrect.",
                             Toast.LENGTH_LONG).show();
                 }
             }
