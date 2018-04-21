@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -19,12 +18,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-// TODO: Replace the implementation with code after implementing data set.
 public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<RestaurantsRecyclerViewAdpater.ViewHolder> {
-    private static final int TEMP_NUM_ITEMS = 10;
-    private static final String ZOMATO_LOGO_URL =
-            "https://static2.tripoto.com/media/filter/nt/img/19307/UserPhoto/logo_unit_2_red.png";
-
     private List<GETRestaurantResponse> restaurants;
 
     public RestaurantsRecyclerViewAdpater(List<GETRestaurantResponse> restaurants) {
@@ -48,10 +42,17 @@ public class RestaurantsRecyclerViewAdpater extends RecyclerView.Adapter<Restaur
     public void onBindViewHolder(ViewHolder holder, int position) {
         GETRestaurantResponse restaurantObj = this.restaurants.get(position);
         holder.restaurantObj = restaurantObj;
-        Glide.with(holder.itemView.getContext())
-                .load(restaurantObj.getImageUrl())
-                .apply(new RequestOptions().override(110, 110).centerCrop())
-                .into(holder.imageViewRestaurant);
+
+        if ("".equals(restaurantObj.getImageUrl())) {
+            Glide.with(holder.itemView.getContext())
+                    .load(R.drawable.default_restaurant_image)
+                    .into(holder.imageViewRestaurant);
+        } else {
+            Glide.with(holder.itemView.getContext())
+                    .load(restaurantObj.getImageUrl())
+                    .apply(new RequestOptions().override(110, 110).centerCrop())
+                    .into(holder.imageViewRestaurant);
+        }
         holder.textViewRestaurantName.setText(restaurantObj.getName());
 
         String[] categories = restaurantObj.getCategories();
