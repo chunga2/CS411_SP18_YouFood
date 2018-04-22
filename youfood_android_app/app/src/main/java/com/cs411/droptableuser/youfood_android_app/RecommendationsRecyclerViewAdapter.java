@@ -149,6 +149,11 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
                                     RecommendationsRecyclerViewAdapter.this.notifyItemRemoved(index);
                                     RecommendationsRecyclerViewAdapter.this.notifyItemRangeChanged(index, recommendations.size());
                                     Toast.makeText(context, "Succesfully deleted", Toast.LENGTH_LONG).show();
+
+                                    // Decrement recommendation count
+                                    int oldRecommenationCount = UtilsCache.getRecommenationCount();
+                                    UtilsCache.storeRecommendationCount(oldRecommenationCount-1);
+
                                 } else {
                                     Toast.makeText(context, "Could not delete", Toast.LENGTH_LONG).show();
                                 }

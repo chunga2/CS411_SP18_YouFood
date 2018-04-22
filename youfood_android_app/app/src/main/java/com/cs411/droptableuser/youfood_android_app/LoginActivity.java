@@ -101,6 +101,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     UtilsCache.storeIsOwner(loginResponse.isOwner());
                     UtilsCache.storeHasLoggedIn(true);
                     UtilsCache.storePassword(password);
+                    UtilsCache.storeRecommendationCount(0);
 
                     // Move on to next activity
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);

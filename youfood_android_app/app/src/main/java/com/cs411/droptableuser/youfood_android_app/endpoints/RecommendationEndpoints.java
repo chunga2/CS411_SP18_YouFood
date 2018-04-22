@@ -1,6 +1,7 @@
 package com.cs411.droptableuser.youfood_android_app.endpoints;
 
 import com.cs411.droptableuser.youfood_android_app.requests.POSTRecommendationRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRecommendationCountResponse;
 import com.cs411.droptableuser.youfood_android_app.responses.GETRecommendationResponse;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public interface RecommendationEndpoints {
                                     @Query("restaurant_address") String address,
                                     @Query("restaurant_name") String name);
 
+    @GET("/get_recommendation_count")
+    Call<GETRecommendationCountResponse> getRecommendationCount(@Query("useremail") String email);
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("http://youfood.ddns.net")

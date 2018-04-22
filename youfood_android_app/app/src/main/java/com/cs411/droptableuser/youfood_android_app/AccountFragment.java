@@ -78,6 +78,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        adapter = null;
         View rootView = inflater.inflate(R.layout.fragment_account, container, false);
         unbinder = ButterKnife.bind(this, rootView);
         setHasOptionsMenu(false);
@@ -116,6 +117,32 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Call<ArrayList<GETRecommendationResponse>> call = RecommendationEndpoints.recommendationEndpoints.getRecommendationsForUser(UtilsCache.getEmail());
+        call.enqueue(new Callback<ArrayList<GETRecommendationResponse>>() {
+            @Override
+            public void onResponse(Call<ArrayList<GETRecommendationResponse>> call, Response<ArrayList<GETRecommendationResponse>> response) {
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    if(adapter != null) {
+                        adapter.setData(response.body());
+                        adapter.notifyDataSetChanged();
+                    }
+                } else {
+                    Log.e("AccountFrag", String.valueOf(response.code()));
+                    Toast.makeText(AccountFragment.this.getContext(), "Failed To Load Recommendations!", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<GETRecommendationResponse>> call, Throwable t) {
+                Toast.makeText(AccountFragment.this.getContext(), R.string.network_failed_message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

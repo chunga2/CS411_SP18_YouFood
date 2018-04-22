@@ -14,6 +14,7 @@ public class UtilsCache {
     private static final String IS_OWNER_KEY = "IsOwner";
     private static final String HAS_LOGGED_IN_KEY = "HasLoggedIn";
     private static final String PASSWORD_KEY = "Password";
+    private static final String RECOMMENDATION_COUNT_KEY = "RecommendationCount";
 
     static Context context;
     static SharedPreferences prefs;
@@ -59,6 +60,12 @@ public class UtilsCache {
         prefsEditor.apply();
     }
 
+    static void storeRecommendationCount(int count) {
+        SharedPreferences.Editor prefsEditor = prefs.edit();
+        prefsEditor.putInt(RECOMMENDATION_COUNT_KEY, count);
+        prefsEditor.apply();
+    }
+
     static String getName() {
         return prefs.getString(NAME_KEY, "");
     }
@@ -77,5 +84,9 @@ public class UtilsCache {
 
     static String getPassword() {
         return prefs.getString(PASSWORD_KEY, "");
+    }
+
+    static int getRecommenationCount() {
+        return prefs.getInt(RECOMMENDATION_COUNT_KEY, 0);
     }
 }

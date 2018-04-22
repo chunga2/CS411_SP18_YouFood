@@ -1,5 +1,6 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -7,6 +8,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,8 +17,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.cs411.droptableuser.youfood_android_app.endpoints.RecommendationEndpoints;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRecommendationCountResponse;
+import com.cs411.droptableuser.youfood_android_app.responses.GETRecommendationResponse;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements AccountFragment.RestaurantSelectedListener {
     private static final class Constants {
@@ -62,6 +71,49 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
                 });
 
         bottomNavigationView.setSelectedItemId(R.id.menu_restaurants);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Call<GETRecommendationCountResponse> call = RecommendationEndpoints.recommendationEndpoints.getRecommendationCount(UtilsCache.getEmail());
+        call.enqueue(new Callback<GETRecommendationCountResponse>() {
+            @Override
+            public void onResponse(Call<GETRecommendationCountResponse> call, Response<GETRecommendationCountResponse> response) {
+                Log.e("RecommendationCount", String.valueOf(response.code()));
+                if(response.code() == ResponseCodes.HTTP_OK) {
+                    GETRecommendationCountResponse countResponse = response.body();
+                    Log.e("ResponseCount", String.valueOf(countResponse.getRecommendationCount()));
+                    Log.e("CacheCount", String.valueOf(UtilsCache.getRecommenationCount()));
+                    if(countResponse.getRecommendationCount() > UtilsCache.getRecommenationCount()) {
+                        int difference = countResponse.getRecommendationCount() - UtilsCache.getRecommenationCount();
+
+                        // Alert dialog
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("New Recommendations!");
+                        StringBuilder message = new StringBuilder("You have ");
+                        message.append(difference);
+                        message.append(" new Recommendation(s). Check the Account tab to view them!");
+                        builder.setMessage(message.toString());
+
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+
+                        builder.show();
+                    }
+                    // Store the updated recommendation count in the shared preference cache
+                    UtilsCache.storeRecommendationCount(countResponse.getRecommendationCount());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GETRecommendationCountResponse> call, Throwable t) {}
+        });
     }
 
     private void setFragmentTransaction(MenuItem item) {
