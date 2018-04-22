@@ -76,7 +76,7 @@ CREATE VIEW "BudgetStatistics" AS (
     AVG(amount::DECIMAL)::MONEY AS avg_spend,
     SUM(amount) AS total_spend,
     total AS budget,
-    "Budget".date AS date 
+    "Budget".date 
   FROM "Transaction", "Budget"
   WHERE "Budget".date <= "Transaction".date
         AND "Transaction".date < "Budget".date + '7 days'::interval
