@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
                     }
                 } else if (currentFragment != selectedFragment) {
                     transaction.hide(currentFragment).show(selectedFragment);
+                } else {
+                    RestaurantsFragment fragment = (RestaurantsFragment) selectedFragment;
+                    fragment.recyclerView.scrollToPosition(0);
                 }
                 floatingActionButton.setVisibility(View.GONE);
                 getSupportActionBar().setTitle(Constants.RESTAURANTS_TAG);
