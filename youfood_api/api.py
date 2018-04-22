@@ -1146,12 +1146,41 @@ def get_weekly_transactions_for_user():
                 return jsonify(json_objects), 200
 
 
+def get_user_budget_statistics():
+    useremail = request.args.get("useremail")
+    with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""SELECT AVG(total_spend::DECIMAL)::MONEY
+                    FROM "BudgetStatistics"
+                    GROUP BY useremail
+                    HAVING useremail=%s;""", [useremail])
+                average = cur.fetchone()[0]
+
+                cur.execute("""SELECT COUNT(*)
+                    FROM "BudgetStatistics"
+                    WHERE useremail=%s AND total_spend > budget;""", [useremail])
+                num_budgets_over = cur.fetchone()[0]
+
+                cur.execute("""SELECT COUNT(*)
+                    FROM "BudgetStatistics"
+                    WHERE useremail=%s;""", [useremail])
+                num_budets = cur.fetchone()[0]
+
+                stats_dict = {
+                    "average_weekly": average,
+                    "num_weeks_over": num_budgets_over,
+                    "num_weeks_total": num_budets
+                }
+
+                return jsonify(stats_dict), 200
+
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
 app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST'])
 app.add_url_rule('/restaurant_statistics', 'restaurant_statistics', get_restaurant_statistics, methods=['GET'])
 app.add_url_rule('/transactions_weekly', 'transactions_weekly', get_weekly_transactions_for_user, methods=['GET'])
+app.add_url_rule('/get_user_budget_statistics', 'get_user_budget_statistics', get_user_budget_statistics, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
