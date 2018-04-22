@@ -1168,7 +1168,7 @@ def get_user_budget_statistics():
 
                 stats_dict = {
                     "average_weekly": average,
-                    "num_budgets_successful": num_budgets_successful,
+                    "num_weeks_successful": num_budgets_successful,
                     "num_weeks_total": num_budets
                 }
 
