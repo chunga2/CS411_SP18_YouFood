@@ -1158,8 +1158,8 @@ def get_user_budget_statistics():
 
                 cur.execute("""SELECT COUNT(*)
                     FROM "BudgetStatistics"
-                    WHERE useremail=%s AND total_spend > budget;""", [useremail])
-                num_budgets_over = cur.fetchone()[0]
+                    WHERE useremail=%s AND total_spend <= budget;""", [useremail])
+                num_budgets_successful = cur.fetchone()[0]
 
                 cur.execute("""SELECT COUNT(*)
                     FROM "BudgetStatistics"
@@ -1168,7 +1168,7 @@ def get_user_budget_statistics():
 
                 stats_dict = {
                     "average_weekly": average,
-                    "num_weeks_over": num_budgets_over,
+                    "num_budgets_successful": num_budgets_over,
                     "num_weeks_total": num_budets
                 }
 
