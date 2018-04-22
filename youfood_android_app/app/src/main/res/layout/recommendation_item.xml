@@ -35,15 +35,6 @@
         tools:text="03/24/2018" />
 
     <TextView
-        android:id="@+id/text_recommendation_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/text_recommendation_date"
-        android:layout_below="@+id/text_recommendation_date"
-        android:textSize="18sp"
-        tools:text="11:58 PM" />
-
-    <TextView
         android:id="@+id/text_recommendation_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,7 +50,9 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignEnd="@+id/text_recommendation_time"
-        android:layout_below="@+id/text_recommendation_time"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/text_recommendation_date"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
         android:src="@drawable/ic_close_black_24dp" />
 
