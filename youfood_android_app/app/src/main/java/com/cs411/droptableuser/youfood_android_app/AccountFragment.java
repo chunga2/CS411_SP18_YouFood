@@ -4,10 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.Constraints;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,14 +46,16 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     TextView textViewEmail;
     @BindView(R.id.textview_account_accvalue)
     TextView textViewAccountType;
+    @BindView(R.id.textview_account_info)
+    TextView textViewNoRecommendationsInfo;
+    @BindView(R.id.imageview_account_info_sign)
+    ImageView imageViewInfo;
     @BindView(R.id.button_account_edit_account)
-    Button editAccount;
-    @BindView(R.id.button_account_delete_account)
-    Button deleteAccount;
+    RelativeLayout buttonEditAccount;
     @BindView(R.id.button_account_logout)
-    Button logout;
-    @BindView(R.id.textview_account_password)
-    TextView textViewPassword;
+    RelativeLayout buttonLogout;
+    @BindView(R.id.relative_layout_account_viewholder)
+    RelativeLayout layoutViewHolder;
     @BindView(R.id.recycler_view_account_myrecommendations)
     RecyclerView myRecommendationsRV;
 
@@ -92,18 +96,29 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
         } else {
             textViewAccountType.setText(R.string.user);
         }
-        textViewPassword.setText(UtilsCache.getPassword());
 
-        editAccount.setOnClickListener(this);
-        deleteAccount.setOnClickListener(this);
-        logout.setOnClickListener(this);
+        buttonEditAccount.setOnClickListener(this);
+        buttonLogout.setOnClickListener(this);
 
+        myRecommendationsRV.setHasFixedSize(true);
+        myRecommendationsRV.setNestedScrollingEnabled(false);
         myRecommendationsRV.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         Call<ArrayList<GETRecommendationResponse>> call = RecommendationEndpoints.recommendationEndpoints.getRecommendationsForUser(UtilsCache.getEmail());
         call.enqueue(new Callback<ArrayList<GETRecommendationResponse>>() {
             @Override
             public void onResponse(Call<ArrayList<GETRecommendationResponse>> call, Response<ArrayList<GETRecommendationResponse>> response) {
                 if(response.code() == ResponseCodes.HTTP_OK) {
+                    if (response.body().size() == 0) {
+                        myRecommendationsRV.setVisibility(View.INVISIBLE);
+                        textViewNoRecommendationsInfo.setVisibility(View.VISIBLE);
+                        imageViewInfo.setVisibility(View.VISIBLE);
+                        layoutViewHolder.getLayoutParams().height = (int) getResources()
+                                .getDimension(R.dimen.viewholder_height);
+                    } else {
+                        myRecommendationsRV.setVisibility(View.VISIBLE);
+                        textViewNoRecommendationsInfo.setVisibility(View.GONE);
+                        imageViewInfo.setVisibility(View.GONE);
+                    }
                     adapter = new RecommendationsRecyclerViewAdapter(response.body(), AccountFragment.this.getContext(), listener);
                     myRecommendationsRV.setAdapter(adapter);
                 } else {
@@ -131,6 +146,17 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
             public void onResponse(Call<ArrayList<GETRecommendationResponse>> call, Response<ArrayList<GETRecommendationResponse>> response) {
                 if(response.code() == ResponseCodes.HTTP_OK) {
                     if(adapter != null) {
+                        if (response.body().size() == 0) {
+                            myRecommendationsRV.setVisibility(View.INVISIBLE);
+                            textViewNoRecommendationsInfo.setVisibility(View.VISIBLE);
+                            imageViewInfo.setVisibility(View.VISIBLE);
+                            layoutViewHolder.getLayoutParams().height = (int) getResources()
+                                    .getDimension(R.dimen.viewholder_height);
+                        } else {
+                            myRecommendationsRV.setVisibility(View.VISIBLE);
+                            textViewNoRecommendationsInfo.setVisibility(View.GONE);
+                            imageViewInfo.setVisibility(View.GONE);
+                        }
                         adapter.setData(response.body());
                         adapter.notifyDataSetChanged();
                     }
@@ -150,9 +176,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button_account_delete_account:
-                deleteAccount();
-                break;
             case R.id.button_account_logout:
                 UtilsCache.clear();
                 Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
@@ -161,7 +184,7 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.button_account_edit_account:
                 //TODO implement this one
-                intent = new Intent(getActivity(), EditNameActivity.class);
+                intent = new Intent(getActivity(), EditAccountActivity.class);
                 startActivityForResult(intent, EDIT_NAME_REQUEST);
                 break;
         }
@@ -178,63 +201,6 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_NAME_REQUEST && resultCode == 204) {
             textViewUserName.setText(UtilsCache.getName());
-            textViewPassword.setText(UtilsCache.getPassword());
         }
-    }
-
-    private void deleteAccount() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Delete Account");
-        builder.setMessage("Are you sure you want to delete this account?");
-
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
-                Log.e("AccountFragment", call.request().url().toString());
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                        if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                            UtilsCache.clear();
-
-                            Toast.makeText(
-                                    AccountFragment.this.getContext(),
-                                    "Deleted Account!",
-                                    Toast.LENGTH_LONG
-                            ).show();
-
-                            Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(
-                                    AccountFragment.this.getContext(),
-                                    "Failed To Delete Account!",
-                                    Toast.LENGTH_LONG
-                            ).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        Toast.makeText(
-                                AccountFragment.this.getContext(),
-                                getString(R.string.network_failed_message),
-                                Toast.LENGTH_LONG
-                        ).show();
-                    }
-                });
-            }
-        });
-
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-
-        builder.show();
     }
 }

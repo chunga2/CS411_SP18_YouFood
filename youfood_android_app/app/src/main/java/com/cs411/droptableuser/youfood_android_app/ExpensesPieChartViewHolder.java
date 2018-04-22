@@ -5,6 +5,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cs411.droptableuser.youfood_android_app.responses.GETTransactionResponse;
@@ -41,6 +42,8 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
     TextView textViewExpensesHeader;
     @BindView(R.id.textview_expenses_no_data)
     TextView textViewExpensesNoData;
+    @BindView(R.id.relative_layout_expenses_info)
+    RelativeLayout relativeLayoutInfo;
 
     public ExpensesPieChartViewHolder(View itemView) {
         super(itemView);
@@ -59,16 +62,16 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
                     weeklyTransactions.get(0).getDate()).substring(0, 2));
             addEntryForPieData(transactions, firstDayOfWeek, entries);
 
-            pieChartExpenses.setVisibility(VISIBLE);
+            relativeLayoutInfo.setVisibility(GONE);
             textViewExpensesHeader.setVisibility(GONE);
-            textViewExpensesNoData.setVisibility(GONE);
+            pieChartExpenses.setVisibility(VISIBLE);
 
             customizeLegend();
             setPieChartAttributes(entries);
         } else {
-            pieChartExpenses.setVisibility(View.INVISIBLE);
+            relativeLayoutInfo.setVisibility(VISIBLE);
             textViewExpensesHeader.setVisibility(VISIBLE);
-            textViewExpensesNoData.setVisibility(VISIBLE);
+            pieChartExpenses.setVisibility(View.INVISIBLE);
         }
 
 
@@ -99,7 +102,7 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
 
         PieData data = new PieData(set);
 
-        pieChartExpenses.setCenterText("Weekly Expenses Breakdwon");
+        pieChartExpenses.setCenterText("Weekly Expenses Breakdown");
         pieChartExpenses.setDrawEntryLabels(true);
         pieChartExpenses.setDrawCenterText(true);
         pieChartExpenses.setEntryLabelTextSize(12f);
@@ -113,13 +116,13 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
         Context context = itemView.getContext();
         List<Integer> pieColors = new ArrayList<>();
 
-        pieColors.add(ContextCompat.getColor(context, R.color.Red1));
-        pieColors.add(ContextCompat.getColor(context, R.color.Red2));
-        pieColors.add(ContextCompat.getColor(context, R.color.Red3));
-        pieColors.add(ContextCompat.getColor(context, R.color.Red4));
-        pieColors.add(ContextCompat.getColor(context, R.color.Red5));
-        pieColors.add(ContextCompat.getColor(context, R.color.Red6));
         pieColors.add(ContextCompat.getColor(context, R.color.Red7));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red6));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red5));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red4));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red3));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red2));
+        pieColors.add(ContextCompat.getColor(context, R.color.Red1));
 
         return pieColors;
     }
@@ -128,13 +131,13 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
         Context context = itemView.getContext();
         List<Integer> valueTextColors = new ArrayList<>();
 
+        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
+        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
+        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
+        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
         valueTextColors.add(ContextCompat.getColor(context, R.color.white));
         valueTextColors.add(ContextCompat.getColor(context, R.color.white));
         valueTextColors.add(ContextCompat.getColor(context, R.color.white));
-        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
-        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
-        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
-        valueTextColors.add(ContextCompat.getColor(context, R.color.black));
 
         return valueTextColors;
     }
