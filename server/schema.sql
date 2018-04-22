@@ -75,6 +75,7 @@ CREATE VIEW "BudgetStatistics" AS (
   SELECT "Budget".useremail,
     AVG(amount::DECIMAL)::MONEY,
     SUM(amount),
+    total,
     "Budget".date
   FROM "Transaction", "Budget"
   WHERE "Budget".date <= "Transaction".date
