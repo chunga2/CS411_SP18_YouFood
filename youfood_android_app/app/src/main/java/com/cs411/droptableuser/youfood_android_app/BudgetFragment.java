@@ -90,7 +90,7 @@ public class BudgetFragment extends Fragment implements SwipeRefreshLayout.OnRef
         return rootView;
     }
 
-    private void getWeeklyTransactions() {
+    protected void getWeeklyTransactions() {
         Call<ArrayList<GETTransactionResponse>> call =
                 TransactionEndpoints.transactionEndpoints.getWeeklyTransactions(
                         UtilsCache.getEmail(), date
