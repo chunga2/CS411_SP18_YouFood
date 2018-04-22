@@ -1,6 +1,8 @@
 package com.cs411.droptableuser.youfood_android_app;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -181,40 +183,58 @@ public class AccountFragment extends Fragment implements View.OnClickListener {
     }
 
     private void deleteAccount() {
-        Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
-        Log.e("AccountFragment", call.request().url().toString());
-        call.enqueue(new Callback<Void>() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Delete Account");
+        builder.setMessage("Are you sure you want to delete this account?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
-                    UtilsCache.clear();
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Call<Void> call = UserEndpoints.userEndpoints.deleteUser(UtilsCache.getEmail());
+                Log.e("AccountFragment", call.request().url().toString());
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if(response.code() == ResponseCodes.HTTP_NO_RESPONSE) {
+                            UtilsCache.clear();
 
-                    Toast.makeText(
-                            AccountFragment.this.getContext(),
-                            "Deleted Account!",
-                            Toast.LENGTH_LONG
-                    ).show();
+                            Toast.makeText(
+                                    AccountFragment.this.getContext(),
+                                    "Deleted Account!",
+                                    Toast.LENGTH_LONG
+                            ).show();
 
-                    Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(
-                            AccountFragment.this.getContext(),
-                            "Failed To Delete Account!",
-                            Toast.LENGTH_LONG
-                    ).show();
-                }
-            }
+                            Intent intent = new Intent(AccountFragment.this.getContext(), LoginActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(
+                                    AccountFragment.this.getContext(),
+                                    "Failed To Delete Account!",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
 
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Toast.makeText(
-                        AccountFragment.this.getContext(),
-                        getString(R.string.network_failed_message),
-                        Toast.LENGTH_LONG
-                ).show();
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        Toast.makeText(
+                                AccountFragment.this.getContext(),
+                                getString(R.string.network_failed_message),
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
             }
         });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        builder.show();
     }
 }
