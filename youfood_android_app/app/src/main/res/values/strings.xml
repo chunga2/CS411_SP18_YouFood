@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">youfood_android_app</string>
+    <string name="app_name">YouFood</string>
     <string name="bottom_navigation_restaurants">Restaurants</string>
     <string name="bottom_navigation_account">Account</string>
     <string name="bottom_navigation_budget">Budget</string>
