@@ -66,7 +66,7 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
             customizeLegend();
             setPieChartAttributes(entries);
         } else {
-            pieChartExpenses.setVisibility(GONE);
+            pieChartExpenses.setVisibility(View.INVISIBLE);
             textViewExpensesHeader.setVisibility(VISIBLE);
             textViewExpensesNoData.setVisibility(VISIBLE);
         }
@@ -99,7 +99,7 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
 
         PieData data = new PieData(set);
 
-        pieChartExpenses.setCenterText("Expenses Chart");
+        pieChartExpenses.setCenterText("Weekly Expenses Breakdwon");
         pieChartExpenses.setDrawEntryLabels(true);
         pieChartExpenses.setDrawCenterText(true);
         pieChartExpenses.setEntryLabelTextSize(12f);

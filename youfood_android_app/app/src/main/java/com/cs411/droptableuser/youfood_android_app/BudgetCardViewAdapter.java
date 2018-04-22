@@ -1,8 +1,5 @@
 package com.cs411.droptableuser.youfood_android_app;
 
-import android.content.Context;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,16 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cs411.droptableuser.youfood_android_app.responses.GETTransactionResponse;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.ButterKnife;
 
 /**
  * Created by JunYoung on 2018. 4. 13..
@@ -49,6 +38,8 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
             case R.layout.card_expenses_chart:
                 holder = new ExpensesPieChartViewHolder(view);
                 break;
+            case R.layout.card_statistics:
+                holder = new BudgetStatisticsViewHolder(view);
         }
 
         return holder;
@@ -65,6 +56,10 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
             case R.layout.card_balance:
                 BalanceViewHolder balanceHolder = (BalanceViewHolder) holder;
                 balanceHolder.bind(weeklyTransactions, date.get(0));
+                break;
+            case R.layout.card_statistics:
+                BudgetStatisticsViewHolder statisticsHolder = (BudgetStatisticsViewHolder) holder;
+                statisticsHolder.bind();;
         }
     }
 
@@ -75,6 +70,8 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
                 return R.layout.card_balance;
             case 1:
                 return R.layout.card_expenses_chart;
+            case 2:
+                return R.layout.card_statistics;
             default:
                 return R.layout.card_balance;
         }
@@ -82,6 +79,6 @@ public class BudgetCardViewAdapter extends RecyclerView.Adapter<BaseViewHolder> 
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

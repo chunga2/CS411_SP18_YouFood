@@ -2,6 +2,7 @@ package com.cs411.droptableuser.youfood_android_app.endpoints;
 
 import com.cs411.droptableuser.youfood_android_app.requests.POSTTransactionRequest;
 import com.cs411.droptableuser.youfood_android_app.requests.PUTTransactionRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETBudgetStatistics;
 import com.cs411.droptableuser.youfood_android_app.responses.GETTransactionResponse;
 
 import java.util.ArrayList;

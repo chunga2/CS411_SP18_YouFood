@@ -3,6 +3,7 @@ package com.cs411.droptableuser.youfood_android_app.endpoints;
 import com.cs411.droptableuser.youfood_android_app.requests.GETBudgetResponse;
 import com.cs411.droptableuser.youfood_android_app.requests.POSTBudgetRequest;
 import com.cs411.droptableuser.youfood_android_app.requests.PUTBudgetRequest;
+import com.cs411.droptableuser.youfood_android_app.responses.GETBudgetStatistics;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,8 @@ public interface BudgetEndpoints {
                                                   @Query("end") String end,
                                                   @Query("user") String user,
                                                   @Query("total") String total);
+    @GET("get_user_budget_statistics")
+    Call<GETBudgetStatistics> getBudgetStatistics(@Query("useremail") String email);
 
     @POST("/budgets")
     Call<Void> createBudget(@Body POSTBudgetRequest postBudgetRequest);
