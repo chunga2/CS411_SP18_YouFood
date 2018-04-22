@@ -136,7 +136,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     double total = Double.parseDouble(input.getText().toString());
-                    POSTBudgetRequest budgetRequest = new POSTBudgetRequest(date, UtilsCache
+                    POSTBudgetRequest budgetRequest = new POSTBudgetRequest(DateTime.getFirstDateOfWeek(date), UtilsCache
                             .getEmail(), total);
                     Call<Void> call = BudgetEndpoints.budgetEndpoints.createBudget(budgetRequest);
 
