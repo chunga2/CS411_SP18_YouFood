@@ -50,37 +50,37 @@
                 tools:text="03/19/2018 - 03/25/2018" />
 
             <TextView
-                android:id="@+id/textview_balance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="false"
-                android:layout_below="@+id/text_balance_date_range"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/roboto"
-                android:maxLength="17"
-                tools:text="$1000.00"
-                android:textColor="@color/green_A700"
-                android:textSize="26sp" />
-
-            <TextView
                 android:id="@+id/textview_label_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/textview_balance"
-                android:layout_toStartOf="@+id/textview_balance"
-                android:layout_marginRight="10dp"
+                android:layout_alignStart="@+id/text_balance_header"
+                android:layout_below="@+id/text_balance_header"
+                android:layout_marginTop="9dp"
                 android:fontFamily="@font/roboto"
-                android:text="Limit:"
-                android:textSize="26sp"
-                android:textColor="@color/black"/>
+                android:text="Budget:"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/textview_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/textview_label_balance"
+                android:layout_marginStart="8dp"
+                android:layout_toEndOf="@+id/textview_label_balance"
+                android:fontFamily="@font/roboto"
+                android:maxLength="17"
+                android:textColor="@color/green_A700"
+                android:textSize="18sp"
+                tools:text="$1000.00" />
 
             <ImageView
                 android:id="@+id/imageview_edit_balance"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_alignBottom="@+id/textview_balance"
-                android:layout_marginStart="8dp"
+                android:layout_marginBottom="1dp"
+                android:layout_marginStart="4dp"
                 android:layout_toEndOf="@+id/textview_balance"
                 app:srcCompat="@drawable/ic_edit_black_24dp" />
 
@@ -88,24 +88,26 @@
                 android:id="@+id/text_total_spent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textview_balance"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:textSize="26sp"
-                tools:text="$84.00"
-                android:textColor="@color/green_A700"/>
+                android:layout_alignBaseline="@+id/text_label_total_spent"
+                android:layout_alignBottom="@+id/text_label_total_spent"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_toEndOf="@+id/text_label_total_spent"
+                android:textColor="@color/green_A700"
+                android:textSize="18sp"
+                tools:text="$84.00" />
 
             <TextView
                 android:id="@+id/text_label_total_spent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/text_total_spent"
-                android:layout_toStartOf="@+id/text_total_spent"
-                android:layout_marginRight="10dp"
+                android:layout_alignStart="@+id/textview_label_balance"
+                android:layout_below="@+id/textview_balance"
+                android:layout_marginTop="11dp"
                 android:fontFamily="@font/roboto"
                 android:text="Spent:"
-                android:textSize="26sp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:textSize="18sp" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 

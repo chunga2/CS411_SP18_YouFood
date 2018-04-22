@@ -3,11 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".EditNameActivity">
+    tools:context=".EditAccountActivity">
 
     <item
         android:id="@+id/menu_item_send"
         android:title="OK"
+        android:icon="@drawable/ic_check_white_24px"
         app:showAsAction="ifRoom">
     </item>
 </menu>
