@@ -1154,6 +1154,16 @@ def get_user_budget_statistics():
                     FROM "BudgetStatistics"
                     GROUP BY useremail
                     HAVING useremail=%s;""", [useremail])
+                # This means there are no Budgets that have transactions for this user, so return 0 dict
+                if cur.rowcount == 0:
+                    zero_dict = {
+                        "average_weekly": "$0.00",
+                        "num_weeks_successful": 0,
+                        "num_weeks_total": 0
+                    }
+
+                    return jsonify(zero_dict), 200
+
                 average = cur.fetchone()[0]
 
                 cur.execute("""SELECT COUNT(*)
@@ -1174,6 +1184,19 @@ def get_user_budget_statistics():
 
                 return jsonify(stats_dict), 200
 
+def get_recommendation_count():
+    useremail = request.args.get("useremail")
+    with conn as c:
+            with c.cursor() as cur:
+                cur.execute("""SELECT COUNT(*) 
+                    FROM "Recommendation" 
+                    WHERE useremail=%s;""", [useremail])
+                num_recommendations = cur.fetchone()[0]
+                count_dict = {
+                    'count': num_recommendations
+                }
+
+                return jsonify(count_dict), 200
 
 
 app.add_url_rule('/', 'home', home, methods=['GET'])
@@ -1181,6 +1204,7 @@ app.add_url_rule('/verify_login', 'verify_login', verify_login, methods=['POST']
 app.add_url_rule('/restaurant_statistics', 'restaurant_statistics', get_restaurant_statistics, methods=['GET'])
 app.add_url_rule('/transactions_weekly', 'transactions_weekly', get_weekly_transactions_for_user, methods=['GET'])
 app.add_url_rule('/get_user_budget_statistics', 'get_user_budget_statistics', get_user_budget_statistics, methods=['GET'])
+app.add_url_rule('/get_recommendation_count', 'get_recommendation_count', get_recommendation_count, methods=['GET'])
 
 user_view = UserAPI.as_view('user_api')
 app.add_url_rule('/users', view_func=user_view, methods=['GET', 'POST', 'PUT', 'DELETE'])
