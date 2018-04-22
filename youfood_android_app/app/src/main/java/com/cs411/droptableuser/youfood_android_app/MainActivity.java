@@ -10,14 +10,21 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements AccountFragment.RestaurantSelectedListener {
-    public static final int ADD_TRANSACTION_REQUEST = 102;
+    private static final class Constants {
+        static final int ADD_TRANSACTION_REQUEST = 102;
+        static final String BUDGET_TAG = "Budget";
+        static final String ACCOUNT_TAG = "Account";
+        static final String RESTAURANTS_TAG = "Restaurants";
+    }
 
     @BindView(R.id.toolbar_main)
     Toolbar toolbar;
@@ -32,14 +39,14 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
         setActionBar();
+        this.getWindow().setStatusBarColor(getColor(R.color.colorPrimaryDark));
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, AddTransactionActivity.class);
-                startActivityForResult(intent, ADD_TRANSACTION_REQUEST);
+                startActivityForResult(intent, Constants.ADD_TRANSACTION_REQUEST);
                 overridePendingTransition(R.anim.slide_in_up, R.anim.slide_up);
             }
         });
@@ -48,36 +55,68 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
                 (new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        Fragment selectedFragment = null;
-                        switch (item.getItemId()) {
-                            case R.id.menu_restaurants:
-                                selectedFragment = RestaurantsFragment.newInstance();
-                                floatingActionButton.setVisibility(View.GONE);
-                                getSupportActionBar().setTitle("Restaurants");
-                                break;
-                            case R.id.menu_budget_temp:
-                                selectedFragment = BudgetFragment.newInstance();
-                                floatingActionButton.setVisibility(View.VISIBLE);
-                                getSupportActionBar().setTitle("Budget");
-                                break;
-                            case R.id.menu_account:
-                                selectedFragment = AccountFragment.newInstance();
-                                floatingActionButton.setVisibility(View.GONE);
-                                getSupportActionBar().setTitle("Account");
-                                break;
-                        }
-
-                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                        transaction.replace(R.id.frame_layout, selectedFragment);
-                        transaction.commit();
+                        setFragmentTransaction(item);
 
                         return true;
                     }
                 });
 
-        getSupportActionBar().setTitle("Restaurants");
+        bottomNavigationView.setSelectedItemId(R.id.menu_restaurants);
+    }
+
+    private void setFragmentTransaction(MenuItem item) {
+        Fragment selectedFragment = RestaurantsFragment.newInstance();
+        Fragment currentFragment = getSupportFragmentManager().getPrimaryNavigationFragment();
+
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance());
+
+        switch (item.getItemId()) {
+            case R.id.menu_restaurants:
+                selectedFragment = getSupportFragmentManager().findFragmentByTag(Constants.RESTAURANTS_TAG);
+                if (selectedFragment == null || RestaurantsFragment.isCheckButtonSelected) {
+                    RestaurantsFragment.isCheckButtonSelected = false;
+                    selectedFragment = RestaurantsFragment.newInstance();
+                    transaction.add(R.id.frame_layout, selectedFragment, Constants.RESTAURANTS_TAG);
+                    if (currentFragment != null) {
+                        transaction.hide(currentFragment);
+                    }
+                } else if (currentFragment != selectedFragment) {
+                    transaction.hide(currentFragment).show(selectedFragment);
+                }
+                floatingActionButton.setVisibility(View.GONE);
+                getSupportActionBar().setTitle(Constants.RESTAURANTS_TAG);
+                break;
+            case R.id.menu_budget_temp:
+                selectedFragment = getSupportFragmentManager().findFragmentByTag(Constants.BUDGET_TAG);
+                if (selectedFragment == null) {
+                    selectedFragment = BudgetFragment.newInstance();
+                    transaction.add(R.id.frame_layout, selectedFragment, Constants.BUDGET_TAG);
+                    if (currentFragment != null) {
+                        transaction.hide(currentFragment);
+                    }
+                } else if(currentFragment != selectedFragment) {
+                    transaction.hide(currentFragment).show(selectedFragment);
+                }
+                floatingActionButton.setVisibility(View.VISIBLE);
+                getSupportActionBar().setTitle(Constants.BUDGET_TAG);
+                break;
+            case R.id.menu_account:
+                selectedFragment = getSupportFragmentManager().findFragmentByTag(Constants.ACCOUNT_TAG);
+                if (selectedFragment == null) {
+                    selectedFragment = AccountFragment.newInstance();
+                    transaction.add(R.id.frame_layout, selectedFragment, Constants.ACCOUNT_TAG);
+                    if (currentFragment != null) {
+                        transaction.hide(currentFragment);
+                    }
+                } else if (currentFragment != selectedFragment){
+                    transaction.hide(currentFragment).show(selectedFragment);
+                }
+                floatingActionButton.setVisibility(View.GONE);
+                getSupportActionBar().setTitle(Constants.ACCOUNT_TAG);
+                break;
+        }
+
+        transaction.setPrimaryNavigationFragment(selectedFragment);
         transaction.commit();
     }
 
@@ -89,12 +128,11 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        MenuItem item = bottomNavigationView.getMenu().findItem(R.id.menu_budget_temp);
-        item.setChecked(true);
-        getSupportActionBar().setTitle("Budget");
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, BudgetFragment.newInstance());
-        transaction.commit();
+        if (requestCode == Constants.ADD_TRANSACTION_REQUEST && resultCode == ResponseCodes.HTTP_CREATED) {
+            bottomNavigationView.setSelectedItemId(R.id.menu_budget_temp);
+            BudgetFragment fragment = (BudgetFragment) getSupportFragmentManager().findFragmentByTag(Constants.BUDGET_TAG);
+            fragment.getWeeklyTransactions();
+        }
     }
 
     @Override

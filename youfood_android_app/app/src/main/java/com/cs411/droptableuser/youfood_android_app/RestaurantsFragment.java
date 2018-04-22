@@ -42,6 +42,10 @@ public class RestaurantsFragment extends Fragment {
     private static final String RESTAURANT_NAME_SEARCH_KEY = "RestaurantName";
     private static final String RESTAURANT_ADDRESS_SEARCH_KEY = "RestaurantAddress";
 
+    private ArrayList<GETRestaurantResponse> restaurants = new ArrayList<>();
+
+    public static boolean isCheckButtonSelected = false;
+
     Unbinder unbinder;
     RestaurantsRecyclerViewAdpater adapter;
 
@@ -103,6 +107,11 @@ public class RestaurantsFragment extends Fragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -125,15 +134,17 @@ public class RestaurantsFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
 
-        adapter = new RestaurantsRecyclerViewAdpater(new ArrayList<GETRestaurantResponse>());
-        recyclerView.setAdapter(adapter);
+        adapter = new RestaurantsRecyclerViewAdpater(restaurants);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
+
 
         restaurantsFilterCheckButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 loadRestaurants();
                 drawerLayout.closeDrawer(GravityCompat.END);
+                isCheckButtonSelected = true;
             }
         });
 
@@ -202,7 +213,11 @@ public class RestaurantsFragment extends Fragment {
             @Override
             public void onResponse(Call<ArrayList<GETRestaurantResponse>> call, Response<ArrayList<GETRestaurantResponse>> response) {
                 if (response.code() == ResponseCodes.HTTP_OK) {
-                    adapter.setData(response.body());
+                    if (restaurants != null) {
+                        restaurants.clear();
+                    }
+                    restaurants.addAll(response.body());
+                    adapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(RestaurantsFragment.this.getContext(), "Failed to load restaurants", Toast.LENGTH_LONG).show();
                 }
