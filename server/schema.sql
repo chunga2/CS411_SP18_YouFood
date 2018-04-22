@@ -73,10 +73,10 @@ CREATE TABLE "RestaurantEmbeddings"(
 
 CREATE VIEW "BudgetStatistics" AS (
   SELECT "Budget".useremail,
-    AVG(amount::DECIMAL)::MONEY,
-    SUM(amount),
-    total,
-    "Budget".date
+    AVG(amount::DECIMAL)::MONEY AS avg_spend,
+    SUM(amount) AS total_spend,
+    total AS budget,
+    "Budget".date AS date 
   FROM "Transaction", "Budget"
   WHERE "Budget".date <= "Transaction".date
         AND "Transaction".date < "Budget".date + '7 days'::interval
