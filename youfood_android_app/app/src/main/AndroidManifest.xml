@@ -24,22 +24,26 @@
         </activity>
         <activity
             android:name="com.cs411.droptableuser.youfood_android_app.MainActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name="com.cs411.droptableuser.youfood_android_app.RestaurantDetailActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".SignUpActivity" />
         <activity
-            android:name=".EditNameActivity"
+            android:name=".EditAccountActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".ReviewActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".RestaurantDetailActivity"/>
         <activity android:name=".EditReviewActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
         <activity android:name=".PostReviewActivity"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".AddTransactionActivity" />
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".AddTransactionActivity"
+            android:screenOrientation="portrait"/>
 
         <meta-data
             android:name="preloaded_fonts"

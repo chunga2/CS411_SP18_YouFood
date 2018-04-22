@@ -26,10 +26,12 @@
     <string name="owner">Owner</string>
     <string name="network_failed_message">Network Request Failed. Check Network Connection And Try Again!</string>
 
+    <!-- RestaurantDetailActivity -->
     <string name="one_dollar_sign_description">$10 or less per person</string>
     <string name="two_dollar_signs_description">$11-$30 per person</string>
     <string name="three_dollar_signs_description">$31-$60 per person</string>
     <string name="four_dollar_signs_description">$61 or more per person</string>
+
     <string name="edit_review">Edit Review</string>
     <string name="delete_review">Delete Review</string>
     <string name="close">close</string>
@@ -42,5 +44,19 @@
     <string name="subtraction_sign">-</string>
     <string name="addition_sign">+</string>
     <string name="equal_sign">=</string>
+
+    <string name="auto_complete_text_add_transaction_hint">Search a Restaurant</string>
+
+    <!-- Restaurant Fragment -->
+    <string name="edittext_restaurants_city_name_hint">City Name</string>
+    <string name="edittext_restaurants_name_hint">Restaurant Name</string>
+    <string name="edittext_restaurants_category_hint">Category Name</string>
+    <string name="edittext_restaurants_address_hint">123 Main St, San Francisco, CA 99999</string>
+    <string name="textview_restaurants_name_label">By Name?</string>
+    <string name="textview_restaurants_city_label">By City?</string>
+    <string name="textview_restaurants_filter_label">Filters</string>
+    <string name="textview_restaurants_address_label">By Address?</string>
+    <string name="textview_restaurants_category_label">By Category?</string>
+    <string name="textview_restaurants_price_range_label">By Price Range?</string>
 
 </resources>

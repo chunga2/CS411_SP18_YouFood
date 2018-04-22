@@ -28,10 +28,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:hint="Search a Restaurant"
+            android:hint="@string/auto_complete_text_add_transaction_hint"
             android:inputType="text"
             android:maxLines="1"
-            android:theme="@style/AutoCompleteTextViewUnderline" />
+            android:theme="@style/TextViewUnderline" />
 
     </android.support.design.widget.TextInputLayout>
 

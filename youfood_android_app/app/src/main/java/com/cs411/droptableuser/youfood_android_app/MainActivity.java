@@ -195,8 +195,15 @@ public class MainActivity extends AppCompatActivity implements AccountFragment.R
         MenuItem item = bottomNavigationView.getMenu().findItem(R.id.menu_restaurants);
         item.setChecked(true);
         getSupportActionBar().setTitle("Restaurants");
+
+        Fragment fragment = RestaurantsFragment.newInstance(restaurant, address);
+        Fragment currentFragment = getSupportFragmentManager().getPrimaryNavigationFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, RestaurantsFragment.newInstance(restaurant, address));
+        transaction.add(R.id.frame_layout,
+                fragment,
+                Constants.RESTAURANTS_TAG);
+        transaction.hide(currentFragment);
+        transaction.setPrimaryNavigationFragment(fragment);
         transaction.commit();
     }
 }

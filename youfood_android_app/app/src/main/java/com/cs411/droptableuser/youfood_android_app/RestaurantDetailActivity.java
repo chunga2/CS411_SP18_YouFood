@@ -80,9 +80,9 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
         Intent intent = getIntent();
         if(intent.hasExtra(RESTAURANT_KEY) && intent.hasExtra(CATEGORIES_KEY) && intent.hasExtra(PRICE_RANGE_KEY)) {
-            restaurantObj = (GETRestaurantResponse) intent.getParcelableExtra("Restaurant");
-            String cuisines = (String) intent.getStringExtra(CATEGORIES_KEY);
-            String priceRange = (String) intent.getStringExtra(PRICE_RANGE_KEY);
+            restaurantObj = intent.getParcelableExtra("Restaurant");
+            String cuisines = intent.getStringExtra(CATEGORIES_KEY);
+            String priceRange = intent.getStringExtra(PRICE_RANGE_KEY);
 
             textViewName.setText(restaurantObj.getName());
             textViewCuisines.setText(cuisines);
@@ -191,13 +191,10 @@ public class RestaurantDetailActivity extends AppCompatActivity implements OnMap
 
     @Override
     public void onMapReady(GoogleMap map) {
-        // Temporary Siebel center coordinate.
         LatLng restaurantLatLng = new LatLng(restaurantObj.getLatitude(), restaurantObj.getLongitude());
         map.addMarker(new MarkerOptions().position(restaurantLatLng)
                 .title(restaurantObj.getName()));
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(restaurantLatLng, 16);
-        //map.moveCamera(CameraUpdateFactory.newLatLng(restaurantLatLng));
-        map.animateCamera(cameraUpdate);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(restaurantLatLng, 15.5f));
         map.setOnMapLongClickListener(this);
     }
 

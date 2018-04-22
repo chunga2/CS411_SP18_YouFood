@@ -104,6 +104,8 @@ public class RestaurantsFragment extends Fragment {
         args.putString(RESTAURANT_ADDRESS_SEARCH_KEY, restaurantAddress);
         fragment.setArguments(args);
 
+        isCheckButtonSelected = true;
+
         return fragment;
     }
 
@@ -135,6 +137,7 @@ public class RestaurantsFragment extends Fragment {
         recyclerView.setVisibility(View.INVISIBLE);
 
         adapter = new RestaurantsRecyclerViewAdpater(restaurants);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
