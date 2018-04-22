@@ -79,6 +79,7 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
             public void onResponse(Call<ArrayList<GETBudgetResponse>> call, Response<ArrayList<GETBudgetResponse>> response) {
                 if(response.code() == ResponseCodes.HTTP_OK) {
                     if (response.body().size() == 0) {
+                        budget = null;
                         textViewBalance.setText(NO_BUDGET);
                     } else {
                         ArrayList<GETBudgetResponse> body = response.body();
@@ -135,7 +136,8 @@ public class BalanceViewHolder extends BaseViewHolder implements View.OnClickLis
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     double total = Double.parseDouble(input.getText().toString());
-                    POSTBudgetRequest budgetRequest = new POSTBudgetRequest(DateTime.getCurrentDateTime(), UtilsCache.getEmail(), total);
+                    POSTBudgetRequest budgetRequest = new POSTBudgetRequest(date, UtilsCache
+                            .getEmail(), total);
                     Call<Void> call = BudgetEndpoints.budgetEndpoints.createBudget(budgetRequest);
 
                     call.enqueue(new Callback<Void>() {
