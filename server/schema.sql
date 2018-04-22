@@ -70,3 +70,14 @@ CREATE TABLE "RestaurantEmbeddings"(
   c4 REAL,
   c5 REAL
 );
+
+CREATE VIEW "BudgetStatistics" AS (
+  SELECT "Budget".useremail,
+    AVG(amount::DECIMAL)::MONEY,
+    SUM(amount),
+    "Budget".date
+  FROM "Transaction", "Budget"
+  WHERE "Budget".date <= "Transaction".date
+        AND "Transaction".date < "Budget".date + '7 days'::interval
+        AND "Transaction".useremail = "Budget".useremail
+  GROUP BY "Budget".date, "Budget".useremail);
