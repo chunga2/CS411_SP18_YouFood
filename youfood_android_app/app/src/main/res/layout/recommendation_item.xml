@@ -38,22 +38,23 @@
         android:id="@+id/text_recommendation_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/image_recommendation_delete"
-        android:layout_alignStart="@+id/text_recommendation_name"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/text_recommendation_name"
         android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
         android:layout_toStartOf="@+id/image_recommendation_delete"
         android:textSize="18sp"
         tools:text="fawef" />
 
     <ImageView
         android:id="@+id/image_recommendation_delete"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignEnd="@+id/text_recommendation_time"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/text_recommendation_date"
+        android:layout_alignTop="@+id/text_recommendation_address"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="16dp"
         android:src="@drawable/ic_close_black_24dp" />
 
     <View

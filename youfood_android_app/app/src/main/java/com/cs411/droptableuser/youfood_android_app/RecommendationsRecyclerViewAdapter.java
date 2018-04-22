@@ -82,7 +82,6 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
             String firstHalfDate = String.format("%d/%d/%d", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.YEAR));
             holder.date.setText(firstHalfDate);
 
-<<<<<<< HEAD
             String timeofDay;
             int hourOfDay;
             if(calendar.get(Calendar.HOUR_OF_DAY) >= 12) {
@@ -104,10 +103,7 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
                 secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
             }
 
-            holder.time.setText(secondHalfDate);
-
-=======
->>>>>>> 91703eef697a35d14d757a595d379447685269cc
+            //holder.time.setText(secondHalfDate);
         } catch (ParseException e) {}
     }
 
