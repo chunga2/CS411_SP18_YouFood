@@ -46,6 +46,8 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
     @BindView(R.id.button_edit_review_update)
     Button buttonUpdate;
 
+    private int ratingAfterEditing;
+    private String descriptionAfterEditing;
     private GETReviewResponse review;
 
     @Override
@@ -58,6 +60,8 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
                 review = extras.getParcelable(REVIEW_KEY);
+                ratingAfterEditing = extras.getInt(ReviewActivity.RATING_KEY);
+                descriptionAfterEditing = extras.getString(ReviewActivity.DESCRIPTION_KEY);
             }
         }
 
@@ -68,7 +72,13 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        ratingBar.setRating(review.getRating()/2.0f);
+        if (ratingAfterEditing != -1) {
+            float ratingTemp = ratingAfterEditing / 2.0f;
+            ratingBar.setRating(ratingAfterEditing/2.0f);
+        } else {
+            ratingBar.setRating(review.getRating() / 2.0f);
+        }
+        numStars = ratingBar.getRating();
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
@@ -76,8 +86,10 @@ public class EditReviewActivity extends AppCompatActivity implements View.OnClic
             }
         });
 
-        if (review != null) {
+        if (review != null && "".equals(descriptionAfterEditing)) {
             editTextReview.setText(review.getDescription());
+        } else {
+            editTextReview.setText(descriptionAfterEditing);
         }
         buttonUpdate.setOnClickListener(this);
     }
