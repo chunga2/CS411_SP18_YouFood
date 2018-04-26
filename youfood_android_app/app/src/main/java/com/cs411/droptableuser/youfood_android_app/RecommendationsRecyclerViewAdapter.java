@@ -84,17 +84,26 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
 
             String timeofDay;
             int hourOfDay;
-            if(calendar.get(Calendar.HOUR_OF_DAY) > 12) {
+            if(calendar.get(Calendar.HOUR_OF_DAY) >= 12) {
                 hourOfDay = calendar.get(Calendar.HOUR_OF_DAY) - 12;
                 timeofDay = "PM";
             } else {
                 hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
                 timeofDay = "AM";
+                if(hourOfDay == 0) {
+                    hourOfDay = 12;
+                }
             }
 
-            String secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
-            holder.time.setText(secondHalfDate);
+            String secondHalfDate;
+            if(calendar.get(Calendar.MINUTE) < 10) {
+                String twoDigitMinute = "0" + String.valueOf(calendar.get(Calendar.MINUTE));
+                secondHalfDate = String.format("%d:%s %s", hourOfDay, twoDigitMinute, timeofDay);
+            } else {
+                secondHalfDate = String.format("%d:%d %s", hourOfDay, calendar.get(Calendar.MINUTE), timeofDay);
+            }
 
+            //holder.time.setText(secondHalfDate);
         } catch (ParseException e) {}
     }
 
@@ -112,9 +121,6 @@ public class RecommendationsRecyclerViewAdapter extends RecyclerView.Adapter<Rec
 
         @BindView(R.id.text_recommendation_date)
         TextView date;
-
-        @BindView(R.id.text_recommendation_time)
-        TextView time;
 
         @BindView(R.id.image_recommendation_delete)
         ImageView deleteButton;

@@ -164,6 +164,9 @@ public class ExpensesPieChartViewHolder extends BaseViewHolder {
                                     List<PieEntry> entries) {
         for (int i = 1; i <= Calendar.DAY_OF_WEEK; i++) {
             String key = String.valueOf(firstDayOfWeek + (i - 1));
+            if (key.length() == 1) {
+                key = '0' + key;
+            }
             if (transactions.containsKey(key)) {
                 if (i == Calendar.SUNDAY) {
                     entries.add(new PieEntry(transactions.get(key), "Sunday"));

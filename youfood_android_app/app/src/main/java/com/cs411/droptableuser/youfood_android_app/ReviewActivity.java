@@ -37,6 +37,8 @@ public class ReviewActivity extends AppCompatActivity {
     public static final String RATING_KEY = "Rating";
     public static final String DESCRIPTION_KEY = "Description";
 
+    private int rating = -1;
+    private String description = "";
     private GETReviewResponse review;
 
     @BindView(R.id.toolbar_review)
@@ -113,6 +115,8 @@ public class ReviewActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.menu_item_edit) {
             Intent intent = new Intent(this, EditReviewActivity.class);
             intent.putExtra(EditReviewActivity.REVIEW_KEY, review);
+            intent.putExtra(RATING_KEY, rating);
+            intent.putExtra(DESCRIPTION_KEY, description);
             startActivityForResult(intent, EDIT_REVIEW_REQUEST);
         } else if (item.getItemId() == R.id.menu_item_delete) {
             deleteReview();
@@ -125,8 +129,9 @@ public class ReviewActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_REVIEW_REQUEST && resultCode == 204) {
             int numStars = data.getExtras().getInt(RATING_KEY);
-            String description = data.getExtras().getString(DESCRIPTION_KEY);
+            description = data.getExtras().getString(DESCRIPTION_KEY);
 
+            rating = numStars;
             ratingBar.setRating(numStars/2.0f);
             textViewDescription.setText(description);
         }

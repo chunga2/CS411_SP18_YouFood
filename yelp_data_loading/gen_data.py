@@ -5,7 +5,9 @@ This program requires the Python requests library, which you can install via:
 Sample usage of the program:
 `python sample.py --term="bars" --location="San Francisco, CA"`
 
-This is a modified version to return a JSON of 1000 entries based on the target parameters.
+From: https://github.com/Yelp/yelp-fusion/tree/master/fusion/python
+
+This is a modified version of the Yelp Sample code to return. a JSON of 1000 entries based on the target parameters.
 This does not check if there's less than 1000. It's designed to try to get as many from a city as possible.
 """
 from __future__ import print_function
